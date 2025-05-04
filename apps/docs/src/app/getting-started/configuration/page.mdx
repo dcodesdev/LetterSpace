@@ -1,0 +1,50 @@
+# Configuring LetterSpace
+
+LetterSpace leverages the SMTP protocol to send newsletters to your audience so, you'll need to have an SMTP server set up already.
+
+The easiest way to have a fully functional SMTP server ready is by using [Resend](https://resend.com). Create an account and connect your domain; you'll have an SMTP server ready in minutes.
+
+## Configuration
+
+Before being able to send newsletters, you'll need to configure the SMTP server details.
+
+### SMTP Server Details
+
+To connect to your SMTP server, you'll need a few details:
+
+- **SMTP Host**: E.g. `smtp.resend.com`
+- **SMTP Port**: E.g. `465`
+- **SMTP Username**: E.g. `resend`
+- **SMTP Password**: E.g. `re_...`
+- **From Email**: Email address that will appear as the sender
+- **From Name**: Name that will appear as the sender
+- **Secure**: Whether to use secure connection (default: true)
+- **Encryption**: Connection encryption type (STARTTLS, SSL_TLS, or NONE)
+- **Timeout**: Connection timeout in milliseconds (default: 30000)
+
+Go to the settings menu and fill in the details with your SMTP server details.
+
+### Email Delivery Settings
+
+You can configure various email delivery parameters to optimize your newsletter sending:
+
+- **Rate Limit**: Maximum number of emails that can be sent within the rate window (default: 100)
+- **Rate Window**: Time window in seconds for the rate limit (default: 3600)
+- **Max Retries**: Number of retry attempts for failed email deliveries (default: 3)
+- **Retry Delay**: Delay in seconds between retry attempts (default: 300)
+- **Concurrency**: Number of simultaneous email sending operations (default: 5)
+- **Connection Timeout**: SMTP connection timeout in milliseconds (default: 30000)
+
+These settings can be adjusted in the Email Delivery Settings section of your dashboard to match your SMTP provider's requirements and your sending needs.
+
+### API Keys
+
+API keys allow you to interact with the newsletter system programmatically. You can manage your API keys in the API Keys section of the dashboard. Each API key includes:
+
+- A unique key identifier
+- Name for the key
+- Creation date
+- Expiration date (optional)
+- Last used timestamp
+
+Keep your API keys secure and rotate them regularly. You can create multiple API keys for different integrations and revoke them individually if needed.

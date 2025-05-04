@@ -1,0 +1,304 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["typedSql"]
+  output          = "./client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id String @id @default(uuid())
+
+  name        String
+  description String?
+
+  UserOrganizations     UserOrganization[]
+  Lists                 List[]
+  Subscribers           Subscriber[]
+  Templates             Template[]
+  Campaigns             Campaign[]
+  SmtpSettings          SmtpSettings[]
+  ApiKeys               ApiKey[]
+  GeneralSettings       GeneralSettings?
+  EmailDeliverySettings EmailDeliverySettings?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id String @id @default(uuid())
+
+  name       String
+  email      String @unique
+  password   String
+  pwdVersion Int    @default(1)
+
+  UserOrganizations UserOrganization[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserOrganization {
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, organizationId])
+}
+
+model Subscriber {
+  id String @id @default(uuid())
+
+  name  String?
+  email String
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  ListSubscribers ListSubscriber[]
+  Messages        Message[]
+  Clicks          Click[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, email])
+  @@index([createdAt, id])
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  COMPLETED
+  CANCELLED
+}
+
+model Campaign {
+  id String @id @default(uuid())
+
+  title       String
+  description String?
+  subject     String?
+  content     String?
+  completedAt DateTime?
+
+  status       CampaignStatus @default(DRAFT)
+  scheduledAt  DateTime?
+  htmlOnly     Boolean        @default(false)
+  openTracking Boolean        @default(true)
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  templateId String?
+  Template   Template? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  Messages      Message[]
+  CampaignLists CampaignList[]
+  TrackedLinks  TrackedLink[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model List {
+  id String @id @default(uuid())
+
+  name        String
+  description String?
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  ListSubscribers ListSubscriber[]
+  CampaignLists   CampaignList[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CampaignList {
+  campaignId String
+  listId     String
+
+  Campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  List     List     @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@id([campaignId, listId])
+}
+
+model ListSubscriber {
+  id String @id @default(uuid())
+
+  unsubscribedAt DateTime?
+
+  listId       String
+  subscriberId String
+
+  List       List       @relation(fields: [listId], references: [id], onDelete: Cascade)
+  Subscriber Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([listId, subscriberId])
+}
+
+model Template {
+  id String @id @default(uuid())
+
+  name        String
+  description String?
+  content     String
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  Campaigns Campaign[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum MessageStatus {
+  QUEUED
+  PENDING
+  SENT
+  OPENED
+  CLICKED
+  FAILED
+  RETRYING
+}
+
+model Message {
+  id String @id @default(uuid())
+
+  content     String?
+  status      MessageStatus @default(QUEUED)
+  sentAt      DateTime?
+  tries       Int           @default(0)
+  lastTriedAt DateTime?
+
+  /// Returned from SMTP response
+  messageId String?
+
+  subscriberId String
+  Subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  campaignId String
+  Campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  error String? @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt, id])
+}
+
+model TrackedLink {
+  id String @id @default(uuid())
+
+  url String
+
+  campaignId String?
+  Campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  Clicks     Click[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([url, campaignId])
+}
+
+model Click {
+  id String @id @default(uuid())
+
+  trackedLinkId String?
+  TrackedLink   TrackedLink? @relation(fields: [trackedLinkId], references: [id], onDelete: Cascade)
+
+  subscriberId String?
+  Subscriber   Subscriber? @relation(fields: [subscriberId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum SmtpEncryption {
+  STARTTLS
+  SSL_TLS
+  NONE
+}
+
+model ApiKey {
+  id        String    @id @default(uuid())
+  name      String
+  key       String    @unique
+  lastUsed  DateTime?
+  expiresAt DateTime?
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SmtpSettings {
+  id String @id @default(uuid())
+
+  host       String
+  port       Int
+  username   String
+  password   String
+  fromEmail  String?
+  fromName   String?
+  secure     Boolean        @default(true)
+  encryption SmtpEncryption @default(STARTTLS)
+  timeout    Int            @default(30000)
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GeneralSettings {
+  id String @id @default(uuid())
+
+  defaultFromEmail String?
+  defaultFromName  String?
+  baseURL          String?
+
+  organizationId String       @unique
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EmailDeliverySettings {
+  id String @id @default(uuid())
+
+  rateLimit         Int @default(100)
+  rateWindow        Int @default(3600)
+  maxRetries        Int @default(3)
+  retryDelay        Int @default(300)
+  concurrency       Int @default(5)
+  connectionTimeout Int @default(30000)
+
+  organizationId String       @unique
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

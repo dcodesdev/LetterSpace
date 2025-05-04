@@ -1,0 +1,127 @@
+import { Callout } from "nextra/components"
+
+# Getting Started
+
+This guide will help you set up LetterSpace quickly on your own infrastructure.
+
+## Installation
+
+We've made LetterSpace for simplicity and ease of use. The easiest way to get started is by using `docker-compose`.
+
+### Using Docker Compose
+
+1.  **Create a `docker-compose.yaml` file:**
+
+    Create a file named `docker-compose.yaml` with the following content:
+
+    ```yaml
+    services:
+      db:
+        image: postgres:17 # Use your preferred Postgres version
+        restart: always
+        environment:
+          POSTGRES_USER: user # Change to a secure user
+          POSTGRES_PASSWORD: password # Change to a secure password
+          POSTGRES_DB: letterspace
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+        networks:
+          - app_network
+
+      backend:
+        image: ghcr.io/dcodesdev/letterspace # Use the pre-built image
+        restart: always
+        depends_on:
+          - db
+        ports:
+          - "5000:5000" # Expose backend on port 5000
+        environment:
+          # Make sure this matches the db service credentials
+          DATABASE_URL: "postgresql://user:password@db:5432/letterspace?schema=public"
+          JWT_SECRET: your_super_secret_jwt_key # Change to a secure secret
+        networks:
+          - app_network
+
+    volumes:
+      postgres_data:
+        driver: local
+
+    networks:
+      app_network:
+        driver: bridge
+    ```
+
+<Callout type="warning">
+  Replace <code>POSTGRES_USER</code>, <code>POSTGRES_PASSWORD</code>, and{" "}
+  <code>JWT_SECRET</code> with your own secure values before running.
+</Callout>
+
+2.  **Run Docker Compose:**
+
+    Navigate to the directory where you saved the `docker-compose.yaml` file and run:
+
+    ```bash
+    docker-compose up -d
+    ```
+
+That's it! LetterSpace backend should now be running and accessible on port `5000` of your host machine.
+
+You can access the LetterSpace dashboard directly at [http://localhost:5000](http://localhost:5000) if running locally, or proceed to set up a reverse proxy.
+
+## Reverse Proxy (Optional)
+
+If you don't already have a reverse proxy, you can follow along.
+
+To access the LetterSpace dashboard securely via a domain name (e.g., `https://newsletter.yourdomain.com`), you can use a reverse proxy like Nginx or Caddy.
+
+We'll use [Caddy](https://caddyserver.com) as an example. Caddy is easy to use and automatically manages SSL certificates.
+
+### Install Caddy on Ubuntu
+
+```bash
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update
+sudo apt install caddy
+```
+
+For other Linux distributions, check the [official Caddy installation documentation](https://caddyserver.com/docs/install).
+
+### DNS Configuration
+
+Configure your domain's DNS records. Add an `A` record pointing your desired subdomain (e.g., `newsletter`) to the public IP address of your server.
+
+### Configure Caddy
+
+Create or edit Caddy's configuration file:
+
+```bash
+sudo nano /etc/caddy/Caddyfile
+```
+
+Add the following configuration:
+
+```bash
+newsletter.yourdomain.com { # Replace with your actual domain
+    reverse_proxy localhost:5000
+}
+```
+
+> Replace `newsletter.yourdomain.com` with your actual domain. Caddy will automatically provision an SSL certificate for it.
+
+### Start Caddy
+
+Restart Caddy to apply your changes:
+
+```bash
+sudo systemctl restart caddy
+```
+
+Check the status to ensure it's running:
+
+```bash
+sudo systemctl status caddy
+```
+
+Wait a minute or two for Caddy to provision the SSL certificate, then access the LetterSpace dashboard securely at `https://newsletter.yourdomain.com`.

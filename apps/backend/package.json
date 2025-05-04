@@ -1,0 +1,71 @@
+{
+  "name": "backend",
+  "version": "0.1.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "watchexec -r -e ts bun run src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "generate": "prisma generate",
+    "generate:sql": "prisma exec generate --sql && pnpm exec prettier --write prisma/client",
+    "test": "dotenv -e .env.test -- vitest"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./data": "./src/data.ts",
+    "./shared": "./src/shared.ts"
+  },
+  "prisma": {
+    "seed": "bun prisma/seed.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.7.0",
+    "@trpc/server": "11.0.0-rc.730",
+    "bcryptjs": "^3.0.0",
+    "cors": "^2.8.5",
+    "csv-parse": "^5.6.0",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.10.0",
+    "p-map": "^7.0.3",
+    "superjson": "^2.2.2",
+    "uuid": "^11.0.5",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@faker-js/faker": "^9.5.0",
+    "@repo/eslint-config": "workspace:*",
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^8.2.3",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.8",
+    "@types/node": "^22.12.0",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^6.4.17",
+    "@types/supertest": "^6.0.2",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.7",
+    "@types/uuid": "^10.0.0",
+    "@vitest/ui": "3.0.5",
+    "dotenv-cli": "^8.0.0",
+    "eslint": "^9.19.0",
+    "globals": "^15.14.0",
+    "prisma": "^6.7.0",
+    "supertest": "^7.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.22.0",
+    "vitest": "^3.0.5"
+  }
+}

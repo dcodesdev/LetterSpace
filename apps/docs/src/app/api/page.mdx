@@ -1,0 +1,176 @@
+# API Reference
+
+LetterSpace is most useful when interacted with through its API, enabling you to seamlessly integrate your applications with it. This integration allows you to programmatically manage subscribers by adding, updating, or removing them from your lists, all through simple REST endpoints requiring only API key authentication.
+
+This document outlines the available REST API endpoints for interacting with LetterSpace.
+
+Authentication is required for all endpoints using an API key provided in the `x-api-key` header.
+
+## Subscribers
+
+### `POST /api/subscribers`
+
+Create a new subscriber or update an existing one (based on email) and add them to specified lists.
+
+This endpoint is **idempotent**: sending the same request multiple times with the same data will not create duplicate subscribers or list associations.
+
+**Request Body:**
+
+```json
+{
+  "email": "subscriber@example.com",
+  "name": "Subscriber Name (Optional)",
+  "lists": ["listId1", "listId2"]
+}
+```
+
+- `email` (string, required): The email address of the subscriber.
+- `name` (string, optional): The name of the subscriber.
+- `lists` (array of strings, required): An array of List IDs to associate the subscriber with. Must contain at least one ID.
+
+**Responses:**
+
+- **`201 Created`**: Subscriber created or updated successfully. Returns the subscriber object.
+  ```json
+  {
+    "id": "subscriberId",
+    "email": "subscriber@example.com",
+    "name": "Subscriber Name",
+    "lists": [
+      {
+        "id": "listId1",
+        "name": "List 1 Name",
+        "description": "List 1 Description"
+      },
+      { "id": "listId2", "name": "List 2 Name", "description": null }
+    ],
+    "createdAt": "2023-10-27T10:00:00.000Z",
+    "updatedAt": "2023-10-27T10:00:00.000Z"
+  }
+  ```
+- **`400 Bad Request`**: Invalid input data (e.g., missing email, invalid email format, invalid list ID).
+- **`401 Unauthorized`**: Invalid or missing API key.
+- **`500 Server Error`**: Internal server error.
+
+---
+
+### `PUT /api/subscribers/{id}`
+
+Update an existing subscriber's details or list associations.
+
+**Path Parameters:**
+
+- `id` (string, required): The ID of the subscriber to update.
+
+**Request Body:**
+
+```json
+{
+  "email": "new_email@example.com",
+  "name": "Updated Name",
+  "lists": ["newListId1", "newListId2"]
+}
+```
+
+- `email` (string, optional): The new email address.
+- `name` (string, optional): The new name.
+- `lists` (array of strings, optional): An array of List IDs to **replace** the subscriber's current list associations. Must contain at least one ID if provided.
+
+**Responses:**
+
+- **`200 OK`**: Subscriber updated successfully. Returns the updated subscriber object.
+- **`400 Bad Request`**: Invalid input data or ID format.
+- **`401 Unauthorized`**: Invalid or missing API key.
+- **`404 Not Found`**: Subscriber with the specified ID not found.
+- **`500 Server Error`**: Internal server error.
+
+---
+
+### `DELETE /api/subscribers/{id}`
+
+Delete a subscriber by their ID.
+
+**Path Parameters:**
+
+- `id` (string, required): The ID of the subscriber to delete.
+
+**Responses:**
+
+- **`200 OK`**: Subscriber deleted successfully.
+  ```json
+  {
+    "success": true
+  }
+  ```
+- **`400 Bad Request`**: Invalid ID format.
+- **`401 Unauthorized`**: Invalid or missing API key.
+- **`404 Not Found`**: Subscriber with the specified ID not found.
+- **`500 Server Error`**: Internal server error.
+
+---
+
+### `GET /api/subscribers/{id}`
+
+Retrieve a specific subscriber by their ID.
+
+**Path Parameters:**
+
+- `id` (string, required): The ID of the subscriber to retrieve.
+
+**Responses:**
+
+- **`200 OK`**: Subscriber details found. Returns the subscriber object.
+  ```json
+  {
+    "id": "subscriberId",
+    "email": "subscriber@example.com",
+    "name": "Subscriber Name",
+    "lists": [
+      {
+        "id": "listId1",
+        "name": "List 1 Name",
+        "description": "List 1 Description"
+      }
+    ],
+    "createdAt": "2023-10-27T10:00:00.000Z",
+    "updatedAt": "2023-10-27T10:00:00.000Z"
+  }
+  ```
+- **`400 Bad Request`**: Invalid ID format.
+- **`401 Unauthorized`**: Invalid or missing API key.
+- **`404 Not Found`**: Subscriber with the specified ID not found.
+- **`500 Server Error`**: Internal server error.
+
+---
+
+### `GET /api/subscribers`
+
+List subscribers with pagination and optional filtering.
+
+**Query Parameters:**
+
+- `page` (string, optional, default: "1"): The page number to retrieve.
+- `perPage` (string, optional, default: "100"): The number of subscribers to return per page.
+- `emailEquals` (string, optional): Filter subscribers by exact email match.
+- `nameEquals` (string, optional): Filter subscribers by exact name match.
+
+**Responses:**
+
+- **`200 OK`**: List of subscribers returned successfully.
+  ```json
+  {
+    "data": [
+      // Array of subscriber objects (schema like POST response)
+    ],
+    "pagination": {
+      "total": 150,
+      "page": 1,
+      "perPage": 100,
+      "totalPages": 2,
+      "hasMore": true
+    }
+  }
+  ```
+- **`400 Bad Request`**: Invalid query parameters (e.g., non-numeric page).
+- **`401 Unauthorized`**: Invalid or missing API key.
+- **`500 Server Error`**: Internal server error.
