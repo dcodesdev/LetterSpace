@@ -12,7 +12,7 @@ export function TrpcProvider({ children }: { children: React.ReactNode }) {
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: `${constants.VITE_API_URL}/trpc`,
+          url: constants.trpcUrl,
           fetch: async (input, init) => {
             const response = await fetch(input, init)
 
