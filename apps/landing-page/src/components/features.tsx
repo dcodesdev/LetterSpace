@@ -4,11 +4,9 @@ import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
 import {
   Zap,
-  Code,
   Wifi,
   Database,
   MessageSquare,
-  RefreshCw,
   FileCode,
   Settings,
   BugPlay,
