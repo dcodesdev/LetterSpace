@@ -16,9 +16,8 @@ import {
   AuthPage,
 } from "./pages"
 import { scan } from "react-scan"
-import { constants } from "./constants"
 
-if (constants.isDev && typeof window !== "undefined") {
+if (import.meta.env.DEV) {
   scan({
     enabled: true,
     log: true,
