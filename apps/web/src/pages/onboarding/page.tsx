@@ -105,7 +105,12 @@ export function OnboardingPage() {
                 )}
               />
 
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full"
+                loading={createOrganization.isPending}
+                disabled={createOrganization.isPending}
+              >
                 Create Organization
               </Button>
             </form>

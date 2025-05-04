@@ -120,7 +120,12 @@ export const Login = () => {
           />
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="w-full">
+          <Button
+            type="submit"
+            className="w-full"
+            loading={login.isPending}
+            disabled={login.isPending}
+          >
             Login
           </Button>
         </CardFooter>

@@ -27,25 +27,24 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ github.token }}
 
-      - name: Set Docker tags
-        id: docker_tags
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          TAGS="ghcr.io/dcodesdev/letterspace:${VERSION}"
-
-          # Check if version has a dash (indicating prerelease)
-          if [[ ! "$VERSION" == *"-"* ]]; then
-            TAGS="$TAGS,ghcr.io/dcodesdev/letterspace:latest"
-          fi
-
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/dcodesdev/letterspace
+          tags: |
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable=${{ !contains(github.ref, '-') }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ steps.docker_tags.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max

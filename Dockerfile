@@ -20,7 +20,8 @@ RUN cd apps/backend && pnpm run generate
 
 ENV NODE_ENV=production
 
-RUN cd apps/web && pnpm run build
+# There is a flaky bug that vite build hands forever
+RUN cd apps/web && timeout 60s sh -c 'for i in 1 2 3; do pnpm run build && exit 0; echo "Retry $i..." && sleep 5; done; exit 1'
 
 EXPOSE 5000
 WORKDIR /app/apps/backend
