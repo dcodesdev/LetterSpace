@@ -21,7 +21,7 @@ export const Header = () => (
           href="#"
           className="text-gray-300 hover:text-white flex items-center gap-1"
         >
-          {constants.version}
+          v{constants.version}
         </Link>
         <Link
           href={constants.env.GITHUB_URL}
