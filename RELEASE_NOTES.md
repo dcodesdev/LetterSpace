@@ -1,14 +1,15 @@
 # Release Notes
 
-## v1.0.0 - Initial Release
+## v0.3.0
 
 ### ✨ Features
 
-- **Newsletter Management:** Create and manage multiple newsletters.
-- **Subscriber Management:** Import, add, and manage subscribers.
-- **Email Campaign Creation:** Compose email campaigns using a rich text editor.
-- **Self-Hosting:** Deploy LetterSpace on your own infrastructure.
-- **Basic Analytics:** View basic open and click tracking for campaigns.
+- **Date Columns:** Display dates in a human readable format
+
+### 🐛 Bug Fixes
+
+- Removed unnecessary columns
+- Zod bug fixed, downgraded to `3.24.4`
 
 ### 📚 Docs
 
