@@ -50,6 +50,13 @@ export const Login = () => {
   const login = trpc.user.login.useMutation()
   const [, setOrgId] = useLocalStorage("orgId", "")
 
+  /**
+   * Handles user login form submission by authenticating credentials and managing post-login navigation.
+   *
+   * On successful authentication, stores the received token in a cookie and navigates the user to the dashboard if they belong to an organization, or to onboarding otherwise. Displays an error message on authentication failure.
+   *
+   * @param values - The email and password entered by the user.
+   */
   function onLoginSubmit(values: z.infer<typeof loginSchema>) {
     login.mutate(values, {
       onSuccess: (data) => {
