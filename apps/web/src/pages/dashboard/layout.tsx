@@ -103,6 +103,11 @@ function NavItem({
   )
 }
 
+/**
+ * Renders the main dashboard layout with a sidebar navigation and content area.
+ *
+ * Displays a sidebar containing navigation links, user and organization information, theme toggle, logout button, and app version. The main area renders nested routes. Redirects to the root page if the user is not authenticated or organization data is missing, and shows a loading state while user data is loading.
+ */
 export function DashboardLayout() {
   const { orgId, user, organization, logout } = useSession()
   const location = useLocation()
