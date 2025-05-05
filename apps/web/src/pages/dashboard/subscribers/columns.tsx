@@ -54,30 +54,8 @@ export const columns = ({
   },
   {
     accessorKey: "createdAt",
-    header: "Joined",
+    header: "Joined at",
     cell: ({ row }) => displayDateTime(row.original.createdAt),
-  },
-  {
-    accessorKey: "lastOpened",
-    header: "Last Opened",
-    cell: ({ row }) => {
-      const date = row.getValue("lastOpened")
-      return date ? new Date(date as string).toLocaleDateString() : "-"
-    },
-  },
-  {
-    accessorKey: "openRate",
-    header: "Open Rate",
-    cell: ({ row }) => {
-      const openRate = row.getValue("openRate") as number
-      const status =
-        openRate > 80
-          ? "text-emerald-500"
-          : openRate > 50
-            ? "text-yellow-500"
-            : "text-red-500"
-      return <div className={status}>{openRate}%</div>
-    },
   },
   {
     accessorKey: "ListSubscribers",

@@ -3,6 +3,7 @@ import { Button, cn } from "@repo/ui"
 import { Trash } from "lucide-react"
 import { CampaignStatus } from "backend"
 import { Link } from "react-router"
+import { displayDateTime } from "@/utils"
 
 const statusConfig: Record<
   CampaignStatus,
@@ -82,8 +83,8 @@ export const columns = ({ onDelete }: ColumnsProps): ColumnDef<Campaign>[] => [
     accessorKey: "scheduledAt",
     header: "Sent Date",
     cell: ({ row }) => {
-      const date = row.getValue("scheduledAt")
-      return date ? new Date(date as string).toLocaleDateString() : "-"
+      const date = row.original.scheduledAt
+      return date ? displayDateTime(date) : "-"
     },
   },
   {
@@ -91,16 +92,16 @@ export const columns = ({ onDelete }: ColumnsProps): ColumnDef<Campaign>[] => [
     header: "Recipients",
     cell: ({ row }) => row.original._count.Messages.toLocaleString(),
   },
-  {
-    accessorKey: "openRate",
-    header: "Open Rate",
-    cell: () => "-",
-  },
-  {
-    accessorKey: "clickRate",
-    header: "Click Rate",
-    cell: () => "-",
-  },
+  // {
+  //   accessorKey: "openRate",
+  //   header: "Open Rate",
+  //   cell: ({ row }) => row.original.openRate.toLocaleString(),
+  // },
+  // {
+  //   accessorKey: "clickRate",
+  //   header: "Click Rate",
+  //   cell: ({ row }) => row.original.clickRate.toLocaleString(),
+  // },
   {
     id: "actions",
     cell: ({ row }) => (

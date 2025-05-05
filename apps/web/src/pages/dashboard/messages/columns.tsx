@@ -6,6 +6,7 @@ import { MessageStatusBadge } from "./message-status-badge"
 import { MessagePreviewDialog } from "./message-preview-dialog"
 import { MessageErrorDialog } from "./message-error-dialog"
 import { Message } from "backend"
+import { displayDateTime } from "@/utils"
 
 type ColumnsProps = {
   onOpenPreview: (id: string) => void
@@ -68,25 +69,7 @@ export const columns = ({
     accessorKey: "sentAt",
     header: "Sent At",
     cell: ({ row }) =>
-      row.original.createdAt
-        ? new Date(row.original.createdAt).toLocaleString()
-        : "-",
-  },
-  {
-    accessorKey: "openedAt",
-    header: "Opened At",
-    cell: ({ row }) =>
-      row.original.updatedAt
-        ? new Date(row.original.updatedAt).toLocaleString()
-        : "-",
-  },
-  {
-    accessorKey: "clickedAt",
-    header: "Clicked At",
-    cell: ({ row }) =>
-      row.original.content
-        ? new Date(row.original.content).toLocaleString()
-        : "-",
+      row.original.sentAt ? displayDateTime(row.original.sentAt) : "-",
   },
   {
     id: "actions",
