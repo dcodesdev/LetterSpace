@@ -10,7 +10,8 @@
     "declaration": true,
     "module": "ESNext",
     "target": "ESNext",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "skipLibCheck": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
