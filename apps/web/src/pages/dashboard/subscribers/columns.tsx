@@ -8,8 +8,8 @@ import {
 } from "@repo/ui"
 import { ColumnDef } from "@tanstack/react-table"
 import { PopulatedSubscriber } from "./page"
-import dayjs from "dayjs"
 import { ListCell } from "./cells/list-cell"
+import { displayDateTime } from "@/utils"
 
 interface ColumnActions {
   onDelete: (id: string) => void
@@ -55,7 +55,7 @@ export const columns = ({
   {
     accessorKey: "createdAt",
     header: "Joined",
-    cell: ({ row }) => dayjs(row.original.createdAt).format("DD/MM/YYYY"),
+    cell: ({ row }) => displayDateTime(row.original.createdAt),
   },
   {
     accessorKey: "lastOpened",
