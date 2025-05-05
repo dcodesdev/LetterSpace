@@ -209,8 +209,8 @@ export function SmtpSettings() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="STARTTLS">STARTTLS</SelectItem>
-                          <SelectItem value="SSL/TLS">SSL/TLS</SelectItem>
-                          <SelectItem value="None">None</SelectItem>
+                          <SelectItem value="SSL_TLS">SSL/TLS</SelectItem>
+                          <SelectItem value="NONE">None</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>
