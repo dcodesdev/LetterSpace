@@ -16,10 +16,9 @@ import { trpc } from "@/trpc"
 import Cookies from "js-cookie"
 import { useNavigate } from "react-router"
 import { useLocalStorage } from "usehooks-ts"
-import { Eye, EyeOff, Mail, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Mail } from "lucide-react"
 import { Input } from "@repo/ui"
-import { useEffect, useState } from "react"
-import { useSession } from "@/hooks/useSession"
+import { useEffect, useMemo, useState } from "react"
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -28,14 +27,17 @@ const loginSchema = z.object({
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
-  const { user } = useSession()
   const navigate = useNavigate()
 
+  const hasCookie = useMemo(() => {
+    return Cookies.get("token")
+  }, [])
+
   useEffect(() => {
-    if (user.data) {
+    if (hasCookie) {
       navigate("/dashboard", { replace: true })
     }
-  }, [user.data, navigate])
+  }, [hasCookie, navigate])
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -63,18 +65,6 @@ export const Login = () => {
         loginForm.setError("root", { message: error.message })
       },
     })
-  }
-
-  if (user.isLoading) {
-    return (
-      <div className="flex items-center justify-center p-10">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  if (user.data) {
-    return null
   }
 
   return (
