@@ -54,7 +54,9 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-
+        brand: {
+          primary: "hsl(var(--brand-primary))",
+        },
         success: {
           DEFAULT: "#004F3B",
           foreground: "#00D492",

@@ -135,7 +135,10 @@ export function DashboardLayout() {
         <Sidebar>
           <SidebarHeader>
             <div className="px-4 py-4">
-              <h2 className="text-lg font-semibold">Newsletter App</h2>
+              <h2 className="text-lg font-semibold">
+                <span>Letter</span>
+                <span className="text-brand-primary">Space</span>
+              </h2>
             </div>
           </SidebarHeader>
           <SidebarContent>
