@@ -210,12 +210,13 @@ export const createApiKey = authProcedure
         expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
         organizationId: input.organizationId,
       },
+      select: {
+        id: true,
+        key: true,
+      },
     })
 
-    return {
-      id: apiKey.id,
-      key,
-    }
+    return apiKey
   })
 
 const deleteApiKeySchema = z.object({

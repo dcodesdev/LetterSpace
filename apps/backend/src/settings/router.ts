@@ -23,9 +23,12 @@ export const settingsRouter = router({
   testSmtp: testSmtp,
   getGeneral: getGeneral,
   updateGeneral: updateGeneral,
+
+  // API Keys
   createApiKey: createApiKey,
   deleteApiKey: deleteApiKey,
   listApiKeys: listApiKeys,
+
   createWebhook: createWebhook,
   deleteWebhook: deleteWebhook,
   listWebhooks: listWebhooks,

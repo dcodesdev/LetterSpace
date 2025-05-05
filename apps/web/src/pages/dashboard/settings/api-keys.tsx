@@ -78,8 +78,8 @@ export function ApiKeys() {
   const utils = trpc.useUtils()
 
   const createApiKey = trpc.settings.createApiKey.useMutation({
-    onSuccess: (data) => {
-      setNewKey(data.key)
+    onSuccess: ({ key }) => {
+      setNewKey(key)
       utils.settings.listApiKeys.invalidate()
     },
     onError: (error) => {
