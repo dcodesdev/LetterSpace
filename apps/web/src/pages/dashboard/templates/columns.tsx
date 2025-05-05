@@ -14,6 +14,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Template } from "backend"
 import { UpdateTemplateDialog } from "./update-template-dialog"
 import { ViewTemplateDialog } from "./view-template-dialog"
+import { displayDateTime } from "@/utils"
 
 interface ColumnActions {
   onDelete: (id: string) => void
@@ -27,7 +28,7 @@ export const columns = (actions: ColumnActions): ColumnDef<Template>[] => [
     header: "Name",
     cell: ({ row }) => (
       <div>
-        <div className="font-medium">{row.getValue("name")}</div>
+        <div className="font-medium">{row.original.name}</div>
         <div className="text-sm text-muted-foreground">
           {row.original.description}
         </div>
@@ -42,15 +43,13 @@ export const columns = (actions: ColumnActions): ColumnDef<Template>[] => [
     accessorKey: "createdAt",
     header: "Created At",
     cell: ({ row }) => {
-      return new Date(row.getValue("createdAt")).toLocaleDateString()
+      return displayDateTime(row.original.createdAt)
     },
   },
   {
     accessorKey: "updatedAt",
     header: "Updated At",
-    cell: ({ row }) => {
-      return new Date(row.getValue("updatedAt")).toLocaleDateString()
-    },
+    cell: ({ row }) => displayDateTime(row.original.updatedAt),
   },
   {
     id: "actions",

@@ -315,7 +315,7 @@ importers:
         specifier: ^3.1.1
         version: 3.1.1(react@19.1.0)
       zod:
-        specifier: ^3.24.4
+        specifier: 3.24.4
         version: 3.24.4
     devDependencies:
       '@eslint/js':

@@ -8,8 +8,8 @@ import {
 } from "@repo/ui"
 import { ColumnDef } from "@tanstack/react-table"
 import { PopulatedSubscriber } from "./page"
-import dayjs from "dayjs"
 import { ListCell } from "./cells/list-cell"
+import { displayDateTime } from "@/utils"
 
 interface ColumnActions {
   onDelete: (id: string) => void
@@ -54,30 +54,8 @@ export const columns = ({
   },
   {
     accessorKey: "createdAt",
-    header: "Joined",
-    cell: ({ row }) => dayjs(row.original.createdAt).format("DD/MM/YYYY"),
-  },
-  {
-    accessorKey: "lastOpened",
-    header: "Last Opened",
-    cell: ({ row }) => {
-      const date = row.getValue("lastOpened")
-      return date ? new Date(date as string).toLocaleDateString() : "-"
-    },
-  },
-  {
-    accessorKey: "openRate",
-    header: "Open Rate",
-    cell: ({ row }) => {
-      const openRate = row.getValue("openRate") as number
-      const status =
-        openRate > 80
-          ? "text-emerald-500"
-          : openRate > 50
-            ? "text-yellow-500"
-            : "text-red-500"
-      return <div className={status}>{openRate}%</div>
-    },
+    header: "Joined at",
+    cell: ({ row }) => displayDateTime(row.original.createdAt),
   },
   {
     accessorKey: "ListSubscribers",

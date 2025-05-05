@@ -18,7 +18,8 @@ import { useNavigate } from "react-router"
 import { useLocalStorage } from "usehooks-ts"
 import { Eye, EyeOff, Mail } from "lucide-react"
 import { Input } from "@repo/ui"
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
@@ -26,6 +27,18 @@ const loginSchema = z.object({
 
 export const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
+
+  const hasCookie = useMemo(() => {
+    return Cookies.get("token")
+  }, [])
+
+  useEffect(() => {
+    if (hasCookie) {
+      navigate("/dashboard", { replace: true })
+    }
+  }, [hasCookie, navigate])
+
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -35,7 +48,6 @@ export const Login = () => {
   })
 
   const login = trpc.user.login.useMutation()
-  const navigate = useNavigate()
   const [, setOrgId] = useLocalStorage("orgId", "")
 
   function onLoginSubmit(values: z.infer<typeof loginSchema>) {

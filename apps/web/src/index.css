@@ -24,6 +24,7 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --radius: 0.5rem;
+    --brand-primary: 177 59% 58%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -55,6 +56,7 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --ring: 240 6.3% 25.1%;
+    --brand-primary: 177 59% 58%;
 
     --sidebar-background: 240 9.1% 6.5%;
     --sidebar-foreground: 213 31% 91%;
