@@ -1,7 +1,8 @@
 {
-  "name": "shared",
+  "name": "@repo/shared",
   "module": "index.ts",
   "type": "module",
+  "main": "index.ts",
   "devDependencies": {
     "@types/bun": "latest"
   },

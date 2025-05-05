@@ -29,7 +29,7 @@ import {
 import { useSession } from "@/hooks"
 import { useLocation } from "react-router"
 import { ThemeToggle, WithTooltip } from "@/components"
-import { VERSION } from "backend/data"
+import { APP_VERSION } from "@repo/shared"
 
 const sidebarItems = [
   {
@@ -197,7 +197,7 @@ export function DashboardLayout() {
               <div className="flex items-center justify-between gap-2 px-2">
                 <WithTooltip content="Current version">
                   <span className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                    v{VERSION}
+                    v{APP_VERSION}
                   </span>
                 </WithTooltip>
               </div>

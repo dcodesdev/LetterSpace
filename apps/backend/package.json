@@ -14,7 +14,6 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./data": "./src/data.ts",
     "./shared": "./src/shared.ts"
   },
   "prisma": {
