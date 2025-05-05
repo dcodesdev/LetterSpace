@@ -72,7 +72,7 @@ You can access the LetterSpace dashboard directly at [http://localhost:5000](htt
 
 If you don't already have a reverse proxy, you can follow along.
 
-To access the LetterSpace dashboard securely via a domain name (e.g., `https://newsletter.yourdomain.com`), you can use a reverse proxy like Nginx or Caddy.
+To access the LetterSpace dashboard securely via a domain name (e.g., `https://letterspace.yourdomain.com`), you can use a reverse proxy like Nginx or Caddy.
 
 We'll use [Caddy](https://caddyserver.com) as an example. Caddy is easy to use and automatically manages SSL certificates.
 
@@ -103,12 +103,12 @@ sudo nano /etc/caddy/Caddyfile
 Add the following configuration:
 
 ```bash
-newsletter.yourdomain.com { # Replace with your actual domain
+letterspace.yourdomain.com { # Replace with your actual domain
     reverse_proxy localhost:5000
 }
 ```
 
-> Replace `newsletter.yourdomain.com` with your actual domain. Caddy will automatically provision an SSL certificate for it.
+> Replace `letterspace.yourdomain.com` with your actual domain. Caddy will automatically provision an SSL certificate for it.
 
 ### Start Caddy
 
@@ -124,4 +124,4 @@ Check the status to ensure it's running:
 sudo systemctl status caddy
 ```
 
-Wait a minute or two for Caddy to provision the SSL certificate, then access the LetterSpace dashboard securely at `https://newsletter.yourdomain.com`.
+Wait a minute or two for Caddy to provision the SSL certificate, then access the LetterSpace dashboard securely at `https://letterspace.yourdomain.com`.
