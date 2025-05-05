@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@repo/shared": "workspace:*",
     "next": "15.1.7",
     "nextra": "^4.2.11",
     "nextra-theme-docs": "^4.2.11",

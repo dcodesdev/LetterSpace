@@ -1,3 +1,4 @@
+import SMTPTransport from "nodemailer/lib/smtp-transport"
 import { SmtpSettings } from "../../prisma/client"
 import nodemailer from "nodemailer"
 
@@ -32,38 +33,47 @@ interface SendEmailResponse {
   messageId?: string
 }
 
+type TransportOptions = SMTPTransport | SMTPTransport.Options | string
+
 export class Mailer {
   private transporter: nodemailer.Transporter
 
   constructor(smtpSettings: SmtpSettings) {
-    const startTls = {
-      port: 587,
-      secure: false,
-      requireTLS: true,
-    }
-
-    const sslTls = {
-      port: 465,
-      secure: true,
-    }
-
-    const tlsOpts =
-      smtpSettings.encryption === "STARTTLS"
-        ? startTls
-        : smtpSettings.encryption === "SSL_TLS"
-          ? sslTls
-          : { port: smtpSettings.port }
-
-    this.transporter = nodemailer.createTransport({
-      connectionTimeout: smtpSettings.timeout,
+    let transportOptions: TransportOptions = {
       host: smtpSettings.host,
+      port: smtpSettings.port,
+      connectionTimeout: smtpSettings.timeout,
       auth: {
         user: smtpSettings.username,
         pass: smtpSettings.password,
       },
-      requireTLS: smtpSettings.secure,
-      ...tlsOpts,
-    })
+    }
+
+    if (smtpSettings.encryption === "STARTTLS") {
+      transportOptions = {
+        ...transportOptions,
+        port: smtpSettings.port || 587, // Default STARTTLS port
+        secure: false, // Use STARTTLS
+        requireTLS: true, // Require STARTTLS upgrade
+      }
+    } else if (smtpSettings.encryption === "SSL_TLS") {
+      transportOptions = {
+        ...transportOptions,
+        port: smtpSettings.port || 465, // Default SSL/TLS port
+        secure: true, // Use direct TLS connection
+      }
+    } else {
+      // NONE encryption
+      transportOptions = {
+        ...transportOptions,
+        port: smtpSettings.port || 25, // Default non-encrypted port
+        secure: false,
+        requireTLS: false, // Explicitly disable TLS requirement
+        ignoreTLS: true, // Optionally ignore TLS advertised by server if needed
+      }
+    }
+
+    this.transporter = nodemailer.createTransport(transportOptions)
   }
 
   async sendEmail(options: SendMailOptions): Promise<SendEmailResponse> {
