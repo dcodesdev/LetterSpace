@@ -298,36 +298,46 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {Object.entries(dashboard.messageStats ?? {}).map(
-                ([status, count]) => {
-                  const item = statusConfig[
-                    status as keyof typeof statusConfig
-                  ] || {
-                    icon: Mail,
-                    className: "bg-muted text-muted-foreground",
-                  }
+              {Object.keys(dashboard.messageStats ?? {}).length > 0 ? (
+                Object.entries(dashboard.messageStats ?? {}).map(
+                  ([status, count]) => {
+                    const item = statusConfig[
+                      status as keyof typeof statusConfig
+                    ] || {
+                      icon: Mail,
+                      className: "bg-muted text-muted-foreground",
+                    }
 
-                  const Icon = item.icon
+                    const Icon = item.icon
 
-                  return (
-                    <Card key={status} hoverEffect className="hover:bg-accent">
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div
-                            className={cn(
-                              "flex items-center gap-2",
-                              item.textClassName
-                            )}
-                          >
-                            <Icon className="h-4 w-4" />
-                            <p className="text-sm font-medium">{status}</p>
+                    return (
+                      <Card
+                        key={status}
+                        hoverEffect
+                        className="hover:bg-accent"
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div
+                              className={cn(
+                                "flex items-center gap-2",
+                                item.textClassName
+                              )}
+                            >
+                              <Icon className="h-4 w-4" />
+                              <p className="text-sm font-medium">{status}</p>
+                            </div>
+                            <div className="font-medium">{count}</div>
                           </div>
-                          <div className="font-medium">{count}</div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                }
+                        </CardContent>
+                      </Card>
+                    )
+                  }
+                )
+              ) : (
+                <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
+                  No message status data available.
+                </div>
               )}
             </div>
           </CardContent>
@@ -344,43 +354,49 @@ export function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2">
-            {dashboard.recentCampaigns.map((campaign) => (
-              <Link
-                key={campaign.id}
-                to={`/dashboard/campaigns/${campaign.id}`}
-              >
-                <div className="flex items-center justify-between space-x-4 rounded-lg border p-4 hover:bg-accent duration-200">
-                  <div className="flex flex-col space-y-1">
-                    <p className="font-medium">{campaign.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Sent to {campaign.sentMessages.toLocaleString()}{" "}
-                      subscribers
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-4 text-sm">
-                    <div className="flex flex-col items-end space-y-1">
-                      <p className="font-medium">
-                        {campaign.deliveryRate.toFixed(1)}%
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Delivery rate
+            {dashboard.recentCampaigns.length > 0 ? (
+              dashboard.recentCampaigns.map((campaign) => (
+                <Link
+                  key={campaign.id}
+                  to={`/dashboard/campaigns/${campaign.id}`}
+                >
+                  <div className="flex items-center justify-between space-x-4 rounded-lg border p-4 hover:bg-accent duration-200">
+                    <div className="flex flex-col space-y-1">
+                      <p className="font-medium">{campaign.title}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Sent to {campaign.sentMessages.toLocaleString()}{" "}
+                        subscribers
                       </p>
                     </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <p className="font-medium">
-                        {dayjs(campaign.completedAt).format("DD MMM YYYY")}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Completed date
-                      </p>
+                    <div className="flex items-center space-x-4 text-sm">
+                      <div className="flex flex-col items-end space-y-1">
+                        <p className="font-medium">
+                          {campaign.deliveryRate.toFixed(1)}%
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Delivery rate
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end space-y-1">
+                        <p className="font-medium">
+                          {dayjs(campaign.completedAt).format("DD MMM YYYY")}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Completed date
+                        </p>
+                      </div>
+                      <Button variant="ghost" size="icon">
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button variant="ghost" size="icon">
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))
+            ) : (
+              <div className="flex h-24 items-center justify-center text-sm text-muted-foreground">
+                No recent campaigns yet. Start one to see stats here.
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
