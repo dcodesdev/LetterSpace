@@ -15,7 +15,7 @@ import {
   Input,
   Switch,
 } from "@repo/ui"
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { editSubscriberSchema } from "./schemas"
@@ -25,6 +25,7 @@ import { useSession } from "@/hooks"
 import { useEffect } from "react"
 import { RouterOutput } from "@/types"
 import { EditSubscriberDialogState } from "./types"
+import { Plus, Trash2 } from "lucide-react"
 
 interface EditSubscriberDialogProps extends EditSubscriberDialogState {
   onOpenChange: (open: boolean) => void
@@ -47,7 +48,18 @@ export function EditSubscriberDialog({
       name: "",
       listIds: [],
       emailVerified: false,
+      metadata: [],
     },
+  })
+
+  const {
+    fields: metadataFields,
+    append: appendMetadata,
+    remove: removeMetadata,
+    replace: replaceMetadata,
+  } = useFieldArray({
+    control: form.control,
+    name: "metadata",
   })
 
   useEffect(() => {
@@ -57,16 +69,24 @@ export function EditSubscriberDialog({
         name: subscriber.name ?? "",
         listIds: subscriber.ListSubscribers.map((ls) => ls.List.id),
         emailVerified: subscriber.emailVerified ?? false,
+        metadata:
+          subscriber.Metadata?.map((m) => ({ key: m.key, value: m.value })) ||
+          [],
       })
+      replaceMetadata(
+        subscriber.Metadata?.map((m) => ({ key: m.key, value: m.value })) || []
+      )
     } else {
       form.reset({
         email: "",
         name: "",
         listIds: [],
         emailVerified: false,
+        metadata: [],
       })
+      replaceMetadata([])
     }
-  }, [subscriber, form])
+  }, [subscriber, form, replaceMetadata])
 
   const updateSubscriber = trpc.subscriber.update.useMutation({
     onSuccess: () => {
@@ -202,6 +222,79 @@ export function EditSubscriberDialog({
                   </FormItem>
                 )}
               />
+              <div>
+                <FormLabel className="text-base">Metadata</FormLabel>
+                {metadataFields.length > 0 ? (
+                  <>
+                    {metadataFields.map((field, index) => (
+                      <div
+                        key={field.id}
+                        className="flex items-center gap-2 mt-2"
+                      >
+                        <FormField
+                          control={form.control}
+                          name={`metadata.${index}.key`}
+                          render={({ field: keyField }) => (
+                            <FormItem className="flex-1">
+                              <FormControl>
+                                <Input placeholder="Key" {...keyField} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`metadata.${index}.value`}
+                          render={({ field: valueField }) => (
+                            <FormItem className="flex-1">
+                              <FormControl>
+                                <Input placeholder="Value" {...valueField} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeMetadata(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <div className="flex flex-col mt-2 mb-2 border rounded-md p-4">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      No metadata added yet
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => appendMetadata({ key: "", value: "" })}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Metadata
+                    </Button>
+                  </div>
+                )}
+                {metadataFields.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => appendMetadata({ key: "", value: "" })}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Metadata
+                  </Button>
+                )}
+              </div>
             </div>
             <DialogFooter>
               <Button type="submit" disabled={updateSubscriber.isPending}>

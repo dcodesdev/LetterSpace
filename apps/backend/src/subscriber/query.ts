@@ -42,6 +42,7 @@ export const listSubscribers = authProcedure
         skip: (input.page - 1) * input.perPage,
         take: input.perPage,
         include: {
+          Metadata: true,
           ListSubscribers: {
             select: {
               id: true,

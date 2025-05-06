@@ -88,6 +88,14 @@ const updateSubscriberSchema = z.object({
   organizationId: z.string(),
   listIds: z.array(z.string()),
   emailVerified: z.boolean().optional(),
+  metadata: z
+    .array(
+      z.object({
+        key: z.string().min(1),
+        value: z.string().min(1),
+      })
+    )
+    .optional(),
 })
 
 export const updateSubscriber = authProcedure
@@ -142,17 +150,24 @@ export const updateSubscriber = authProcedure
         name: input.name,
         emailVerified: input.emailVerified,
         ListSubscribers: {
-          // Remove unselected lists
           deleteMany: {
             listId: {
               in: listsToRemove,
             },
           },
-          // Add newly selected lists
           create: listsToAdd.map((listId) => ({
             listId,
           })),
         },
+        Metadata: input.metadata
+          ? {
+              deleteMany: {},
+              create: input.metadata.map((meta) => ({
+                key: meta.key,
+                value: meta.value,
+              })),
+            }
+          : { deleteMany: {} },
       },
       include: {
         ListSubscribers: {
