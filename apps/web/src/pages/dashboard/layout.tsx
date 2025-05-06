@@ -28,7 +28,12 @@ import {
 } from "lucide-react"
 import { useSession } from "@/hooks"
 import { useLocation } from "react-router"
-import { CenteredLoader, ThemeToggle, WithTooltip } from "@/components"
+import {
+  CenteredLoader,
+  ThemeToggle,
+  WithTooltip,
+  LetterSpaceText,
+} from "@/components"
 import { APP_VERSION } from "@repo/shared"
 
 const sidebarItems = [
@@ -140,10 +145,7 @@ export function DashboardLayout() {
         <Sidebar>
           <SidebarHeader>
             <div className="px-4 py-4">
-              <h2 className="text-lg font-semibold">
-                <span>Letter</span>
-                <span className="text-brand-primary">Space</span>
-              </h2>
+              <LetterSpaceText as="h2" />
             </div>
           </SidebarHeader>
           <SidebarContent>

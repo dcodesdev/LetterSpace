@@ -5,6 +5,7 @@ import { Button } from "@repo/ui"
 import { trpc } from "@/trpc"
 import { IconBrandGithub } from "@tabler/icons-react"
 import { constants } from "@/constants"
+import { LetterSpaceText } from "@/components"
 
 export function UnsubscribePage() {
   const [error, setError] = useState<string | null>(null)
@@ -98,7 +99,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => (
         rel="noopener noreferrer"
       >
         <IconBrandGithub className="w-4 h-4 mr-2" />
-        Powered by Your Newsletter App
+        Powered by <LetterSpaceText as="span" />
       </Link>
     </footer>
   </div>
