@@ -7,6 +7,14 @@ export const addSubscriberSchema = z.object({
   name: z.string().optional(),
   listIds: z.array(z.string()),
   emailVerified: z.boolean().optional(),
+  metadata: z
+    .array(
+      z.object({
+        key: z.string().min(1, "Key cannot be empty"),
+        value: z.string().min(1, "Value cannot be empty"),
+      })
+    )
+    .optional(),
 })
 
 export const editSubscriberSchema = z.object({

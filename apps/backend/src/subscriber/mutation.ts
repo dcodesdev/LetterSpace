@@ -11,6 +11,14 @@ const createSubscriberSchema = z.object({
   organizationId: z.string(),
   listIds: z.array(z.string()),
   emailVerified: z.boolean().optional(),
+  metadata: z
+    .array(
+      z.object({
+        key: z.string().min(1),
+        value: z.string().min(1),
+      })
+    )
+    .optional(),
 })
 
 export const createSubscriber = authProcedure
@@ -59,6 +67,14 @@ export const createSubscriber = authProcedure
             },
           })),
         },
+        Metadata: input.metadata
+          ? {
+              create: input.metadata.map((meta) => ({
+                key: meta.key,
+                value: meta.value,
+              })),
+            }
+          : undefined,
       },
     })
 

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react"
+import { Plus, Trash2 } from "lucide-react"
 import {
   Button,
   Dialog,
@@ -17,7 +17,7 @@ import {
   Input,
   Switch,
 } from "@repo/ui"
-import { useForm } from "react-hook-form"
+import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { addSubscriberSchema } from "./schemas"
@@ -49,7 +49,17 @@ export function AddSubscriberDialog({
       name: "",
       listIds: [],
       emailVerified: false,
+      metadata: [{ key: "", value: "" }],
     },
+  })
+
+  const {
+    fields: metadataFields,
+    append: appendMetadata,
+    remove: removeMetadata,
+  } = useFieldArray({
+    control: form.control,
+    name: "metadata",
   })
 
   const addSubscriber = trpc.subscriber.create.useMutation({
@@ -178,6 +188,57 @@ export function AddSubscriberDialog({
                 </FormItem>
               )}
             />
+            <div>
+              <FormLabel>Metadata</FormLabel>
+              {metadataFields.map((field, index) => (
+                <div key={field.id} className="flex items-center gap-2 mt-2">
+                  <FormField
+                    control={form.control}
+                    name={`metadata.${index}.key`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input placeholder="Key" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`metadata.${index}.value`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input placeholder="Value" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {metadataFields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeMetadata(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => appendMetadata({ key: "", value: "" })}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Metadata
+              </Button>
+            </div>
             <DialogFooter>
               <Button
                 loading={addSubscriber.isPending}
