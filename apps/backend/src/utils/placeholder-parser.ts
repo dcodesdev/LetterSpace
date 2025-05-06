@@ -17,7 +17,6 @@ export interface PlaceholderData {
   campaign: CampaignPlaceholderData
   organization: OrganizationPlaceholderData
   unsubscribe_url: string
-  web_version_url?: string
   current_date?: string
 }
 
@@ -26,7 +25,6 @@ export type PlaceholderDataKey =
   | `campaign.${keyof CampaignPlaceholderData}`
   | `organization.${keyof OrganizationPlaceholderData}`
   | `unsubscribe_url`
-  | `web_version_url`
   | `current_date`
 
 export function replacePlaceholders(

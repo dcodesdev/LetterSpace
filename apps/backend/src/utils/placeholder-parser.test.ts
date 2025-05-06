@@ -65,13 +65,12 @@ describe("replacePlaceholders", () => {
 
   it("should correctly replace various types of placeholders", () => {
     const template =
-      "Email: {{subscriber.email}}, Campaign: {{campaign.name}}, Org: {{organization.name}}, Unsub: {{unsubscribe_url}}, Web: {{web_version_url}}, Date: {{current_date}}"
+      "Email: {{subscriber.email}}, Campaign: {{campaign.name}}, Org: {{organization.name}}, Unsub: {{unsubscribe_url}}, Date: {{current_date}}"
     const data = {
       "subscriber.email": "test@example.com",
       "campaign.name": "Newsletter Q1",
       "organization.name": "MyCompany",
       unsubscribe_url: "domain.com/unsub",
-      web_version_url: "domain.com/web",
       current_date: "2024-01-01",
     }
     expect(replacePlaceholders(template, data)).toBe(
