@@ -4,8 +4,8 @@ const meta: MetaRecord = {
   index: "Introduction",
   "getting-started": "Getting Started",
   api: "API Reference",
-  todo: "To-Do List",
   placeholders: "Placeholders",
+  todo: "To-Do List",
   "---": {
     type: "separator",
   },
