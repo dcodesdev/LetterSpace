@@ -149,3 +149,50 @@ export const updateProfile = authProcedure
 
     return { user: updatedUser }
   })
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string(),
+  newPassword: z.string().min(8, "New password must be at least 8 characters."),
+})
+
+export const changePassword = authProcedure
+  .input(changePasswordSchema)
+  .mutation(async ({ ctx, input }) => {
+    const userId = ctx.user.id
+    const { currentPassword, newPassword } = input
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { password: true, pwdVersion: true },
+    })
+
+    if (!user) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found." })
+    }
+
+    const isValidPassword = await comparePasswords(
+      currentPassword,
+      user.password
+    )
+    if (!isValidPassword) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "Incorrect current password.",
+      })
+    }
+
+    const hashedNewPassword = await hashPassword(newPassword)
+    const newPwdVersion = (user.pwdVersion || 0) + 1
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        password: hashedNewPassword,
+        pwdVersion: newPwdVersion,
+      },
+    })
+
+    const newToken = generateToken(userId, newPwdVersion)
+
+    return { success: true, token: newToken }
+  })
