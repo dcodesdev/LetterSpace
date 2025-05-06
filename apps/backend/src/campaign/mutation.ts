@@ -410,7 +410,7 @@ export const startCampaign = authProcedure
             "campaign.name": campaign.title,
             "campaign.subject": campaign.subject ?? "",
             "organization.name": organization.name,
-            unsubscribe_url: `${generalSettings.baseURL}/unsubscribe?sid=${subscriber.id}&cid=${campaign.id}`,
+            unsubscribe_url: `${generalSettings.baseURL}/unsubscribe?sid=${subscriber.id}&cid=${campaign.id}&mid=${messageId}`,
             current_date: new Date().toLocaleDateString("en-CA"),
           }
 
