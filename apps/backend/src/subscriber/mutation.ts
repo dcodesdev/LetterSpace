@@ -394,3 +394,38 @@ export const publicUnsubscribe = publicProcedure
       })
     }
   })
+
+export const verifyEmail = publicProcedure
+  .input(
+    z.object({
+      token: z.string(),
+    })
+  )
+  .mutation(async ({ input }) => {
+    const subscriber = await prisma.subscriber.findFirst({
+      where: {
+        emailVerificationToken: input.token,
+        emailVerificationTokenExpiresAt: {
+          gt: new Date(),
+        },
+      },
+    })
+
+    if (!subscriber) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Invalid or expired verification token",
+      })
+    }
+
+    await prisma.subscriber.update({
+      where: { id: subscriber.id },
+      data: {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationTokenExpiresAt: null,
+      },
+    })
+
+    return { success: true }
+  })

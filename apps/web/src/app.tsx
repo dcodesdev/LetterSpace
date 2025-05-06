@@ -15,6 +15,7 @@ import {
   UnsubscribePage,
   AuthPage,
   NotFoundPage,
+  VerifyEmailPage,
 } from "./pages"
 import { scan } from "react-scan"
 
@@ -52,6 +53,7 @@ export function App() {
         </Route>
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/unsubscribe" element={<UnsubscribePage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

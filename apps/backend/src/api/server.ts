@@ -51,6 +51,8 @@ apiRouter.use(authenticateApiKey)
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *         emailVerified:
+ *           type: boolean
  */
 
 /**
@@ -83,6 +85,8 @@ apiRouter.use(authenticateApiKey)
  *                   type: string
  *               doubleOptIn:
  *                 type: boolean
+ *               emailVerified:
+ *                 type: boolean
  *     responses:
  *       201:
  *         description: Subscriber created successfully
@@ -106,6 +110,7 @@ apiRouter.post("/subscribers", async (req, res) => {
         name: z.string().optional(),
         lists: z.array(z.string()).min(1, "At least one listId is required"),
         doubleOptIn: z.boolean().optional(),
+        emailVerified: z.boolean().optional(),
       })
       .safeParse(req.body)
 
@@ -116,7 +121,7 @@ apiRouter.post("/subscribers", async (req, res) => {
       return
     }
 
-    const { email, name, lists, doubleOptIn } = body
+    const { email, name, lists, doubleOptIn, emailVerified } = body
 
     const existingLists = await prisma.list.findMany({
       where: {
@@ -154,14 +159,19 @@ apiRouter.post("/subscribers", async (req, res) => {
 
     const uniqueLists = [...new Set(allLists)]
 
-    let emailVerificationToken: string | null = null
-    let emailVerificationTokenExpiresAt: Date | null = null
-    let emailVerified = true
+    const isExpired = existingSubscriber?.emailVerificationTokenExpiresAt
+      ? dayjs(existingSubscriber.emailVerificationTokenExpiresAt).isBefore(
+          dayjs()
+        )
+      : true
 
-    if (doubleOptIn && !existingSubscriber) {
-      emailVerificationToken = crypto.randomBytes(32).toString("hex")
-      emailVerificationTokenExpiresAt = dayjs().add(24, "hours").toDate()
-      emailVerified = false
+    const shouldSendVerificationEmail =
+      doubleOptIn && !existingSubscriber?.emailVerified && isExpired
+
+    if (shouldSendVerificationEmail) {
+      const emailVerificationToken = crypto.randomBytes(32).toString("hex")
+      const emailVerificationTokenExpiresAt = dayjs().add(24, "hours").toDate()
+      const emailVerified = false
 
       try {
         const smtpSettings = await prisma.smtpSettings.findFirst({
@@ -227,7 +237,62 @@ apiRouter.post("/subscribers", async (req, res) => {
           subject: "Verify Your Email Address",
           html: emailHtmlContent,
         })
-        console.log(`Verification email sent to ${email}`)
+
+        const subscriber = await prisma.subscriber.upsert({
+          where: { id: existingSubscriber?.id || "create" },
+          update: {
+            emailVerificationToken,
+            emailVerificationTokenExpiresAt,
+            emailVerified,
+            ListSubscribers: {
+              deleteMany: {},
+              create: uniqueLists.map((listId: string) => ({
+                List: { connect: { id: listId } },
+              })),
+            },
+          },
+          create: {
+            email,
+            name,
+            organizationId: req.organization.id,
+            emailVerified,
+            emailVerificationToken,
+            emailVerificationTokenExpiresAt,
+            ListSubscribers: {
+              create: uniqueLists.map((listId: string) => ({
+                List: { connect: { id: listId } },
+              })),
+            },
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            ListSubscribers: { include: { List: true } },
+            emailVerified: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        })
+
+        const data = {
+          id: subscriber.id,
+          email: subscriber.email,
+          name: subscriber.name,
+          lists: subscriber.ListSubscribers.map((list) => ({
+            id: list.List.id,
+            name: list.List.name,
+            description: list.List.description,
+          })),
+          emailVerified: subscriber.emailVerified,
+          createdAt: subscriber.createdAt,
+          updatedAt: subscriber.updatedAt,
+        }
+
+        console.log("data", data)
+
+        res.status(201).json(data)
+        return
       } catch (emailError: any) {
         console.error(
           `Error sending verification email to ${email}:`,
@@ -238,14 +303,6 @@ apiRouter.post("/subscribers", async (req, res) => {
         })
         return
       }
-    } else if (
-      existingSubscriber &&
-      !existingSubscriber.emailVerified &&
-      doubleOptIn
-    ) {
-      emailVerified = existingSubscriber.emailVerified ?? false
-    } else if (existingSubscriber) {
-      emailVerified = existingSubscriber.emailVerified ?? true
     }
 
     const subscriber = await prisma.subscriber.upsert({
@@ -268,8 +325,6 @@ apiRouter.post("/subscribers", async (req, res) => {
         name,
         organizationId: req.organization.id,
         emailVerified,
-        emailVerificationToken,
-        emailVerificationTokenExpiresAt,
         ListSubscribers: {
           create: uniqueLists.map((listId: string) => ({
             List: {
