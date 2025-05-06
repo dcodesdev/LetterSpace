@@ -5,6 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Badge,
 } from "@repo/ui"
 import { ColumnDef } from "@tanstack/react-table"
 import { PopulatedSubscriber } from "./page"
@@ -56,6 +57,18 @@ export const columns = ({
     accessorKey: "createdAt",
     header: "Joined at",
     cell: ({ row }) => displayDateTime(row.original.createdAt),
+  },
+  {
+    accessorKey: "emailVerified",
+    header: "Status",
+    cell: ({ row }) => {
+      const isVerified = row.original.emailVerified
+      return (
+        <Badge variant={isVerified ? "default" : "secondary"}>
+          {isVerified ? "Verified" : "Unverified"}
+        </Badge>
+      )
+    },
   },
   {
     accessorKey: "ListSubscribers",
