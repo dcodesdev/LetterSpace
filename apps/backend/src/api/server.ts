@@ -4,6 +4,9 @@ import { authenticateApiKey } from "./middleware"
 import { z } from "zod"
 import { Prisma } from "../../prisma/client"
 import crypto from "crypto"
+import { Mailer } from "../lib/Mailer"
+import fs from "fs/promises"
+import path from "path"
 
 export const apiRouter = express.Router()
 
@@ -93,7 +96,7 @@ apiRouter.use(authenticateApiKey)
  */
 apiRouter.post("/subscribers", async (req, res) => {
   try {
-    const { data: body, error } = z
+    const { data: body, error: validationError } = z
       .object({
         email: z
           .string()
@@ -105,10 +108,10 @@ apiRouter.post("/subscribers", async (req, res) => {
       })
       .safeParse(req.body)
 
-    if (error) {
-      res
-        .status(400)
-        .json({ error: error.issues[0]?.message || "Invalid input data" })
+    if (validationError) {
+      res.status(400).json({
+        error: validationError.issues[0]?.message || "Invalid input data",
+      })
       return
     }
 
@@ -160,6 +163,82 @@ apiRouter.post("/subscribers", async (req, res) => {
         Date.now() + 24 * 60 * 60 * 1000
       )
       emailVerified = false
+
+      try {
+        const smtpSettings = await prisma.smtpSettings.findFirst({
+          where: { organizationId: req.organization.id },
+        })
+
+        if (!smtpSettings) {
+          console.error(
+            `SMTP settings not found for organization ${req.organization.id}.`
+          )
+          res.status(422).json({
+            error:
+              "SMTP settings not configured for this organization. Cannot send verification email.",
+          })
+          return
+        }
+
+        const generalSettings = await prisma.generalSettings.findFirst({
+          where: { organizationId: req.organization.id },
+        })
+
+        if (!generalSettings || !generalSettings.baseURL) {
+          console.error(
+            `General settings (especially baseURL) not found for organization ${req.organization.id}.`
+          )
+          res.status(422).json({
+            error:
+              "Base URL not configured in general settings for this organization. Cannot send verification email.",
+          })
+          return
+        }
+
+        const fromEmailAddress =
+          smtpSettings.fromEmail || generalSettings.defaultFromEmail
+        if (!fromEmailAddress) {
+          console.error(
+            `Sender email (fromEmail/defaultFromEmail) not configured for organization ${req.organization.id}.`
+          )
+          res.status(422).json({
+            error:
+              "Sender email not configured for this organization. Cannot send verification email.",
+          })
+          return
+        }
+
+        const mailer = new Mailer(smtpSettings)
+        const verificationLink = `${generalSettings.baseURL.replace(/\/$/, "")}/verify-email?token=${emailVerificationToken}`
+
+        const templatePath = path.join(
+          __dirname,
+          "../../templates/verificationEmail.html"
+        )
+        let emailHtmlContent = await fs.readFile(templatePath, "utf-8")
+
+        emailHtmlContent = emailHtmlContent
+          .replace(/{{name}}/g, name || "there")
+          .replace(/{{verificationLink}}/g, verificationLink)
+          .replace(/{{currentYear}}/g, new Date().getFullYear().toString())
+
+        await mailer.sendEmail({
+          to: email,
+          from: fromEmailAddress,
+          subject: "Verify Your Email Address",
+          html: emailHtmlContent,
+        })
+        console.log(`Verification email sent to ${email}`)
+      } catch (emailError: any) {
+        console.error(
+          `Error sending verification email to ${email}:`,
+          emailError
+        )
+        res.status(422).json({
+          error: `Failed to send verification email: ${emailError.message || "Unknown reason"}`,
+        })
+        return
+      }
     } else if (
       existingSubscriber &&
       !existingSubscriber.emailVerified &&
