@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import { createUser } from "@helpers/user/user"
 import { request } from "@helpers/request"
 import { createList } from "@tests/integration/helpers/list/list"
+import { prisma } from "@src/utils/prisma"
 
 describe("[POST] /api/subscribers", () => {
   it("should create a subscriber", async () => {
@@ -228,5 +229,95 @@ describe("[POST] /api/subscribers", () => {
 
     expect(response.status).toBe(400)
     expect(response.body.error).toBe("List with id non-existent-id not found")
+  })
+
+  it("should create a subscriber with doubleOptIn true, send verification email, and set emailVerified to false", async () => {
+    const {
+      apiKey: { key: apiKey },
+      orgId,
+      user,
+    } = await createUser()
+
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY is not set")
+    }
+    if (!process.env.RESEND_TEST_EMAIL) {
+      throw new Error("RESEND_TEST_EMAIL is not set")
+    }
+
+    // Delete existing SMTP settings for the org to ensure a clean slate for this test
+    await prisma.smtpSettings.deleteMany({
+      where: { organizationId: orgId },
+    })
+
+    // Create specific SMTP settings for this test with SSL_TLS encryption
+    await prisma.smtpSettings.create({
+      data: {
+        organizationId: orgId,
+        host: "smtp.resend.com",
+        port: 465, // Standard SSL/TLS port
+        username: "resend",
+        password: process.env.RESEND_API_KEY,
+        fromEmail: process.env.RESEND_TEST_EMAIL,
+        encryption: "SSL_TLS", // Explicitly set to SSL_TLS
+        secure: true, // Ensure secure is true, though Mailer handles it for SSL_TLS
+      },
+    })
+
+    // Upsert General settings (organizationId is unique here, so upsert is fine)
+    await prisma.generalSettings.upsert({
+      where: { organizationId: orgId },
+      update: {
+        baseURL: "http://localhost:3000",
+        defaultFromEmail: process.env.RESEND_TEST_EMAIL,
+      },
+      create: {
+        organizationId: orgId,
+        baseURL: "http://localhost:3000",
+        defaultFromEmail: process.env.RESEND_TEST_EMAIL,
+      },
+    })
+
+    const list = await createList({
+      name: "Double Opt-In List",
+      organizationId: orgId,
+    })
+
+    const receivingEmail = process.env.RESEND_TEST_EMAIL_RECEIVER
+    if (!receivingEmail) {
+      throw new Error("RESEND_TEST_EMAIL_RECEIVER is not set")
+    }
+
+    const response = await request
+      .post("/api/subscribers")
+      .set("x-api-key", apiKey)
+      .send({
+        email: receivingEmail,
+        lists: [list.id],
+        doubleOptIn: true,
+      })
+
+    expect(response.status).toBe(201)
+    expect(response.body).toBeDefined()
+
+    const subscriber = response.body
+    expect(subscriber.email).toBe(receivingEmail.toLowerCase())
+    expect(subscriber.lists).toBeDefined()
+    expect(subscriber.lists.length).toBe(1)
+    expect(subscriber.lists[0].id).toBe(list.id)
+    expect(subscriber.emailVerified).toBe(false)
+
+    const dbSubscriber = await prisma.subscriber.findUnique({
+      where: { id: subscriber.id },
+    })
+    expect(dbSubscriber).toBeDefined()
+    expect(dbSubscriber?.emailVerified).toBe(false)
+    expect(dbSubscriber?.emailVerificationToken).toBeTypeOf("string")
+    expect(dbSubscriber?.emailVerificationTokenExpiresAt).toBeInstanceOf(Date)
+
+    await prisma.generalSettings.deleteMany({
+      where: { organizationId: orgId },
+    })
+    await prisma.smtpSettings.deleteMany({ where: { organizationId: orgId } })
   })
 })
