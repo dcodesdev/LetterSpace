@@ -71,6 +71,7 @@ const updateSubscriberSchema = z.object({
   name: z.string().optional(),
   organizationId: z.string(),
   listIds: z.array(z.string()),
+  emailVerified: z.boolean().optional(),
 })
 
 export const updateSubscriber = authProcedure
@@ -123,6 +124,7 @@ export const updateSubscriber = authProcedure
       data: {
         email: input.email,
         name: input.name,
+        emailVerified: input.emailVerified,
         ListSubscribers: {
           // Remove unselected lists
           deleteMany: {

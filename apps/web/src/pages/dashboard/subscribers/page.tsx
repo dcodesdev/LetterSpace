@@ -82,6 +82,7 @@ const editSubscriberSchema = z.object({
   }),
   name: z.string().optional(),
   listIds: z.array(z.string()),
+  emailVerified: z.boolean().optional(),
 })
 
 export function SubscribersPage() {
@@ -138,6 +139,7 @@ export function SubscribersPage() {
       email: "",
       name: "",
       listIds: [],
+      emailVerified: false,
     },
   })
 
@@ -148,6 +150,7 @@ export function SubscribersPage() {
         email: editDialog.subscriber.email,
         name: editDialog.subscriber.name ?? "",
         listIds: editDialog.subscriber.ListSubscribers.map((ls) => ls.List.id),
+        emailVerified: editDialog.subscriber.emailVerified ?? false,
       })
     }
   }, [editDialog.subscriber, editForm])
@@ -722,6 +725,24 @@ export function SubscribersPage() {
                         )}
                       </div>
                       <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="emailVerified"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                      <div className="space-y-0.5">
+                        <FormLabel>Email Verified</FormLabel>
+                        <FormMessage />
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
                     </FormItem>
                   )}
                 />
