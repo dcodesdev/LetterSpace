@@ -16,13 +16,37 @@ import { useState } from "react"
 import { Eye, Wand2, Link2 } from "lucide-react"
 import { EmailPreview } from "@/components"
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@repo/ui"
+import { trpc } from "@/trpc"
+import { useSession } from "@/hooks"
 
 export const EditorTab = () => {
   const [previewOpen, setPreviewOpen] = useState(false)
+  const { organization } = useSession()
 
   const { form, isEditable } = useCampaignContext()
 
   const content = form.watch("content")
+  const templateId = form.watch("templateId")
+
+  const { data: template } = trpc.template.get.useQuery(
+    {
+      id: templateId ?? "",
+      organizationId: organization?.id ?? "",
+    },
+    {
+      enabled: !!templateId && !!organization?.id && previewOpen,
+    }
+  )
+
+  let previewContent = content ?? "<p>No content available.</p>"
+  if (previewOpen && template?.content && content) {
+    previewContent = template.content.replace("{{CONTENT}}", content)
+  } else if (previewOpen && template?.content && !content) {
+    previewContent = template.content.replace(
+      "{{CONTENT}}",
+      "<p>No campaign content entered yet. This is where it will appear.</p>"
+    )
+  }
 
   const handleInsertUnsubscribeLink = () => {
     const textarea = document.querySelector(
@@ -72,15 +96,22 @@ export const EditorTab = () => {
                     </DialogTitle>
                   </div>
                   <div className="relative min-h-[70vh] max-h-[80vh] overflow-y-auto scroll-hidden">
-                    {content ? (
+                    {previewOpen && (templateId ? template : true) ? (
                       <EmailPreview
-                        content={content}
-                        className="cursor-default rounded-md bg-white scroll-hidden"
+                        content={previewContent}
+                        className="h-full cursor-default rounded-md bg-white scroll-hidden"
                       />
+                    ) : previewOpen && templateId && !template ? (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-muted-foreground">
+                          Loading template...
+                        </p>
+                      </div>
                     ) : (
                       <div className="flex items-center justify-center h-full">
                         <p className="text-muted-foreground">
-                          No content to preview
+                          No content to preview. Select a template if you wish
+                          to see it populated.
                         </p>
                       </div>
                     )}
