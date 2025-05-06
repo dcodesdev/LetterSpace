@@ -28,7 +28,7 @@ import {
 } from "lucide-react"
 import { useSession } from "@/hooks"
 import { useLocation } from "react-router"
-import { ThemeToggle, WithTooltip } from "@/components"
+import { CenteredLoader, ThemeToggle, WithTooltip } from "@/components"
 import { APP_VERSION } from "@repo/shared"
 
 const sidebarItems = [
@@ -127,7 +127,7 @@ export function DashboardLayout() {
   }
 
   if (user.isLoading) {
-    return <div>Loading...</div>
+    return <CenteredLoader />
   }
 
   if (!user.data) {
