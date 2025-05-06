@@ -45,6 +45,11 @@ apiRouter.use(authenticateApiKey)
  *               description:
  *                 type: string
  *                 nullable: true
+ *         metadata:
+ *           type: object
+ *           additionalProperties:
+ *             type: string
+ *           nullable: true
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -87,6 +92,11 @@ apiRouter.use(authenticateApiKey)
  *                 type: boolean
  *               emailVerified:
  *                 type: boolean
+ *               metadata:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: string
+ *                 description: Key-value pairs for subscriber metadata. Providing this will overwrite all existing metadata.
  *     responses:
  *       201:
  *         description: Subscriber created successfully
@@ -111,6 +121,7 @@ apiRouter.post("/subscribers", async (req, res) => {
         lists: z.array(z.string()).min(1, "At least one listId is required"),
         doubleOptIn: z.boolean().optional(),
         emailVerified: z.boolean().optional(),
+        metadata: z.record(z.string(), z.string()).optional(),
       })
       .safeParse(req.body)
 
@@ -121,7 +132,14 @@ apiRouter.post("/subscribers", async (req, res) => {
       return
     }
 
-    const { email, name, lists, doubleOptIn, emailVerified } = body
+    const {
+      email,
+      name,
+      lists,
+      doubleOptIn,
+      emailVerified,
+      metadata: newMetadata,
+    } = body
 
     const existingLists = await prisma.list.findMany({
       where: {
@@ -150,6 +168,7 @@ apiRouter.post("/subscribers", async (req, res) => {
             List: true,
           },
         },
+        Metadata: true,
       },
     })
 
@@ -250,6 +269,15 @@ apiRouter.post("/subscribers", async (req, res) => {
                 List: { connect: { id: listId } },
               })),
             },
+            Metadata: newMetadata
+              ? {
+                  deleteMany: {},
+                  create: Object.entries(newMetadata).map(([key, value]) => ({
+                    key,
+                    value,
+                  })),
+                }
+              : undefined,
           },
           create: {
             email,
@@ -263,12 +291,21 @@ apiRouter.post("/subscribers", async (req, res) => {
                 List: { connect: { id: listId } },
               })),
             },
+            Metadata: newMetadata
+              ? {
+                  create: Object.entries(newMetadata).map(([key, value]) => ({
+                    key,
+                    value,
+                  })),
+                }
+              : undefined,
           },
           select: {
             id: true,
             email: true,
             name: true,
             ListSubscribers: { include: { List: true } },
+            Metadata: true,
             emailVerified: true,
             createdAt: true,
             updatedAt: true,
@@ -284,6 +321,13 @@ apiRouter.post("/subscribers", async (req, res) => {
             name: list.List.name,
             description: list.List.description,
           })),
+          metadata: subscriber.Metadata.reduce(
+            (acc, meta) => {
+              acc[meta.key] = meta.value
+              return acc
+            },
+            {} as Record<string, string>
+          ),
           emailVerified: subscriber.emailVerified,
           createdAt: subscriber.createdAt,
           updatedAt: subscriber.updatedAt,
@@ -319,6 +363,15 @@ apiRouter.post("/subscribers", async (req, res) => {
             List: { connect: { id: listId } },
           })),
         },
+        Metadata: newMetadata
+          ? {
+              deleteMany: {},
+              create: Object.entries(newMetadata).map(([key, value]) => ({
+                key,
+                value,
+              })),
+            }
+          : undefined,
       },
       create: {
         email,
@@ -334,6 +387,14 @@ apiRouter.post("/subscribers", async (req, res) => {
             },
           })),
         },
+        Metadata: newMetadata
+          ? {
+              create: Object.entries(newMetadata).map(([key, value]) => ({
+                key,
+                value,
+              })),
+            }
+          : undefined,
       },
       include: {
         ListSubscribers: {
@@ -341,6 +402,7 @@ apiRouter.post("/subscribers", async (req, res) => {
             List: true,
           },
         },
+        Metadata: true,
       },
     })
 
@@ -353,6 +415,13 @@ apiRouter.post("/subscribers", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      metadata: subscriber.Metadata.reduce(
+        (acc, meta) => {
+          acc[meta.key] = meta.value
+          return acc
+        },
+        {} as Record<string, string>
+      ),
       emailVerified: subscriber.emailVerified,
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
@@ -397,6 +466,11 @@ apiRouter.post("/subscribers", async (req, res) => {
  *                 type: array
  *                 items:
  *                   type: string
+ *               metadata:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: string
+ *                 description: Key-value pairs for subscriber metadata. Providing this will overwrite all existing metadata.
  *     responses:
  *       200:
  *         description: Subscriber updated successfully
@@ -421,6 +495,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
           .array(z.string())
           .min(1, "At least one listId is required")
           .optional(),
+        metadata: z.record(z.string(), z.string()).optional(),
       })
       .safeParse(req.body)
 
@@ -431,7 +506,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
       return
     }
 
-    const { email, name, lists } = body
+    const { email, name, lists, metadata: newMetadata } = body
 
     const id = req.params.id
 
@@ -444,6 +519,14 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
       where: {
         id,
         organizationId: req.organization.id,
+      },
+      include: {
+        ListSubscribers: {
+          include: {
+            List: true,
+          },
+        },
+        Metadata: true,
       },
     })
     if (!subscriber) {
@@ -488,6 +571,15 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
                 : [],
             }
           : undefined,
+        Metadata: newMetadata
+          ? {
+              deleteMany: {},
+              create: Object.entries(newMetadata).map(([key, value]) => ({
+                key,
+                value,
+              })),
+            }
+          : undefined,
       },
       include: {
         ListSubscribers: {
@@ -495,6 +587,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
             List: true,
           },
         },
+        Metadata: true,
       },
     })
 
@@ -507,6 +600,13 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      metadata: updatedSubscriber.Metadata.reduce(
+        (acc, meta) => {
+          acc[meta.key] = meta.value
+          return acc
+        },
+        {} as Record<string, string>
+      ),
       createdAt: updatedSubscriber.createdAt,
       updatedAt: updatedSubscriber.updatedAt,
     }
@@ -635,6 +735,7 @@ apiRouter.get("/subscribers/:id", async (req, res) => {
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           take: 10,
         },
+        Metadata: true,
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     })
@@ -652,6 +753,13 @@ apiRouter.get("/subscribers/:id", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      metadata: subscriber.Metadata.reduce(
+        (acc, meta) => {
+          acc[meta.key] = meta.value
+          return acc
+        },
+        {} as Record<string, string>
+      ),
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
     }
@@ -777,6 +885,7 @@ apiRouter.get("/subscribers", async (req, res) => {
             List: true,
           },
         },
+        Metadata: true,
       },
     })
 
@@ -791,6 +900,13 @@ apiRouter.get("/subscribers", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      metadata: subscriber.Metadata.reduce(
+        (acc, meta) => {
+          acc[meta.key] = meta.value
+          return acc
+        },
+        {} as Record<string, string>
+      ),
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
     }))

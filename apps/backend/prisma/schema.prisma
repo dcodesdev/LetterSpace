@@ -65,6 +65,7 @@ model Subscriber {
   ListSubscribers ListSubscriber[]
   Messages        Message[]
   Clicks          Click[]
+  Metadata        SubscriberMetadata[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -75,6 +76,21 @@ model Subscriber {
 
   @@unique([organizationId, email])
   @@index([createdAt, id])
+}
+
+model SubscriberMetadata {
+  id String @id @default(uuid())
+
+  key   String
+  value String
+
+  subscriberId String
+  Subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([subscriberId, key])
 }
 
 enum CampaignStatus {
