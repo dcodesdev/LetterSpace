@@ -5,6 +5,7 @@ import { SmtpSettings } from "./smtp-settings"
 import { GeneralSettings } from "./general-settings"
 import { ApiKeys } from "./api-keys"
 import { EmailSettings } from "./email-delivery-settings"
+import { OrganizationSettings } from "./organization-settings"
 import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
 import { Loader } from "@/components"
@@ -40,12 +41,21 @@ export function SettingsPage() {
 
       <Tabs defaultValue="smtp" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="organization">Organization</TabsTrigger>
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
           <TabsTrigger value="email">Email Delivery</TabsTrigger>
-          <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="api">API Keys</TabsTrigger>
           {/* <TabsTrigger value="webhooks">Webhooks</TabsTrigger> */}
         </TabsList>
+        <TabsContent value="general">
+          <div className="max-w-4xl">
+            <GeneralSettings />
+          </div>
+        </TabsContent>
+        <TabsContent value="organization">
+          <OrganizationSettings />
+        </TabsContent>
         <TabsContent value="smtp" className="space-y-4">
           <div className="max-w-4xl">
             <SmtpSettings />
@@ -54,11 +64,6 @@ export function SettingsPage() {
         <TabsContent value="email" className="space-y-4">
           <div className="max-w-4xl">
             <EmailSettings />
-          </div>
-        </TabsContent>
-        <TabsContent value="general">
-          <div className="max-w-4xl">
-            <GeneralSettings />
           </div>
         </TabsContent>
         <TabsContent value="api">
