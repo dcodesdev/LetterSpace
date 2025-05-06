@@ -40,10 +40,10 @@ export const EditorTab = () => {
 
   let previewContent = content ?? "<p>No content available.</p>"
   if (previewOpen && template?.content && content) {
-    previewContent = template.content.replace("{{CONTENT}}", content)
+    previewContent = template.content.replace("{{content}}", content)
   } else if (previewOpen && template?.content && !content) {
     previewContent = template.content.replace(
-      "{{CONTENT}}",
+      "{{content}}",
       "<p>No campaign content entered yet. This is where it will appear.</p>"
     )
   }

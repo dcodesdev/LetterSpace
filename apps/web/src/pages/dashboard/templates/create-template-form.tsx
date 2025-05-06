@@ -32,8 +32,8 @@ const templateSchema = z.object({
     .string()
     .min(1, "HTML content is required")
     .refine(
-      (content) => content.includes("{{CONTENT}}"),
-      "Content must include the {{CONTENT}} placeholder"
+      (content) => content.includes("{{content}}"),
+      "Content must include the {{content}} placeholder"
     ),
 })
 
@@ -63,13 +63,13 @@ export function CreateTemplateForm({ children }: CreateTemplateFormProps) {
     const textBefore = textarea.value.substring(0, cursorPos)
     const textAfter = textarea.value.substring(cursorPos)
 
-    const newValue = `${textBefore}{{CONTENT}}${textAfter}`
+    const newValue = `${textBefore}{{content}}${textAfter}`
     form.setValue("content", newValue)
 
     // Reset cursor position after the placeholder
     setTimeout(() => {
       textarea.focus()
-      const newCursorPos = cursorPos + 11 // length of "{{CONTENT}}"
+      const newCursorPos = cursorPos + 11 // length of "{{content}}"
       textarea.setSelectionRange(newCursorPos, newCursorPos)
     }, 0)
   }
