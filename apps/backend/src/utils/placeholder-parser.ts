@@ -26,6 +26,7 @@ export type PlaceholderDataKey =
   | `organization.${keyof OrganizationPlaceholderData}`
   | `unsubscribe_url`
   | `current_date`
+  | `subscriber.metadata.${string}`
 
 export function replacePlaceholders(
   template: string,

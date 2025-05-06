@@ -283,6 +283,7 @@ export const startCampaign = authProcedure
                         id: true,
                         email: true,
                         name: true,
+                        Metadata: true,
                       },
                     },
                   },
@@ -333,7 +334,9 @@ export const startCampaign = authProcedure
     }
 
     type Subscriber =
-      (typeof campaign)["CampaignLists"][0]["List"]["ListSubscribers"][0]["Subscriber"]
+      (typeof campaign)["CampaignLists"][0]["List"]["ListSubscribers"][0]["Subscriber"] & {
+        Metadata: { key: string; value: string }[]
+      }
 
     const subscribers = new Map<string, Subscriber>()
     await pMap(campaign.CampaignLists, (campaignList) => {
@@ -420,6 +423,12 @@ export const startCampaign = authProcedure
 
           if (subscriber.name) {
             placeholderData["subscriber.name"] = subscriber.name
+          }
+
+          if (subscriber.Metadata) {
+            for (const meta of subscriber.Metadata) {
+              placeholderData[`subscriber.metadata.${meta.key}`] = meta.value
+            }
           }
 
           content = replacePlaceholders(content, placeholderData)
