@@ -52,6 +52,7 @@ import { CardSkeleton } from "@/components"
 import { DataTable } from "@repo/ui"
 import { Pagination } from "@/components"
 import { SubscriberSearch } from "./subscriber-search"
+import { RouterOutput } from "@/types"
 
 const addSubscriberSchema = z.object({
   email: z.string().email({
@@ -73,7 +74,7 @@ export type PopulatedSubscriber = Subscriber & {
 
 interface EditSubscriberDialogState {
   open: boolean
-  subscriber: PopulatedSubscriber | null
+  subscriber: RouterOutput["subscriber"]["list"]["subscribers"][number] | null
 }
 
 const editSubscriberSchema = z.object({

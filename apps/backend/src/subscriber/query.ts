@@ -47,6 +47,8 @@ export const listSubscribers = authProcedure
               id: true,
               unsubscribedAt: true,
               listId: true,
+              createdAt: true,
+              updatedAt: true,
               List: {
                 select: {
                   id: true,

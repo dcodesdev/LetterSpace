@@ -3,6 +3,7 @@ import {
   UseTRPCMutationResult,
   UseTRPCQueryResult,
 } from "@trpc/react-query/shared"
+import { inferRouterOutputs } from "@trpc/server"
 import { AppRouter } from "backend"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,3 +23,5 @@ export type GetTRPCMutationResult<T extends AnyFunction> =
     Parameters<T>[0],
     unknown
   >
+
+export type RouterOutput = inferRouterOutputs<AppRouter>

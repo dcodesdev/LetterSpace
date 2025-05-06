@@ -8,19 +8,21 @@ import {
   Badge,
 } from "@repo/ui"
 import { ColumnDef } from "@tanstack/react-table"
-import { PopulatedSubscriber } from "./page"
 import { ListCell } from "./cells/list-cell"
 import { displayDateTime } from "@/utils"
+import { RouterOutput } from "@/types"
 
 interface ColumnActions {
   onDelete: (id: string) => void
-  onEdit: (subscriber: PopulatedSubscriber) => void
+  onEdit: (subscriber: Data) => void
 }
+
+type Data = RouterOutput["subscriber"]["list"]["subscribers"][number]
 
 export const columns = ({
   onDelete,
   onEdit,
-}: ColumnActions): ColumnDef<PopulatedSubscriber>[] => [
+}: ColumnActions): ColumnDef<Data>[] => [
   // {
   //   id: "select",
   //   header: ({ table }) => (
