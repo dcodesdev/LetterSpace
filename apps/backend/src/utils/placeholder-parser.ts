@@ -21,7 +21,7 @@ export interface PlaceholderData {
   current_date?: string
 }
 
-type PlaceholderDataKey =
+export type PlaceholderDataKey =
   | `subscriber.${keyof SubscriberPlaceholderData}`
   | `campaign.${keyof CampaignPlaceholderData}`
   | `organization.${keyof OrganizationPlaceholderData}`
