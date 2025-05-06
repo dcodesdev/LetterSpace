@@ -12,11 +12,11 @@
 
 ## Overview
 
-The `placeholder-parser.ts` utility provides a function to replace predefined placeholders in a template string with actual data. This is primarily used for personalizing email content, subjects, and other dynamic text based on subscriber, campaign, and organization details.
+Placeholders are special tags you can insert into your emails. When you send an email, our system automatically replaces these tags with real information specific to each recipient, your campaign, or your organization. This helps you personalize your emails and make them more relevant. For example, you can use a placeholder to automatically include a subscriber's name or the name of your latest campaign.
 
 ## Placeholder Format
 
-Placeholders in the template string should be enclosed in double curly braces. Optional whitespace is allowed around the placeholder key.
+To use a placeholder, simply type it into your email content or subject line, enclosed in double curly braces. You can include spaces around the placeholder text if you like.
 
 **Examples:**
 
@@ -24,35 +24,13 @@ Placeholders in the template string should be enclosed in double curly braces. O
 - `{{ subscriber.email }}`
 - `{{  organization.name  }}`
 
-## `replacePlaceholders` Function
+## How Placeholders Work
 
-This is the core function of the utility.
+When you prepare your email, you'll include these placeholders where you want specific information to appear. Before the email is sent, our system looks for these placeholders and replaces them with the correct data. For instance, `{{subscriber.name}}` will be replaced with the actual name of each subscriber receiving the email. If a placeholder doesn't have corresponding information available, it will be left as is in the email.
 
-### Signature
+## Available Placeholders
 
-```typescript
-export function replacePlaceholders(
-  template: string,
-  data: Partial<Record<PlaceholderDataKey, string>>
-): string
-```
-
-### Parameters
-
-- `template: string`: The string containing placeholders to be replaced.
-- `data: Partial<Record<PlaceholderDataKey, string>>`: An object where keys are valid `PlaceholderDataKey`s and values are the strings to replace the corresponding placeholders. If a key is present in the template but not in `data`, or if its value in `data` is `undefined`, the placeholder will not be replaced.
-
-### Returns
-
-- `string`: The template string with all recognized placeholders replaced with their corresponding values from the `data` object.
-
-### How it Works
-
-The function iterates through the keys provided in the `data` object. For each key, it constructs a regular expression to find all occurrences of the corresponding placeholder (e.g., `{{some.key}}`) in the `template` string. It then replaces these occurrences with the value associated with that key in the `data` object. The replacement is case-sensitive and matches globally (i.e., all instances of a placeholder are replaced).
-
-## Available Placeholders (`PlaceholderDataKey`)
-
-The following placeholder keys are currently supported:
+Here are the placeholders you can use in your emails:
 
 ### Subscriber Data
 
@@ -75,33 +53,9 @@ The following placeholder keys are currently supported:
 
 ### Utility Placeholders
 
-- `{{unsubscribe_url}}`: The unique URL for a subscriber to unsubscribe from communications.
+- `{{unsubscribe_url}}`: The unique URL for a subscriber to unsubscribe from communications. This is important for allowing your subscribers to manage their preferences.
   - Example: `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId`
-- `{{current_date}}`: The current date. The format can vary based on how it\'s generated and supplied in the `data` object (e.g., "YYYY-MM-DD").
+- `{{current_date}}`: The current date when the email is sent. You can use this to include timely information. The format will typically be "YYYY-MM-DD".
   - Example: `2023-10-27`
 
-**Note**: Any other keys provided in the `data` object that are not part of `PlaceholderDataKey` will be ignored. Similarly, placeholders in the template that do not correspond to a defined `PlaceholderDataKey` will not be processed by this utility.
-
-## Example Usage
-
-```typescript
-import { replacePlaceholders, PlaceholderDataKey } from "./placeholder-parser"
-
-const emailTemplate =
-  "Hello {{subscriber.name}}, an email from {{organization.name}}. Today is {{current_date}}. Unsubscribe: {{unsubscribe_url}}"
-
-const placeholderValues: Partial<Record<PlaceholderDataKey, string>> = {
-  "subscriber.name": "Alice Wonderland",
-  "organization.name": "Mad Hatter Co.",
-  unsubscribe_url: "https://example.com/unsubscribe/alice",
-  current_date: new Date().toISOString().split("T")[0], // e.g., 2023-10-27
-  "subscriber.email": "alice@example.com", // This key is valid but not in the template
-  "campaign.name": "Tea Party Invite", // This key is valid but not in the template
-}
-
-const processedEmail = replacePlaceholders(emailTemplate, placeholderValues)
-
-console.log(processedEmail)
-// Output:
-// Hello Alice Wonderland, an email from Mad Hatter Co.. Today is 2023-10-27. Unsubscribe: https://example.com/unsubscribe/alice
-```
+**Note**: If you use a placeholder that isn't on this list, or if the information for a valid placeholder isn't available for a specific recipient, the placeholder text itself (e.g., `{{some.key}}`) might appear in the sent email.
