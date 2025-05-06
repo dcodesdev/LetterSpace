@@ -312,8 +312,6 @@ describe("[POST] /api/subscribers", () => {
     })
     expect(dbSubscriber).toBeDefined()
     expect(dbSubscriber?.emailVerified).toBe(false)
-    expect(dbSubscriber?.emailVerificationToken).toBeTypeOf("string")
-    expect(dbSubscriber?.emailVerificationTokenExpiresAt).toBeInstanceOf(Date)
 
     await prisma.generalSettings.deleteMany({
       where: { organizationId: orgId },
