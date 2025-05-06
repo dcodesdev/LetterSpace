@@ -40,7 +40,7 @@ export function SettingsPage() {
         <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
       </div>
 
-      <Tabs defaultValue="smtp" className="space-y-4">
+      <Tabs defaultValue="profile" className="space-y-4">
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
