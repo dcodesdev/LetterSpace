@@ -14,6 +14,7 @@ import {
   EditCampaignLayout,
   UnsubscribePage,
   AuthPage,
+  NotFoundPage,
 } from "./pages"
 import { scan } from "react-scan"
 
@@ -51,6 +52,7 @@ export function App() {
         </Route>
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/unsubscribe" element={<UnsubscribePage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )
