@@ -15,9 +15,17 @@ export function EmailPreview({ content, className = "" }: EmailPreviewProps) {
     const doc = iframeRef.current.contentDocument
     if (!doc) return
 
+    // Modify the tracking pixel URL for preview
+    // Regex to match /img/any-id/img.png
+    const trackingPixelRegex = /\/img\/[^/]+\/img\.png/g
+    const modifiedContent = content.replace(
+      trackingPixelRegex,
+      "#invalid-tracking-pixel-for-preview"
+    )
+
     // Write the content to the iframe
     doc.open()
-    doc.write(content)
+    doc.write(modifiedContent)
     doc.close()
 
     // Make links open in new tab
