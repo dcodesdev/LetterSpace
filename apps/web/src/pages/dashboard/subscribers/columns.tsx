@@ -60,7 +60,7 @@ export const columns = ({
   },
   {
     accessorKey: "emailVerified",
-    header: "Status",
+    header: "Email Status",
     cell: ({ row }) => {
       const isVerified = row.original.emailVerified
       return (
@@ -72,6 +72,24 @@ export const columns = ({
   },
   {
     accessorKey: "ListSubscribers",
+    header: "Subscription Status",
+    cell: ({ row }) => {
+      const listSubscribers = row.original.ListSubscribers
+      if (!listSubscribers || listSubscribers.length === 0) {
+        return <Badge variant="outline">No Lists</Badge>
+      }
+      const isSubscribedToAnyList = listSubscribers.some(
+        (ls) => ls.unsubscribedAt === null
+      )
+      return (
+        <Badge variant={isSubscribedToAnyList ? "default" : "secondary"}>
+          {isSubscribedToAnyList ? "Subscribed" : "Unsubscribed"}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: "lists",
     header: "Lists",
     cell: ({ row }) => (
       <ListCell

@@ -43,7 +43,10 @@ export const listSubscribers = authProcedure
         take: input.perPage,
         include: {
           ListSubscribers: {
-            include: {
+            select: {
+              id: true,
+              unsubscribedAt: true,
+              listId: true,
               List: {
                 select: {
                   id: true,
