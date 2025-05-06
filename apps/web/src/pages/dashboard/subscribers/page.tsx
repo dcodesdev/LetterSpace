@@ -98,7 +98,9 @@ export function SubscribersPage() {
     open: false,
     subscriber: null,
   })
-  const { pagination, setPagination } = usePaginationWithQueryState()
+  const { pagination, setPagination } = usePaginationWithQueryState({
+    perPage: 8,
+  })
 
   const { organization } = useSession()
 
