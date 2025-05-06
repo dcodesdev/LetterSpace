@@ -37,6 +37,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  Switch,
 } from "@repo/ui"
 import { columns } from "./columns"
 import { toast } from "sonner"
@@ -58,6 +59,7 @@ const addSubscriberSchema = z.object({
   }),
   name: z.string().optional(),
   listIds: z.array(z.string()),
+  emailVerified: z.boolean().optional(),
 })
 
 export type PopulatedSubscriber = Subscriber & {
@@ -209,6 +211,7 @@ export function SubscribersPage() {
       email: "",
       name: "",
       listIds: [],
+      emailVerified: false,
     },
   })
 
@@ -426,87 +429,91 @@ export function SubscribersPage() {
                   </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleAddSubscriber)}>
-                    <div className="grid gap-4 py-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Enter subscriber's name"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Enter subscriber's email"
-                                type="email"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="listIds"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Lists</FormLabel>
-                            <div className="flex flex-wrap gap-2">
+                  <form
+                    onSubmit={form.handleSubmit(handleAddSubscriber)}
+                    className="space-y-4"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="listIds"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Lists</FormLabel>
+                          <FormControl>
+                            <div className="grid grid-cols-2 gap-2">
                               {lists.data?.lists.map((list) => (
                                 <Button
                                   key={list.id}
                                   type="button"
-                                  size="sm"
                                   variant={
-                                    field.value.includes(list.id)
+                                    field.value?.includes(list.id)
                                       ? "default"
                                       : "outline"
                                   }
                                   onClick={() => {
-                                    const newValue = field.value.includes(
+                                    const newValue = field.value?.includes(
                                       list.id
                                     )
-                                      ? field.value.filter(
+                                      ? field.value?.filter(
                                           (id) => id !== list.id
                                         )
-                                      : [...field.value, list.id]
+                                      : [...(field.value ?? []), list.id]
                                     field.onChange(newValue)
                                   }}
-                                  className="h-8"
                                 >
                                   {list.name}
-                                  {field.value.includes(list.id) && (
-                                    <span className="ml-1">✓</span>
-                                  )}
                                 </Button>
                               ))}
-                              {lists.data?.lists.length === 0 && (
-                                <p className="text-sm text-muted-foreground">
-                                  No lists available. Create a list first.
-                                </p>
-                              )}
                             </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="emailVerified"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                          <div className="space-y-0.5">
+                            <FormLabel>Email Verified</FormLabel>
                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                     <DialogFooter>
                       <Button
                         loading={addSubscriber.isPending}

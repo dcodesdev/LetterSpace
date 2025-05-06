@@ -10,6 +10,7 @@ const createSubscriberSchema = z.object({
   name: z.string().optional(),
   organizationId: z.string(),
   listIds: z.array(z.string()),
+  emailVerified: z.boolean().optional(),
 })
 
 export const createSubscriber = authProcedure
@@ -48,6 +49,7 @@ export const createSubscriber = authProcedure
         email: input.email,
         name: input.name,
         organizationId: input.organizationId,
+        emailVerified: input.emailVerified,
         ListSubscribers: {
           create: input.listIds.map((listId) => ({
             List: {
