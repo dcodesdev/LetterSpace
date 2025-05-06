@@ -15,6 +15,7 @@ LetterSpace (letterspace.app) is an open source newsletter app that you can self
 - You treat me as a senior too, you won't explain basic things.
 - Always adhere to the same style of code in the codebase.
 - for example: If you're asked to create a table, see how other tables are created, and use the same style.
+- Don't write too much comments, be minimal with writing comments
 
 # Tech Stack
 
