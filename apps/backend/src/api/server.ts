@@ -3,6 +3,7 @@ import { prisma } from "../utils/prisma"
 import { authenticateApiKey } from "./middleware"
 import { z } from "zod"
 import { Prisma } from "../../prisma/client"
+import crypto from "crypto"
 
 export const apiRouter = express.Router()
 
@@ -76,6 +77,8 @@ apiRouter.use(authenticateApiKey)
  *                 type: array
  *                 items:
  *                   type: string
+ *               doubleOptIn:
+ *                 type: boolean
  *     responses:
  *       201:
  *         description: Subscriber created successfully
@@ -98,6 +101,7 @@ apiRouter.post("/subscribers", async (req, res) => {
           .email("Invalid email format"),
         name: z.string().optional(),
         lists: z.array(z.string()).min(1, "At least one listId is required"),
+        doubleOptIn: z.boolean().optional(),
       })
       .safeParse(req.body)
 
@@ -108,7 +112,7 @@ apiRouter.post("/subscribers", async (req, res) => {
       return
     }
 
-    const { email, name, lists } = body
+    const { email, name, lists, doubleOptIn } = body
 
     const existingLists = await prisma.list.findMany({
       where: {
@@ -146,6 +150,26 @@ apiRouter.post("/subscribers", async (req, res) => {
 
     const uniqueLists = [...new Set(allLists)]
 
+    let emailVerificationToken: string | null = null
+    let emailVerificationTokenExpiresAt: Date | null = null
+    let emailVerified = true
+
+    if (doubleOptIn && !existingSubscriber) {
+      emailVerificationToken = crypto.randomBytes(32).toString("hex")
+      emailVerificationTokenExpiresAt = new Date(
+        Date.now() + 24 * 60 * 60 * 1000
+      )
+      emailVerified = false
+    } else if (
+      existingSubscriber &&
+      !existingSubscriber.emailVerified &&
+      doubleOptIn
+    ) {
+      emailVerified = existingSubscriber.emailVerified ?? false
+    } else if (existingSubscriber) {
+      emailVerified = existingSubscriber.emailVerified ?? true
+    }
+
     const subscriber = await prisma.subscriber.upsert({
       where: {
         id: existingSubscriber?.id || "create",
@@ -153,6 +177,7 @@ apiRouter.post("/subscribers", async (req, res) => {
       update: {
         email,
         name,
+        emailVerified,
         ListSubscribers: {
           deleteMany: {},
           create: uniqueLists.map((listId: string) => ({
@@ -164,6 +189,9 @@ apiRouter.post("/subscribers", async (req, res) => {
         email,
         name,
         organizationId: req.organization.id,
+        emailVerified,
+        emailVerificationToken,
+        emailVerificationTokenExpiresAt,
         ListSubscribers: {
           create: uniqueLists.map((listId: string) => ({
             List: {
@@ -192,6 +220,7 @@ apiRouter.post("/subscribers", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      emailVerified: subscriber.emailVerified,
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
     }
