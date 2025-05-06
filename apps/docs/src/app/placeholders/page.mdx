@@ -1,0 +1,97 @@
+# Placeholder Parser Utility
+
+## Overview
+
+The `placeholder-parser.ts` utility provides a function to replace predefined placeholders in a template string with actual data. This is primarily used for personalizing email content, subjects, and other dynamic text based on subscriber, campaign, and organization details.
+
+## Placeholder Format
+
+Placeholders in the template string should be enclosed in double curly braces. Optional whitespace is allowed around the placeholder key.
+
+**Examples:**
+
+- `{{subscriber.name}}`
+- `{{ subscriber.email }}`
+- `{{  organization.name  }}`
+
+## `replacePlaceholders` Function
+
+This is the core function of the utility.
+
+### Signature
+
+```typescript
+export function replacePlaceholders(
+  template: string,
+  data: Partial<Record<PlaceholderDataKey, string>>
+): string
+```
+
+### Parameters
+
+- `template: string`: The string containing placeholders to be replaced.
+- `data: Partial<Record<PlaceholderDataKey, string>>`: An object where keys are valid `PlaceholderDataKey`s and values are the strings to replace the corresponding placeholders. If a key is present in the template but not in `data`, or if its value in `data` is `undefined`, the placeholder will not be replaced.
+
+### Returns
+
+- `string`: The template string with all recognized placeholders replaced with their corresponding values from the `data` object.
+
+### How it Works
+
+The function iterates through the keys provided in the `data` object. For each key, it constructs a regular expression to find all occurrences of the corresponding placeholder (e.g., `{{some.key}}`) in the `template` string. It then replaces these occurrences with the value associated with that key in the `data` object. The replacement is case-sensitive and matches globally (i.e., all instances of a placeholder are replaced).
+
+## Available Placeholders (`PlaceholderDataKey`)
+
+The following placeholder keys are currently supported:
+
+### Subscriber Data
+
+- `{{subscriber.email}}`: The email address of the subscriber.
+  - Example: `john.doe@example.com`
+- `{{subscriber.name}}`: The name of the subscriber.
+  - Example: `John Doe`
+
+### Campaign Data
+
+- `{{campaign.name}}`: The name/title of the campaign.
+  - Example: `Q3 Newsletter`
+- `{{campaign.subject}}`: The subject line of the campaign.
+  - Example: `Your Weekly Update!`
+
+### Organization Data
+
+- `{{organization.name}}`: The name of the organization sending the campaign.
+  - Example: `MyCompany Inc.`
+
+### Utility Placeholders
+
+- `{{unsubscribe_url}}`: The unique URL for a subscriber to unsubscribe from communications.
+  - Example: `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId`
+- `{{current_date}}`: The current date. The format can vary based on how it\'s generated and supplied in the `data` object (e.g., "YYYY-MM-DD").
+  - Example: `2023-10-27`
+
+**Note**: Any other keys provided in the `data` object that are not part of `PlaceholderDataKey` will be ignored. Similarly, placeholders in the template that do not correspond to a defined `PlaceholderDataKey` will not be processed by this utility.
+
+## Example Usage
+
+```typescript
+import { replacePlaceholders, PlaceholderDataKey } from "./placeholder-parser"
+
+const emailTemplate =
+  "Hello {{subscriber.name}}, an email from {{organization.name}}. Today is {{current_date}}. Unsubscribe: {{unsubscribe_url}}"
+
+const placeholderValues: Partial<Record<PlaceholderDataKey, string>> = {
+  "subscriber.name": "Alice Wonderland",
+  "organization.name": "Mad Hatter Co.",
+  unsubscribe_url: "https://example.com/unsubscribe/alice",
+  current_date: new Date().toISOString().split("T")[0], // e.g., 2023-10-27
+  "subscriber.email": "alice@example.com", // This key is valid but not in the template
+  "campaign.name": "Tea Party Invite", // This key is valid but not in the template
+}
+
+const processedEmail = replacePlaceholders(emailTemplate, placeholderValues)
+
+console.log(processedEmail)
+// Output:
+// Hello Alice Wonderland, an email from Mad Hatter Co.. Today is 2023-10-27. Unsubscribe: https://example.com/unsubscribe/alice
+```

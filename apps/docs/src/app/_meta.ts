@@ -5,6 +5,7 @@ const meta: MetaRecord = {
   "getting-started": "Getting Started",
   api: "API Reference",
   todo: "To-Do List",
+  placeholders: "Placeholders",
   "---": {
     type: "separator",
   },
