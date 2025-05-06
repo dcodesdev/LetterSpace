@@ -28,7 +28,7 @@ import {
 import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
 import { Link } from "react-router"
-import { CardSkeleton, WithTooltip } from "@/components"
+import { CardSkeleton, WithTooltip, CenteredLoader } from "@/components"
 import dayjs from "dayjs"
 import { IconExclamationCircle } from "@tabler/icons-react"
 
@@ -86,7 +86,7 @@ export function DashboardPage() {
   )
 
   if (!dashboard) {
-    return <div>Loading...</div>
+    return <CenteredLoader />
   }
 
   return (
