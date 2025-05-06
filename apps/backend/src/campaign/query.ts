@@ -208,8 +208,14 @@ export const getCampaign = authProcedure
         processed: result.processed,
         clicked: result.clicked,
         opened: result.opened,
-        clickRate: (result.clicked / result.sentMessages) * 100,
-        openRate: (result.opened / result.sentMessages) * 100,
+        clickRate:
+          result.sentMessages > 0
+            ? (result.clicked / result.sentMessages) * 100
+            : 0,
+        openRate:
+          result.sentMessages > 0
+            ? (result.opened / result.sentMessages) * 100
+            : 0,
       },
     }
   })
