@@ -282,6 +282,7 @@ model GeneralSettings {
   defaultFromEmail String?
   defaultFromName  String?
   baseURL          String?
+  cleanupInterval  Int?    @default(7)
 
   organizationId String       @unique
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

@@ -21,12 +21,13 @@ import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
 import { toast } from "sonner"
 import { LinkIcon, Save } from "lucide-react"
-import { WithTooltip } from "@/components"
+import { WithTooltip, FormControlledInput } from "@/components"
 
 const generalSettingsSchema = z.object({
   defaultFromEmail: z.string().email().optional().or(z.literal("")),
   defaultFromName: z.string().optional(),
   baseURL: z.string().url().optional().or(z.literal("")),
+  cleanupInterval: z.coerce.number().int().min(1).optional(),
 })
 
 export function GeneralSettings() {
@@ -49,6 +50,7 @@ export function GeneralSettings() {
       defaultFromEmail: "",
       defaultFromName: "",
       baseURL: "",
+      cleanupInterval: 7,
     },
   })
 
@@ -60,6 +62,7 @@ export function GeneralSettings() {
         defaultFromEmail: settings.defaultFromEmail ?? "",
         defaultFromName: settings.defaultFromName ?? "",
         baseURL: settings.baseURL ?? "",
+        cleanupInterval: settings.cleanupInterval ?? 7,
       })
     }
   }, [settings, form])
@@ -70,6 +73,7 @@ export function GeneralSettings() {
         defaultFromEmail: settings.defaultFromEmail ?? "",
         defaultFromName: settings.defaultFromName ?? "",
         baseURL: settings.baseURL ?? "",
+        cleanupInterval: settings.cleanupInterval ?? 7,
       })
       utils.settings.getGeneral.invalidate()
     },
@@ -182,6 +186,17 @@ export function GeneralSettings() {
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+            <FormControlledInput
+              control={form.control}
+              name="cleanupInterval"
+              label="Cleanup Interval (days)"
+              description="Number of days after which to cleanup old data (e.g. sent messages, logs). Default is 7 days."
+              inputProps={{
+                type: "number",
+                placeholder: "7",
+              }}
             />
           </form>
         </Form>

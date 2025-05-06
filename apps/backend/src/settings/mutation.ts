@@ -135,6 +135,7 @@ const generalSettingsSchema = z.object({
   defaultFromEmail: z.string().email().optional().or(z.literal("")),
   defaultFromName: z.string().optional(),
   baseURL: z.string().url().optional().or(z.literal("")),
+  cleanupInterval: z.coerce.number().int().min(1).optional(),
 })
 
 export const updateGeneral = authProcedure
@@ -162,12 +163,14 @@ export const updateGeneral = authProcedure
         defaultFromEmail: input.defaultFromEmail,
         defaultFromName: input.defaultFromName,
         baseURL: input.baseURL,
+        cleanupInterval: input.cleanupInterval,
         organizationId: input.organizationId,
       },
       update: {
         defaultFromEmail: input.defaultFromEmail,
         defaultFromName: input.defaultFromName,
         baseURL: input.baseURL,
+        cleanupInterval: input.cleanupInterval,
       },
     })
 
