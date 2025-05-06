@@ -1,4 +1,4 @@
-import { Edit, MoreHorizontal, Trash } from "lucide-react"
+import { Edit, MoreHorizontal, Trash, View } from "lucide-react"
 import {
   Button,
   DropdownMenu,
@@ -15,6 +15,7 @@ import { RouterOutput } from "@/types"
 interface ColumnActions {
   onDelete: (id: string) => void
   onEdit: (subscriber: Data) => void
+  onViewDetails: (subscriber: Data) => void
 }
 
 type Data = RouterOutput["subscriber"]["list"]["subscribers"][number]
@@ -22,6 +23,7 @@ type Data = RouterOutput["subscriber"]["list"]["subscribers"][number]
 export const columns = ({
   onDelete,
   onEdit,
+  onViewDetails,
 }: ColumnActions): ColumnDef<Data>[] => [
   // {
   //   id: "select",
@@ -111,6 +113,10 @@ export const columns = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
+            <View className="mr-2 h-4 w-4" />
+            View Details
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onEdit(row.original)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit

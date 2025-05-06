@@ -23,6 +23,7 @@ import { SubscriberStats } from "./subscriber-stats"
 import { AddSubscriberDialog } from "./add-subscriber-dialog"
 import { EditSubscriberDialog } from "./edit-subscriber-dialog"
 import { DeleteSubscriberAlertDialog } from "./delete-subscriber-alert-dialog"
+import { SubscriberDetailsDialog } from "./subscriber-details-dialog"
 
 export function SubscribersPage() {
   const [sorting, setSorting] = useState<SortingState>([])
@@ -36,6 +37,13 @@ export function SubscribersPage() {
   const [editDialog, setEditDialog] = useState<EditSubscriberDialogState>({
     open: false,
     subscriber: null,
+  })
+  const [detailsDialog, setDetailsDialog] = useState<{
+    open: boolean
+    subscriberId: string | null
+  }>({
+    open: false,
+    subscriberId: null,
   })
   const { pagination, setPagination } = usePaginationWithQueryState({
     perPage: 8,
@@ -54,6 +62,16 @@ export function SubscribersPage() {
     },
     {
       enabled: !!organization?.id,
+    }
+  )
+
+  const { data: subscriberDetails } = trpc.subscriber.get.useQuery(
+    {
+      id: detailsDialog.subscriberId ?? "",
+      organizationId: organization?.id ?? "",
+    },
+    {
+      enabled: !!detailsDialog.subscriberId && !!organization?.id,
     }
   )
 
@@ -79,6 +97,8 @@ export function SubscribersPage() {
     columns: columns({
       onDelete: handleDeleteClick,
       onEdit: (subscriber) => setEditDialog({ open: true, subscriber }),
+      onViewDetails: (subscriber) =>
+        setDetailsDialog({ open: true, subscriberId: subscriber.id }),
     }),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -222,6 +242,8 @@ export function SubscribersPage() {
           columns={columns({
             onDelete: handleDeleteClick,
             onEdit: (subscriber) => setEditDialog({ open: true, subscriber }),
+            onViewDetails: (subscriber) =>
+              setDetailsDialog({ open: true, subscriberId: subscriber.id }),
           })}
           data={data?.subscribers ?? []}
           className="h-[calc(100vh-440px)]"
@@ -268,9 +290,15 @@ export function SubscribersPage() {
         subscriber={editDialog.subscriber}
         onOpenChange={(open) => {
           setEditDialog((prev) => ({ ...prev, open }))
-          // Reset logic is handled within EditSubscriberDialog
         }}
         lists={lists.data}
+      />
+
+      {/* Subscriber Details Dialog */}
+      <SubscriberDetailsDialog
+        open={detailsDialog.open}
+        onOpenChange={(open) => setDetailsDialog({ open, subscriberId: null })}
+        subscriber={subscriberDetails}
       />
     </div>
   )

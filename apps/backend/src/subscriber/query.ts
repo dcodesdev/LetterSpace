@@ -115,6 +115,7 @@ export const getSubscriber = authProcedure
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           take: 10,
         },
+        Metadata: true,
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     })
