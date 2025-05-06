@@ -1,97 +1,313 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html dir="ltr" lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Verify Your Email Address</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f4;
-        color: #333333;
-      }
-      .container {
-        width: 100%;
-        max-width: 600px;
-        margin: 0 auto;
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      .header {
-        text-align: center;
-        padding-bottom: 20px;
-      }
-      .header h1 {
-        margin: 0;
-        font-size: 24px;
-        color: #333333;
-      }
-      .content {
-        padding: 20px 0;
-        text-align: left;
-        line-height: 1.6;
-      }
-      .content p {
-        margin: 10px 0;
-      }
-      .button-container {
-        text-align: center;
-        padding: 20px 0;
-      }
-      .button {
-        background-color: #007bff;
-        color: #ffffff;
-        padding: 12px 25px;
-        text-decoration: none;
-        border-radius: 5px;
-        font-size: 16px;
-        display: inline-block;
-      }
-      .footer {
-        text-align: center;
-        padding-top: 20px;
-        font-size: 12px;
-        color: #777777;
-      }
-      .footer p {
-        margin: 5px 0;
-      }
-    </style>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <meta name="x-apple-disable-message-reformatting" />
   </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <h1>Verify Your Email Address</h1>
-      </div>
-      <div class="content">
-        <p>Hi {{name}},</p>
-        <p>
-          Thanks for signing up! Please verify your email address by clicking
-          the button below:
-        </p>
-      </div>
-      <div class="button-container">
-        <a href="{{verificationLink}}" class="button">Verify Email</a>
-      </div>
-      <div class="content">
-        <p>
-          If the button above doesn't work, please copy and paste the following
-          link into your web browser:
-        </p>
-        <p><a href="{{verificationLink}}">{{verificationLink}}</a></p>
-        <p>This link will expire in 24 hours.</p>
-        <p>
-          If you did not sign up for this account, you can ignore this email.
-        </p>
-      </div>
-      <div class="footer">
-        <p>&copy; {{currentYear}} Your Company. All rights reserved.</p>
-        <p>Your Company Address</p>
+  <body
+    style="
+      background-color: rgb(21, 21, 22);
+      font-family: ui-sans-serif, system-ui, sans-serif,
+        &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;,
+        &quot;Segoe UI Symbol&quot;, &quot;Noto Color Emoji&quot;;
+      padding-top: 40px;
+      padding-bottom: 40px;
+    "
+  >
+    <!--$-->
+    <div
+      style="
+        display: none;
+        overflow: hidden;
+        line-height: 1px;
+        opacity: 0;
+        max-height: 0;
+        max-width: 0;
+      "
+    >
+      Verify your email address to complete your registration
+      <div>
+         ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿
       </div>
     </div>
+    <table
+      align="center"
+      width="100%"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      role="presentation"
+      style="
+        background-color: rgb(15, 15, 18);
+        border-radius: 8px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 20px;
+        max-width: 600px;
+      "
+    >
+      <tbody>
+        <tr style="width: 100%">
+          <td>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="margin-top: 32px"
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <h1
+                      style="
+                        font-size: 24px;
+                        font-weight: 700;
+                        color: rgb(255, 255, 255);
+                        text-align: center;
+                        margin: 0px;
+                      "
+                    >
+                      Verify Your Email Address
+                    </h1>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="margin-top: 24px"
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <p
+                      style="
+                        font-size: 16px;
+                        line-height: 24px;
+                        color: rgb(224, 224, 224);
+                        margin-bottom: 16px;
+                        margin-top: 16px;
+                      "
+                    >
+                      Hello there,
+                    </p>
+                    <p
+                      style="
+                        font-size: 16px;
+                        line-height: 24px;
+                        color: rgb(224, 224, 224);
+                        margin-bottom: 16px;
+                        margin-top: 16px;
+                      "
+                    >
+                      Thank you for signing up! To complete your registration
+                      and access all features of our platform, please verify
+                      your email address by clicking the button below.
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="text-align: center; margin-top: 32px; margin-bottom: 32px"
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <a
+                      href="https://example.com/verify-email?token=12345"
+                      style="
+                        background-color: rgb(78, 205, 196);
+                        border-radius: 4px;
+                        color: rgb(15, 15, 18);
+                        padding-top: 12px;
+                        padding-bottom: 12px;
+                        padding-left: 24px;
+                        padding-right: 24px;
+                        font-size: 16px;
+                        font-weight: 500;
+                        text-decoration-line: none;
+                        text-align: center;
+                        box-sizing: border-box;
+                        line-height: 100%;
+                        text-decoration: none;
+                        display: inline-block;
+                        max-width: 100%;
+                        mso-padding-alt: 0px;
+                        padding: 12px 24px 12px 24px;
+                      "
+                      target="_blank"
+                      ><span
+                        ><!--[if mso
+                          ]><i
+                            style="mso-font-width: 400%; mso-text-raise: 18"
+                            hidden
+                            >&#8202;&#8202;&#8202;</i
+                          ><!
+                        [endif]--></span
+                      ><span
+                        style="
+                          max-width: 100%;
+                          display: inline-block;
+                          line-height: 120%;
+                          mso-padding-alt: 0px;
+                          mso-text-raise: 9px;
+                        "
+                        >Verify Email Address</span
+                      ><span
+                        ><!--[if mso
+                          ]><i style="mso-font-width: 400%" hidden
+                            >&#8202;&#8202;&#8202;&#8203;</i
+                          ><!
+                        [endif]--></span
+                      ></a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <p
+                      style="
+                        font-size: 14px;
+                        line-height: 24px;
+                        color: rgb(224, 224, 224);
+                        margin-bottom: 16px;
+                        margin-top: 16px;
+                      "
+                    >
+                      If you did not create an account, you can safely ignore
+                      this email.
+                    </p>
+                    <p
+                      style="
+                        font-size: 14px;
+                        line-height: 24px;
+                        color: rgb(224, 224, 224);
+                        margin-bottom: 16px;
+                        margin-top: 16px;
+                      "
+                    >
+                      If the button above doesn&#x27;t work, copy and paste the
+                      following link into your browser:
+                    </p>
+                    <p
+                      style="
+                        font-size: 14px;
+                        line-height: 24px;
+                        color: rgb(160, 160, 160);
+                        word-break: break-all;
+                        margin-bottom: 16px;
+                        margin-top: 16px;
+                      "
+                    >
+                      <a
+                        href="https://example.com/verify-email?token=12345"
+                        style="
+                          color: rgb(78, 205, 196);
+                          text-decoration-line: none;
+                        "
+                        target="_blank"
+                        >https://example.com/verify-email?token=12345</a
+                      >
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="
+                border-top-width: 1px;
+                border-style: solid;
+                border-color: rgb(42, 42, 45);
+                margin-top: 32px;
+                padding-top: 32px;
+              "
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <p
+                      style="
+                        font-size: 14px;
+                        line-height: 24px;
+                        color: rgb(160, 160, 160);
+                        text-align: center;
+                        margin-bottom: 16px;
+                        margin-top: 16px;
+                      "
+                    >
+                      This verification link will expire in 24 hours.
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <table
+              align="center"
+              width="100%"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              style="margin-top: 32px; text-align: center"
+            >
+              <tbody>
+                <tr>
+                  <td>
+                    <p
+                      style="
+                        font-size: 14px;
+                        line-height: 24px;
+                        text-align: center;
+                        font-weight: 500;
+                        margin-top: 24px;
+                        color: rgb(176, 176, 176);
+                        margin-bottom: 16px;
+                      "
+                    >
+                      Powered by
+                      <span style="color: rgb(255, 255, 255)">Letter</span
+                      ><span style="color: rgb(78, 205, 196)">Space</span>
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!--7--><!--/$-->
   </body>
 </html>

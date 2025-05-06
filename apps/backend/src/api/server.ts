@@ -7,6 +7,7 @@ import crypto from "crypto"
 import { Mailer } from "../lib/Mailer"
 import fs from "fs/promises"
 import path from "path"
+import dayjs from "dayjs"
 
 export const apiRouter = express.Router()
 
@@ -159,9 +160,7 @@ apiRouter.post("/subscribers", async (req, res) => {
 
     if (doubleOptIn && !existingSubscriber) {
       emailVerificationToken = crypto.randomBytes(32).toString("hex")
-      emailVerificationTokenExpiresAt = new Date(
-        Date.now() + 24 * 60 * 60 * 1000
-      )
+      emailVerificationTokenExpiresAt = dayjs().add(24, "hours").toDate()
       emailVerified = false
 
       try {
