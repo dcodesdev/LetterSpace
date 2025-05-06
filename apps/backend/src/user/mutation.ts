@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { publicProcedure } from "../trpc"
+import { publicProcedure, authProcedure } from "../trpc"
 import { prisma } from "../utils/prisma"
 import { comparePasswords, generateToken, hashPassword } from "../utils/auth"
 import { TRPCError } from "@trpc/server"
@@ -96,4 +96,56 @@ export const login = publicProcedure
       token,
       user,
     }
+  })
+
+const updateProfileSchema = z.object({
+  name: z.string().min(1, "Name is required."),
+  email: z.string().email("Invalid email address."),
+})
+
+export const updateProfile = authProcedure
+  .input(updateProfileSchema)
+  .mutation(async ({ ctx, input }) => {
+    const { name, email } = input
+    const userId = ctx.user.id
+
+    if (email) {
+      const currentUser = await prisma.user.findUnique({
+        where: { id: userId },
+      })
+      if (currentUser?.email !== email) {
+        const existingUserWithEmail = await prisma.user.findFirst({
+          where: {
+            email: email,
+            id: { not: userId },
+          },
+        })
+        if (existingUserWithEmail) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Email address is already in use by another account.",
+          })
+        }
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        email,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        UserOrganizations: {
+          include: {
+            Organization: true,
+          },
+        },
+      },
+    })
+
+    return { user: updatedUser }
   })

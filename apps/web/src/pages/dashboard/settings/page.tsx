@@ -9,6 +9,7 @@ import { OrganizationSettings } from "./organization-settings"
 import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
 import { Loader } from "@/components"
+import { ProfileSettings } from "./profile-settings"
 
 export function SettingsPage() {
   const { organization } = useSession()
@@ -41,6 +42,7 @@ export function SettingsPage() {
 
       <Tabs defaultValue="smtp" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="organization">Organization</TabsTrigger>
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
@@ -48,6 +50,9 @@ export function SettingsPage() {
           <TabsTrigger value="api">API Keys</TabsTrigger>
           {/* <TabsTrigger value="webhooks">Webhooks</TabsTrigger> */}
         </TabsList>
+        <TabsContent value="profile">
+          <ProfileSettings />
+        </TabsContent>
         <TabsContent value="general">
           <div className="max-w-4xl">
             <GeneralSettings />
