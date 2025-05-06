@@ -1,5 +1,15 @@
 # Placeholder Parser Utility
 
+| Placeholder             | Description                                                         | Example                                                           |
+| ----------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `{{subscriber.email}}`  | The email address of the subscriber.                                | `john.doe@example.com`                                            |
+| `{{subscriber.name}}`   | The name of the subscriber.                                         | `John Doe`                                                        |
+| `{{campaign.name}}`     | The name/title of the campaign.                                     | `Q3 Newsletter`                                                   |
+| `{{campaign.subject}}`  | The subject line of the campaign.                                   | `Your Weekly Update!`                                             |
+| `{{organization.name}}` | The name of the organization sending the campaign.                  | `MyCompany Inc.`                                                  |
+| `{{unsubscribe_url}}`   | The unique URL for a subscriber to unsubscribe from communications. | `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId` |
+| `{{current_date}}`      | The current date. The format can vary (e.g., "YYYY-MM-DD").         | `2023-10-27`                                                      |
+
 ## Overview
 
 The `placeholder-parser.ts` utility provides a function to replace predefined placeholders in a template string with actual data. This is primarily used for personalizing email content, subjects, and other dynamic text based on subscriber, campaign, and organization details.
