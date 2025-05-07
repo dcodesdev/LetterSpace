@@ -63,9 +63,8 @@ export const metadata: Metadata = {
 
 const navbar = (
   <Navbar
-    // logo={<b>LetterSpace</b>}
     logo={
-      <Link className="flex items-center gap-2" href="/">
+      <Link className="flex items-center gap-2" href="https://letterspace.app">
         <Image
           src="/android-chrome-192x192.png"
           alt="LetterSpace"
