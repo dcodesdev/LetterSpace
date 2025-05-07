@@ -1,5 +1,7 @@
 # Placeholder Parser Utility
 
+Placeholders are special tags you can insert into your emails. When you send an email, our system automatically replaces these tags with real information specific to each recipient, your campaign, or your organization. This helps you personalize your emails and make them more relevant. For example, you can use a placeholder to automatically include a subscriber's name or the name of your latest campaign.
+
 | Placeholder                        | Description                                                                                   | Example                                                           |
 | ---------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | `{{subscriber.email}}`             | The email address of the subscriber.                                                          | `john.doe@example.com`                                            |
@@ -10,10 +12,6 @@
 | `{{unsubscribe_url}}`              | The unique URL for a subscriber to unsubscribe from communications.                           | `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId` |
 | `{{current_date}}`                 | The current date. The format can vary (e.g., "YYYY-MM-DD").                                   | `2023-10-27`                                                      |
 | `{{subscriber.metadata.some_key}}` | A custom metadata field for the subscriber. Replace `some_key` with your actual metadata key. | `custom_value`                                                    |
-
-## Overview
-
-Placeholders are special tags you can insert into your emails. When you send an email, our system automatically replaces these tags with real information specific to each recipient, your campaign, or your organization. This helps you personalize your emails and make them more relevant. For example, you can use a placeholder to automatically include a subscriber's name or the name of your latest campaign.
 
 ## Placeholder Format
 
