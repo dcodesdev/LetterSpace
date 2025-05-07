@@ -14,7 +14,11 @@ export function UnsubscribePage() {
   const subscriberId = searchParams.get("sid")
   const campaignId = searchParams.get("cid")
 
-  const unsubscribeUser = trpc.subscriber.unsubscribe.useMutation({
+  const {
+    mutate: unsubscribeUser,
+    isSuccess,
+    isPending,
+  } = trpc.subscriber.unsubscribe.useMutation({
     onError: (error) => {
       setError(error.message)
     },
@@ -36,10 +40,10 @@ export function UnsubscribePage() {
   }
 
   const handleUnsubscribe = () => {
-    unsubscribeUser.mutate({ sid: subscriberId, cid: campaignId })
+    unsubscribeUser({ sid: subscriberId, cid: campaignId })
   }
 
-  if (unsubscribeUser.isSuccess) {
+  if (isSuccess) {
     return (
       <PageWrapper>
         <div className="flex justify-center">
@@ -71,6 +75,8 @@ export function UnsubscribePage() {
       <Button
         onClick={handleUnsubscribe}
         variant="destructive"
+        disabled={isPending}
+        loading={isPending}
         className="w-full bg-red-500 hover:bg-red-600"
       >
         <MailX className="w-4 h-4 mr-2" />
@@ -94,11 +100,11 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => (
     <footer className="mt-8 text-sm text-gray-500">
       <Link
         to={constants.GITHUB_URL}
-        className="flex items-center hover:text-gray-300 transition-colors"
+        className="flex items-center hover:text-gray-300 transition-colors gap-1"
         target="_blank"
         rel="noopener noreferrer"
       >
-        <IconBrandGithub className="w-4 h-4 mr-2" />
+        <IconBrandGithub className="w-4 h-4" />
         Powered by <LetterSpaceText as="span" />
       </Link>
     </footer>
