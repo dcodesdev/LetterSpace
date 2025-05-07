@@ -14,8 +14,8 @@ const createSubscriberSchema = z.object({
   metadata: z
     .array(
       z.object({
-        key: z.string().min(1),
-        value: z.string().min(1),
+        key: z.string().min(1).max(64),
+        value: z.string().min(1).max(256),
       })
     )
     .optional(),
