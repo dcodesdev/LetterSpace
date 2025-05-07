@@ -109,23 +109,22 @@ export const updateProfile = authProcedure
     const { name, email } = input
     const userId = ctx.user.id
 
-    if (email) {
-      const currentUser = await prisma.user.findUnique({
-        where: { id: userId },
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+    })
+
+    if (currentUser?.email !== email) {
+      const existingUserWithEmail = await prisma.user.findFirst({
+        where: {
+          email: email,
+          id: { not: userId },
+        },
       })
-      if (currentUser?.email !== email) {
-        const existingUserWithEmail = await prisma.user.findFirst({
-          where: {
-            email: email,
-            id: { not: userId },
-          },
+      if (existingUserWithEmail) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Email address is already in use by another account.",
         })
-        if (existingUserWithEmail) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Email address is already in use by another account.",
-          })
-        }
       }
     }
 
