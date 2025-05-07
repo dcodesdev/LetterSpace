@@ -100,7 +100,7 @@ export const login = publicProcedure
 
 const updateProfileSchema = z.object({
   name: z.string().min(1, "Name is required."),
-  email: z.string().email("Invalid email address."),
+  email: z.string().email("Invalid email address.").toLowerCase(),
 })
 
 export const updateProfile = authProcedure
@@ -132,7 +132,7 @@ export const updateProfile = authProcedure
       where: { id: userId },
       data: {
         name,
-        email,
+        email: email.toLowerCase(),
       },
       select: {
         id: true,
