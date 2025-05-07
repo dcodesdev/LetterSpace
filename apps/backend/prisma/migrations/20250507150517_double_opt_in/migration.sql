@@ -5,7 +5,7 @@
 
 */
 -- AlterTable
-ALTER TABLE "GeneralSettings" ADD COLUMN     "cleanupInterval" INTEGER DEFAULT 7;
+ALTER TABLE "GeneralSettings" ADD COLUMN     "cleanupInterval" INTEGER NOT NULL DEFAULT 7;
 
 -- AlterTable
 ALTER TABLE "Subscriber" ADD COLUMN     "emailVerificationToken" TEXT,
