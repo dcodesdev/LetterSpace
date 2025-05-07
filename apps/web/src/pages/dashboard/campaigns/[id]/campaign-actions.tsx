@@ -93,7 +93,7 @@ export const CampaignActions = () => {
   }, [campaignQuery.data?.campaign.Template?.content, content])
 
   const hasUnsubscribeLink = useMemo(
-    () => finalContent.includes("{{UNSUBSCRIBE_LINK}}"),
+    () => finalContent.includes("{{unsubscribe_link}}"),
     [finalContent]
   )
 
@@ -184,7 +184,7 @@ export const CampaignActions = () => {
                 <AlertDialogTitle>Missing Unsubscribe Link</AlertDialogTitle>
                 <AlertDialogDescription>
                   Your email content does not include an unsubscribe link. It's
-                  recommended to add {`{{UNSUBSCRIBE_LINK}}`} to your template
+                  recommended to add {`{{unsubscribe_link}}`} to your template
                   or content. Do you want to continue anyway?
                 </AlertDialogDescription>
               </AlertDialogHeader>

@@ -58,14 +58,14 @@ export const EditorTab = () => {
     const currentContent = textarea.value
     const newContent =
       currentContent.slice(0, selectionStart) +
-      "{{UNSUBSCRIBE_LINK}}" +
+      "{{unsubscribe_link}}" +
       currentContent.slice(selectionEnd)
 
     form.setValue("content", newContent)
     textarea.focus()
     textarea.setSelectionRange(
-      selectionStart + "{{UNSUBSCRIBE_LINK}}".length,
-      selectionStart + "{{UNSUBSCRIBE_LINK}}".length
+      selectionStart + "{{unsubscribe_link}}".length,
+      selectionStart + "{{unsubscribe_link}}".length
     )
   }
 

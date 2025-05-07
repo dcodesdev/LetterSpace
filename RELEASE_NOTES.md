@@ -4,6 +4,7 @@
 
 ### 🐛 Bug Fixes
 
+- Unsubscribe link typo fixed
 - Various bug fixes and optimizations.
 
 ### 📚 Docs
