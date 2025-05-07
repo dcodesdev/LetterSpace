@@ -120,6 +120,7 @@ export function EditSubscriberDialog({
         onOpenChange(isOpen)
         if (!isOpen) {
           form.reset()
+          replaceMetadata([])
         }
       }}
     >
