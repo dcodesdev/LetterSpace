@@ -405,7 +405,10 @@ export const startCampaign = authProcedure
 
           const messageId = uuidV4()
           let content = campaign.Template
-            ? campaign.Template.content.replace("{{content}}", campaign.content)
+            ? campaign.Template.content.replace(
+                /{{content}}/g,
+                campaign.content
+              )
             : campaign.content
 
           const placeholderData: Partial<Record<PlaceholderDataKey, string>> = {
@@ -589,7 +592,7 @@ export const sendTestEmail = authProcedure
     }
 
     const content = campaign.Template
-      ? campaign.Template.content.replace("{{content}}", campaign.content)
+      ? campaign.Template.content.replace(/{{content}}/g, campaign.content)
       : campaign.content
 
     const mailer = new Mailer(settings)
