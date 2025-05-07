@@ -15,7 +15,7 @@ export default defineConfig({
         short_name: "LetterSpace",
         description: "Open source newsletter app",
         theme_color: "#ffffff",
-        start_url: "/",
+        start_url: "/dashboard",
         icons: [
           {
             src: "pwa-64x64.png",

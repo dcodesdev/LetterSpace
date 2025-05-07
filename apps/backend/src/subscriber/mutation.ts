@@ -398,10 +398,9 @@ export const publicUnsubscribe = publicProcedure
       })
 
       if (!listSubscribers.length) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Subscriber not found",
-        })
+        return {
+          success: true,
+        }
       }
 
       await prisma.listSubscriber.updateMany({
@@ -414,6 +413,13 @@ export const publicUnsubscribe = publicProcedure
           unsubscribedAt: new Date(),
         },
       })
+
+      await prisma.campaign
+        .update({
+          where: { id: input.cid },
+          data: { unsubscribedCount: { increment: 1 } },
+        })
+        .catch(() => {})
 
       return {
         success: true,

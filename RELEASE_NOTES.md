@@ -1,11 +1,12 @@
 ### ✨ Features
 
-- Placeholder text added for login/register forms.
+- Unsubscribe count per campaign
+- Vite start URL goes to dashboard
 - New features and improvements.
 
 ### 🐛 Bug Fixes
 
-- PWA start url fixed.
+- Template preview bug fixes
 - Various bug fixes and optimizations.
 
 ### 📚 Docs

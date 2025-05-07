@@ -110,10 +110,11 @@ model Campaign {
   content     String?
   completedAt DateTime?
 
-  status       CampaignStatus @default(DRAFT)
-  scheduledAt  DateTime?
-  htmlOnly     Boolean        @default(false)
-  openTracking Boolean        @default(true)
+  status            CampaignStatus @default(DRAFT)
+  scheduledAt       DateTime?
+  htmlOnly          Boolean        @default(false)
+  openTracking      Boolean        @default(true)
+  unsubscribedCount Int            @default(0)
 
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
