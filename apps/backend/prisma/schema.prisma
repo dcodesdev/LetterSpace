@@ -70,7 +70,7 @@ model Subscriber {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  emailVerified                   Boolean?  @default(false)
+  emailVerified                   Boolean   @default(false)
   emailVerificationToken          String?   @unique
   emailVerificationTokenExpiresAt DateTime?
 

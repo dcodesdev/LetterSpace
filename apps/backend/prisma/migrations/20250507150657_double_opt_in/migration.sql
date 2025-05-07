@@ -10,7 +10,7 @@ ALTER TABLE "GeneralSettings" ADD COLUMN     "cleanupInterval" INTEGER NOT NULL 
 -- AlterTable
 ALTER TABLE "Subscriber" ADD COLUMN     "emailVerificationToken" TEXT,
 ADD COLUMN     "emailVerificationTokenExpiresAt" TIMESTAMP(3),
-ADD COLUMN     "emailVerified" BOOLEAN DEFAULT false;
+ADD COLUMN     "emailVerified" BOOLEAN NOT NULL DEFAULT false;
 
 -- CreateTable
 CREATE TABLE "SubscriberMetadata" (
