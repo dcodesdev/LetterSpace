@@ -1,14 +1,15 @@
 # Placeholder Parser Utility
 
-| Placeholder             | Description                                                         | Example                                                           |
-| ----------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `{{subscriber.email}}`  | The email address of the subscriber.                                | `john.doe@example.com`                                            |
-| `{{subscriber.name}}`   | The name of the subscriber.                                         | `John Doe`                                                        |
-| `{{campaign.name}}`     | The name/title of the campaign.                                     | `Q3 Newsletter`                                                   |
-| `{{campaign.subject}}`  | The subject line of the campaign.                                   | `Your Weekly Update!`                                             |
-| `{{organization.name}}` | The name of the organization sending the campaign.                  | `MyCompany Inc.`                                                  |
-| `{{unsubscribe_url}}`   | The unique URL for a subscriber to unsubscribe from communications. | `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId` |
-| `{{current_date}}`      | The current date. The format can vary (e.g., "YYYY-MM-DD").         | `2023-10-27`                                                      |
+| Placeholder                        | Description                                                                                   | Example                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `{{subscriber.email}}`             | The email address of the subscriber.                                                          | `john.doe@example.com`                                            |
+| `{{subscriber.name}}`              | The name of the subscriber.                                                                   | `John Doe`                                                        |
+| `{{campaign.name}}`                | The name/title of the campaign.                                                               | `Q3 Newsletter`                                                   |
+| `{{campaign.subject}}`             | The subject line of the campaign.                                                             | `Your Weekly Update!`                                             |
+| `{{organization.name}}`            | The name of the organization sending the campaign.                                            | `MyCompany Inc.`                                                  |
+| `{{unsubscribe_url}}`              | The unique URL for a subscriber to unsubscribe from communications.                           | `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId` |
+| `{{current_date}}`                 | The current date. The format can vary (e.g., "YYYY-MM-DD").                                   | `2023-10-27`                                                      |
+| `{{subscriber.metadata.some_key}}` | A custom metadata field for the subscriber. Replace `some_key` with your actual metadata key. | `custom_value`                                                    |
 
 ## Overview
 
@@ -38,6 +39,8 @@ Here are the placeholders you can use in your emails:
   - Example: `john.doe@example.com`
 - `{{subscriber.name}}`: The name of the subscriber.
   - Example: `John Doe`
+- `{{subscriber.metadata.some_key}}`: A custom metadata field associated with the subscriber. You can define these custom fields to store additional information about your subscribers. Replace `some_key` with the actual key of your custom metadata.
+  - Example: If you have a custom field `loyalty_level`, you would use `{{subscriber.metadata.loyalty_level}}`. If the value for a subscriber is `gold`, this placeholder would be replaced with `gold`.
 
 ### Campaign Data
 
