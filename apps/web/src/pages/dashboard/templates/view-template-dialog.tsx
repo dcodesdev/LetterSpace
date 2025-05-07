@@ -23,7 +23,7 @@ export function ViewTemplateDialog({
 
   // Replace {{content}} with sample content for preview
   const previewContent = template.content.replace(
-    "{{content}}",
+    /{{content}}/g,
     "<p>This is a sample content placeholder. Your actual content will appear here.</p>"
   )
 
