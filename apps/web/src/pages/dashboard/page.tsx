@@ -1,5 +1,3 @@
-"use client"
-
 import {
   Mail,
   ArrowRight,
@@ -255,7 +253,7 @@ export function DashboardPage() {
             <CardTitle>Subscriber Growth</CardTitle>
             <CardDescription>
               New subscribers over time{" "}
-              <span className="text-xs text-muted-foreground">(Weekly)</span>
+              <span className="text-xs text-muted-foreground">(Daily)</span>
             </CardDescription>
           </CardHeader>
           <CardContent>

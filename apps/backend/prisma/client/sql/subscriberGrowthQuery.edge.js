@@ -3,5 +3,5 @@
 "use strict";
 const { makeTypedQueryFactory: $mkFactory } = require("../runtime/edge.js");
 exports.subscriberGrowthQuery = /*#__PURE__*/ $mkFactory(
-  'SELECT\nDATE_TRUNC(\'week\', "createdAt") as date,\nCOUNT(*) as count\nFROM "public"."Subscriber"\nWHERE "organizationId" = $1\nAND "createdAt" >= $2\nAND "createdAt" <= $3\nGROUP BY DATE_TRUNC(\'week\', "createdAt")\nORDER BY date ASC',
+  'SELECT\nDATE_TRUNC(\'day\', "createdAt") as date,\nCOUNT(*) as count\nFROM "public"."Subscriber"\nWHERE "organizationId" = $1\nAND "createdAt" >= $2\nAND "createdAt" <= $3\nGROUP BY DATE_TRUNC(\'day\', "createdAt")\nORDER BY date ASC',
 );

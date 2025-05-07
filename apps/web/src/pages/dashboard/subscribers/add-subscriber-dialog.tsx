@@ -49,7 +49,7 @@ export function AddSubscriberDialog({
       name: "",
       listIds: [],
       emailVerified: false,
-      metadata: [{ key: "", value: "" }],
+      metadata: [],
     },
   })
 
@@ -189,55 +189,77 @@ export function AddSubscriberDialog({
               )}
             />
             <div>
-              <FormLabel>Metadata</FormLabel>
-              {metadataFields.map((field, index) => (
-                <div key={field.id} className="flex items-center gap-2 mt-2">
-                  <FormField
-                    control={form.control}
-                    name={`metadata.${index}.key`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input placeholder="Key" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`metadata.${index}.value`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <Input placeholder="Value" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {metadataFields.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeMetadata(index)}
+              <FormLabel className="text-base">Metadata</FormLabel>
+              {metadataFields.length > 0 ? (
+                <>
+                  {metadataFields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="flex items-center gap-2 mt-2"
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
+                      <FormField
+                        control={form.control}
+                        name={`metadata.${index}.key`}
+                        render={({ field: keyField }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Input placeholder="Key" {...keyField} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`metadata.${index}.value`}
+                        render={({ field: valueField }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Input placeholder="Value" {...valueField} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeMetadata(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="flex flex-col mt-2 mb-2 border rounded-md p-4">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    No metadata added yet
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => appendMetadata({ key: "", value: "" })}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Metadata
+                  </Button>
                 </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() => appendMetadata({ key: "", value: "" })}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Metadata
-              </Button>
+              )}
+              {metadataFields.length > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => appendMetadata({ key: "", value: "" })}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Metadata
+                </Button>
+              )}
             </div>
             <DialogFooter>
               <Button
