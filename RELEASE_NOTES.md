@@ -4,6 +4,8 @@
 
 ### 🐛 Bug Fixes
 
+- Subscriber growth graph bug fixed
+- Creating a subscriber with metadata now works
 - Various bug fixes and optimizations.
 
 ### 📚 Docs
