@@ -106,6 +106,7 @@ export const Signup = () => {
                       {...field}
                       type={showPassword ? "text" : "password"}
                       className="pr-10"
+                      placeholder="********"
                     />
                   </FormControl>
                   <button

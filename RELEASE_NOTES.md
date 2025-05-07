@@ -1,10 +1,11 @@
 ### ✨ Features
 
-- Unsubscribe page updated.
+- Placeholder text added for login/register forms.
 - New features and improvements.
 
 ### 🐛 Bug Fixes
 
+- PWA start url fixed.
 - Various bug fixes and optimizations.
 
 ### 📚 Docs
