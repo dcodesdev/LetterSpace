@@ -17,22 +17,27 @@ export const dailyMaintenanceCron = cronJob("daily-maintenance", async () => {
       .subtract(cleanupIntervalDays, "days")
       .toDate()
 
-    const result = await prisma.message.deleteMany({
-      where: {
-        Campaign: {
-          organizationId: org.id,
+    try {
+      const result = await prisma.message.deleteMany({
+        where: {
+          Campaign: {
+            organizationId: org.id,
+          },
+          createdAt: {
+            lt: cleanupOlderThanDate,
+          },
         },
-        createdAt: {
-          lt: cleanupOlderThanDate,
-        },
-      },
-    })
+      })
 
-    if (result.count > 0) {
-      console.log(
-        `Daily maintenance for org ${org.id}: Deleted ${result.count} messages older than ${cleanupIntervalDays} days.`
-      )
-      totalDeletedMessages += result.count
+      if (result.count > 0) {
+        console.log(
+          `Daily maintenance for org ${org.id}: Deleted ${result.count} messages older than ${cleanupIntervalDays} days.`
+        )
+        totalDeletedMessages += result.count
+      }
+    } catch (error) {
+      console.error(`Error deleting messages for org ${org.id}: ${error}`)
+      continue
     }
   }
 
