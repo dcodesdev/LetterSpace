@@ -88,7 +88,7 @@ export const CampaignActions = () => {
 
   const finalContent = useMemo(() => {
     const template = campaignQuery.data?.campaign.Template?.content || ""
-    const final = template.replace("{{content}}", content)
+    const final = template.replace(/{{content}}/g, content)
     return final
   }, [campaignQuery.data?.campaign.Template?.content, content])
 
