@@ -15,6 +15,8 @@ export namespace countDbSize {
     campaign_count: bigint | null;
     template_count: bigint | null;
     message_count: bigint | null;
+    subscriber_count: bigint | null;
+    list_count: bigint | null;
     total_size_mb: $runtime.Decimal | null;
   };
 }

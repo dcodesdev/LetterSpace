@@ -6,6 +6,7 @@ import {
   importSubscribers,
   publicUnsubscribe,
   unsubscribeToggle,
+  verifyEmail,
 } from "./mutation"
 import { getSubscriber, listSubscribers } from "./query"
 
@@ -18,4 +19,5 @@ export const subscriberRouter = router({
   import: importSubscribers,
   unsubscribe: publicUnsubscribe,
   unsubscribeToggle,
+  verifyEmail,
 })

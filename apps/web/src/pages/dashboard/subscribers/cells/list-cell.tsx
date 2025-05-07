@@ -11,14 +11,13 @@ import {
   Switch,
   cn,
 } from "@repo/ui"
-import { PopulatedSubscriber } from "../page"
 import { trpc } from "@/trpc"
 import { toast } from "sonner"
-import { ListSubscriber } from "backend"
 import { displayDate } from "backend/shared"
+import { RouterOutput } from "@/types"
 
 interface ListCellProps {
-  subscriber: PopulatedSubscriber
+  subscriber: RouterOutput["subscriber"]["list"]["subscribers"][number]
   organizationId: string
 }
 
@@ -66,12 +65,7 @@ export const ListCell = memo(
 )
 
 interface ListItemProps {
-  list: ListSubscriber & {
-    List: {
-      id: string
-      name: string
-    }
-  }
+  list: RouterOutput["subscriber"]["list"]["subscribers"][number]["ListSubscribers"][number]
   organizationId: string
 }
 

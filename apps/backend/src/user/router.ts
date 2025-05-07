@@ -1,5 +1,5 @@
 import { router } from "../trpc"
-import { login, signup } from "./mutation"
+import { login, signup, updateProfile, changePassword } from "./mutation"
 import { me, isFirstUser } from "./query"
 
 export const userRouter = router({
@@ -7,4 +7,6 @@ export const userRouter = router({
   login,
   me,
   isFirstUser,
+  updateProfile,
+  changePassword,
 })

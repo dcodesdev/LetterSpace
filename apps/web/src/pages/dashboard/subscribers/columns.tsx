@@ -1,25 +1,30 @@
-import { Edit, MoreHorizontal, Trash } from "lucide-react"
+import { Edit, MoreHorizontal, Trash, View } from "lucide-react"
 import {
   Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  Badge,
 } from "@repo/ui"
 import { ColumnDef } from "@tanstack/react-table"
-import { PopulatedSubscriber } from "./page"
 import { ListCell } from "./cells/list-cell"
 import { displayDateTime } from "@/utils"
+import { RouterOutput } from "@/types"
 
 interface ColumnActions {
   onDelete: (id: string) => void
-  onEdit: (subscriber: PopulatedSubscriber) => void
+  onEdit: (subscriber: Data) => void
+  onViewDetails: (subscriber: Data) => void
 }
+
+type Data = RouterOutput["subscriber"]["list"]["subscribers"][number]
 
 export const columns = ({
   onDelete,
   onEdit,
-}: ColumnActions): ColumnDef<PopulatedSubscriber>[] => [
+  onViewDetails,
+}: ColumnActions): ColumnDef<Data>[] => [
   // {
   //   id: "select",
   //   header: ({ table }) => (
@@ -58,7 +63,37 @@ export const columns = ({
     cell: ({ row }) => displayDateTime(row.original.createdAt),
   },
   {
+    accessorKey: "emailVerified",
+    header: "Email Status",
+    cell: ({ row }) => {
+      const isVerified = row.original.emailVerified
+      return (
+        <Badge variant={isVerified ? "default" : "secondary"}>
+          {isVerified ? "Verified" : "Unverified"}
+        </Badge>
+      )
+    },
+  },
+  {
     accessorKey: "ListSubscribers",
+    header: "Subscription Status",
+    cell: ({ row }) => {
+      const listSubscribers = row.original.ListSubscribers
+      if (!listSubscribers || listSubscribers.length === 0) {
+        return <Badge variant="outline">No Lists</Badge>
+      }
+      const isSubscribedToAnyList = listSubscribers.some(
+        (ls) => ls.unsubscribedAt === null
+      )
+      return (
+        <Badge variant={isSubscribedToAnyList ? "default" : "secondary"}>
+          {isSubscribedToAnyList ? "Subscribed" : "Unsubscribed"}
+        </Badge>
+      )
+    },
+  },
+  {
+    accessorKey: "lists",
     header: "Lists",
     cell: ({ row }) => (
       <ListCell
@@ -78,6 +113,10 @@ export const columns = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onViewDetails(row.original)}>
+            <View className="mr-2 h-4 w-4" />
+            View Details
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onEdit(row.original)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit

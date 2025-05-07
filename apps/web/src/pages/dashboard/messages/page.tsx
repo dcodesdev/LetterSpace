@@ -27,7 +27,7 @@ export function MessagesPage() {
     },
     {
       enabled: !!organization?.id,
-      refetchInterval: 5000,
+      refetchInterval: 60_000,
     }
   )
 

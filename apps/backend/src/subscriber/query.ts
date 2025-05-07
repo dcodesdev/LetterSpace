@@ -42,8 +42,14 @@ export const listSubscribers = authProcedure
         skip: (input.page - 1) * input.perPage,
         take: input.perPage,
         include: {
+          Metadata: true,
           ListSubscribers: {
-            include: {
+            select: {
+              id: true,
+              unsubscribedAt: true,
+              listId: true,
+              createdAt: true,
+              updatedAt: true,
               List: {
                 select: {
                   id: true,
@@ -110,6 +116,7 @@ export const getSubscriber = authProcedure
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           take: 10,
         },
+        Metadata: true,
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     })

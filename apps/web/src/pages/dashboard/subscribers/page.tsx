@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Plus, Users, Trash } from "lucide-react"
+import { Plus, Trash } from "lucide-react"
 import {
   type ColumnFiltersState,
   type SortingState,
@@ -9,78 +9,21 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Input,
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogDescription,
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@repo/ui"
+import { Button } from "@repo/ui"
 import { columns } from "./columns"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 import { trpc } from "@/trpc"
 import { useSession, usePaginationWithQueryState } from "@/hooks"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { ListSubscriber, Subscriber } from "backend"
-import { CardSkeleton } from "@/components"
 import { DataTable } from "@repo/ui"
 import { Pagination } from "@/components"
 import { SubscriberSearch } from "./subscriber-search"
-
-const addSubscriberSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  name: z.string().optional(),
-  listIds: z.array(z.string()),
-})
-
-export type PopulatedSubscriber = Subscriber & {
-  ListSubscribers: (ListSubscriber & {
-    List: {
-      id: string
-      name: string
-    }
-  })[]
-}
-
-interface EditSubscriberDialogState {
-  open: boolean
-  subscriber: PopulatedSubscriber | null
-}
-
-const editSubscriberSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  name: z.string().optional(),
-  listIds: z.array(z.string()),
-})
+import { EditSubscriberDialogState } from "./types"
+import { SubscriberStats } from "./subscriber-stats"
+import { AddSubscriberDialog } from "./add-subscriber-dialog"
+import { EditSubscriberDialog } from "./edit-subscriber-dialog"
+import { DeleteSubscriberAlertDialog } from "./delete-subscriber-alert-dialog"
+import { SubscriberDetailsDialog } from "./subscriber-details-dialog"
 
 export function SubscribersPage() {
   const [sorting, setSorting] = useState<SortingState>([])
@@ -95,7 +38,16 @@ export function SubscribersPage() {
     open: false,
     subscriber: null,
   })
-  const { pagination, setPagination } = usePaginationWithQueryState()
+  const [detailsDialog, setDetailsDialog] = useState<{
+    open: boolean
+    subscriberId: string | null
+  }>({
+    open: false,
+    subscriberId: null,
+  })
+  const { pagination, setPagination } = usePaginationWithQueryState({
+    perPage: 8,
+  })
 
   const { organization } = useSession()
 
@@ -110,6 +62,16 @@ export function SubscribersPage() {
     },
     {
       enabled: !!organization?.id,
+    }
+  )
+
+  const { data: subscriberDetails } = trpc.subscriber.get.useQuery(
+    {
+      id: detailsDialog.subscriberId ?? "",
+      organizationId: organization?.id ?? "",
+    },
+    {
+      enabled: !!detailsDialog.subscriberId && !!organization?.id,
     }
   )
 
@@ -130,56 +92,13 @@ export function SubscribersPage() {
     setSubscriberToDelete(id)
   }
 
-  const editForm = useForm<z.infer<typeof editSubscriberSchema>>({
-    resolver: zodResolver(editSubscriberSchema),
-    defaultValues: {
-      email: "",
-      name: "",
-      listIds: [],
-    },
-  })
-
-  // Reset form when subscriber changes
-  useEffect(() => {
-    if (editDialog.subscriber) {
-      editForm.reset({
-        email: editDialog.subscriber.email,
-        name: editDialog.subscriber.name ?? "",
-        listIds: editDialog.subscriber.ListSubscribers.map((ls) => ls.List.id),
-      })
-    }
-  }, [editDialog.subscriber, editForm])
-
-  const updateSubscriber = trpc.subscriber.update.useMutation({
-    onSuccess: () => {
-      toast.success("Subscriber updated successfully")
-      setEditDialog({ open: false, subscriber: null })
-      editForm.reset()
-      utils.list.invalidate()
-      utils.subscriber.invalidate()
-    },
-    onError: (error) => {
-      toast.error(error.message)
-    },
-  })
-
-  const handleEditSubscriber = (
-    values: z.infer<typeof editSubscriberSchema>
-  ) => {
-    if (!editDialog.subscriber || !organization?.id) return
-
-    updateSubscriber.mutate({
-      id: editDialog.subscriber.id,
-      organizationId: organization.id,
-      ...values,
-    })
-  }
-
   const table = useReactTable({
     data: data?.subscribers ?? [],
     columns: columns({
       onDelete: handleDeleteClick,
       onEdit: (subscriber) => setEditDialog({ open: true, subscriber }),
+      onViewDetails: (subscriber) =>
+        setDetailsDialog({ open: true, subscriberId: subscriber.id }),
     }),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -202,35 +121,6 @@ export function SubscribersPage() {
   const lists = trpc.list.list.useQuery({
     organizationId: organization?.id ?? "",
   })
-
-  const form = useForm<z.infer<typeof addSubscriberSchema>>({
-    resolver: zodResolver(addSubscriberSchema),
-    defaultValues: {
-      email: "",
-      name: "",
-      listIds: [],
-    },
-  })
-
-  const addSubscriber = trpc.subscriber.create.useMutation({
-    onSuccess: () => {
-      toast.success("Subscriber added successfully")
-      setIsAddingSubscriber(false)
-      form.reset()
-      utils.list.invalidate()
-      utils.subscriber.invalidate()
-    },
-    onError: (error) => {
-      toast.error(error.message)
-    },
-  })
-
-  const handleAddSubscriber = (values: z.infer<typeof addSubscriberSchema>) => {
-    addSubscriber.mutate({
-      ...values,
-      organizationId: organization?.id ?? "",
-    })
-  }
 
   const handleDeleteSubscriber = () => {
     if (!subscriberToDelete) return
@@ -269,106 +159,7 @@ export function SubscribersPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card hoverEffect>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Subscribers
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {analyticsLoading || !analytics ? (
-              <CardSkeleton />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">
-                  {analytics.subscribers.allTime.toLocaleString()}
-                </div>
-                <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                  <span className="text-emerald-500 inline-flex items-center">
-                    <ArrowUp className="mr-1 h-4 w-4" />+
-                    {analytics.subscribers.newThisMonth.toLocaleString()}
-                  </span>{" "}
-                  this month
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-        <Card hoverEffect>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Average Open Rate{" "}
-              <small className="text-xs text-muted-foreground">
-                (Last 30 days)
-              </small>
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {analyticsLoading || !analytics ? (
-              <CardSkeleton />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">
-                  {analytics.openRate.thisMonth.toFixed(1)}%
-                </div>
-                <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                  {analytics.openRate.comparison >= 0 ? (
-                    <span className="text-emerald-500 inline-flex items-center">
-                      <ArrowUp className="mr-1 h-4 w-4" />+
-                      {analytics.openRate.comparison.toFixed(1)}%
-                    </span>
-                  ) : (
-                    <span className="text-rose-500 inline-flex items-center">
-                      <ArrowDown className="mr-1 h-4 w-4" />
-                      {analytics.openRate.comparison.toFixed(1)}%
-                    </span>
-                  )}{" "}
-                  vs last month
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-        <Card hoverEffect>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Unsubscribed{" "}
-              <small className="text-xs text-muted-foreground">
-                (Last 30 days)
-              </small>
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {analyticsLoading || !analytics ? (
-              <CardSkeleton />
-            ) : (
-              <>
-                <div className="text-2xl font-bold">
-                  {analytics.unsubscribed.thisMonth.toLocaleString()}
-                </div>
-                <p className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                  {analytics.unsubscribed.comparison <= 0 ? (
-                    <span className="text-emerald-500 inline-flex items-center">
-                      <ArrowDown className="mr-1 h-4 w-4" />-
-                      {Math.abs(analytics.unsubscribed.comparison)}
-                    </span>
-                  ) : (
-                    <span className="text-rose-500 inline-flex items-center">
-                      <ArrowUp className="mr-1 h-4 w-4" />+
-                      {Math.abs(analytics.unsubscribed.comparison)}
-                    </span>
-                  )}{" "}
-                  vs last month
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <SubscriberStats analytics={analytics} isLoading={analyticsLoading} />
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -403,124 +194,13 @@ export function SubscribersPage() {
             </DropdownMenu> */}
           </div>
           <div className="flex items-center gap-2">
-            <Dialog
+            <AddSubscriberDialog
               open={isAddingSubscriber}
-              onOpenChange={(open) => {
-                setIsAddingSubscriber(open)
-                if (!open) {
-                  form.reset()
-                }
+              onOpenChange={setIsAddingSubscriber}
+              onSuccess={() => {
+                // Optionally, you can add any specific logic needed on success in the parent page
               }}
-            >
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4" />
-                  Add Subscriber
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add New Subscriber</DialogTitle>
-                  <DialogDescription>
-                    Add a new subscriber to your newsletter list.
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(handleAddSubscriber)}>
-                    <div className="grid gap-4 py-4">
-                      <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Enter subscriber's name"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder="Enter subscriber's email"
-                                type="email"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="listIds"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Lists</FormLabel>
-                            <div className="flex flex-wrap gap-2">
-                              {lists.data?.lists.map((list) => (
-                                <Button
-                                  key={list.id}
-                                  type="button"
-                                  size="sm"
-                                  variant={
-                                    field.value.includes(list.id)
-                                      ? "default"
-                                      : "outline"
-                                  }
-                                  onClick={() => {
-                                    const newValue = field.value.includes(
-                                      list.id
-                                    )
-                                      ? field.value.filter(
-                                          (id) => id !== list.id
-                                        )
-                                      : [...field.value, list.id]
-                                    field.onChange(newValue)
-                                  }}
-                                  className="h-8"
-                                >
-                                  {list.name}
-                                  {field.value.includes(list.id) && (
-                                    <span className="ml-1">✓</span>
-                                  )}
-                                </Button>
-                              ))}
-                              {lists.data?.lists.length === 0 && (
-                                <p className="text-sm text-muted-foreground">
-                                  No lists available. Create a list first.
-                                </p>
-                              )}
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        loading={addSubscriber.isPending}
-                        type="submit"
-                        disabled={addSubscriber.isPending}
-                      >
-                        Add Subscriber
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-
+            />
             {/* <ImportSubscribersDialog
               onSuccess={() => {
                 utils.subscriber.list.invalidate()
@@ -562,6 +242,8 @@ export function SubscribersPage() {
           columns={columns({
             onDelete: handleDeleteClick,
             onEdit: (subscriber) => setEditDialog({ open: true, subscriber }),
+            onViewDetails: (subscriber) =>
+              setDetailsDialog({ open: true, subscriberId: subscriber.id }),
           })}
           data={data?.subscribers ?? []}
           className="h-[calc(100vh-440px)]"
@@ -594,142 +276,30 @@ export function SubscribersPage() {
       </div>
 
       {/* Delete Subscriber Alert Dialog */}
-      <AlertDialog
+      <DeleteSubscriberAlertDialog
         open={subscriberToDelete !== null}
         onOpenChange={(open) => !open && setSubscriberToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {subscriberToDelete?.includes(",")
-                ? `This action cannot be undone. This will permanently delete ${subscriberToDelete.split(",").length} subscribers and remove their data from our servers.`
-                : "This action cannot be undone. This will permanently delete the subscriber and remove their data from our servers."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteSubscriber}
-              disabled={deleteSubscriber.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteSubscriber.isPending
-                ? "Deleting..."
-                : subscriberToDelete?.includes(",")
-                  ? `Delete ${subscriberToDelete.split(",").length} subscribers`
-                  : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={handleDeleteSubscriber}
+        subscriberToDelete={subscriberToDelete}
+        isPending={deleteSubscriber.isPending}
+      />
 
       {/* Edit Subscriber Dialog */}
-      <Dialog
+      <EditSubscriberDialog
         open={editDialog.open}
+        subscriber={editDialog.subscriber}
         onOpenChange={(open) => {
           setEditDialog((prev) => ({ ...prev, open }))
-          if (!open) {
-            editForm.reset()
-          }
         }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Subscriber</DialogTitle>
-            <DialogDescription>
-              Update subscriber details and list assignments.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleEditSubscriber)}>
-              <div className="grid gap-4 py-4">
-                <FormField
-                  control={editForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter subscriber's name"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={editForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Enter subscriber's email"
-                          type="email"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={editForm.control}
-                  name="listIds"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Lists</FormLabel>
-                      <div className="flex flex-wrap gap-2">
-                        {lists.data?.lists.map((list) => (
-                          <Button
-                            key={list.id}
-                            type="button"
-                            size="sm"
-                            variant={
-                              field.value.includes(list.id)
-                                ? "default"
-                                : "outline"
-                            }
-                            onClick={() => {
-                              const newValue = field.value.includes(list.id)
-                                ? field.value.filter((id) => id !== list.id)
-                                : [...field.value, list.id]
-                              field.onChange(newValue)
-                            }}
-                            className="h-8"
-                          >
-                            {list.name}
-                            {field.value.includes(list.id) && (
-                              <span className="ml-1">✓</span>
-                            )}
-                          </Button>
-                        ))}
-                        {lists.data?.lists.length === 0 && (
-                          <p className="text-sm text-muted-foreground">
-                            No lists available. Create a list first.
-                          </p>
-                        )}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <DialogFooter>
-                <Button type="submit" disabled={updateSubscriber.isPending}>
-                  {updateSubscriber.isPending
-                    ? "Updating..."
-                    : "Update Subscriber"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+        lists={lists.data}
+      />
+
+      {/* Subscriber Details Dialog */}
+      <SubscriberDetailsDialog
+        open={detailsDialog.open}
+        onOpenChange={(open) => setDetailsDialog({ open, subscriberId: null })}
+        subscriber={subscriberDetails}
+      />
     </div>
   )
 }

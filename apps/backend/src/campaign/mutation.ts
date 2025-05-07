@@ -6,6 +6,10 @@ import pMap from "p-map"
 import { LinkTracker } from "../lib/LinkTracker"
 import { v4 as uuidV4 } from "uuid"
 import { Mailer } from "../lib/Mailer"
+import {
+  replacePlaceholders,
+  PlaceholderDataKey,
+} from "../utils/placeholder-parser"
 
 const createCampaignSchema = z.object({
   title: z.string().min(1, "Campaign title is required"),
@@ -278,6 +282,8 @@ export const startCampaign = authProcedure
                       select: {
                         id: true,
                         email: true,
+                        name: true,
+                        Metadata: true,
                       },
                     },
                   },
@@ -328,7 +334,9 @@ export const startCampaign = authProcedure
     }
 
     type Subscriber =
-      (typeof campaign)["CampaignLists"][0]["List"]["ListSubscribers"][0]["Subscriber"]
+      (typeof campaign)["CampaignLists"][0]["List"]["ListSubscribers"][0]["Subscriber"] & {
+        Metadata: { key: string; value: string }[]
+      }
 
     const subscribers = new Map<string, Subscriber>()
     await pMap(campaign.CampaignLists, (campaignList) => {
@@ -341,6 +349,18 @@ export const startCampaign = authProcedure
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Campaign must have at least one recipient",
+      })
+    }
+
+    const organization = await prisma.organization.findUnique({
+      where: { id: input.organizationId },
+      select: { name: true },
+    })
+
+    if (!organization) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Organization details could not be retrieved.",
       })
     }
 
@@ -385,17 +405,36 @@ export const startCampaign = authProcedure
 
           const messageId = uuidV4()
           let content = campaign.Template
-            ? campaign.Template.content.replace("{{CONTENT}}", campaign.content)
+            ? campaign.Template.content.replace(
+                /{{content}}/g,
+                campaign.content
+              )
             : campaign.content
 
-          content = content.replace(
-            /{{UNSUBSCRIBE_LINK}}/g,
-            `${generalSettings.baseURL}/unsubscribe?sid=${subscriber.id}&cid=${campaign.id}`
-          )
+          const placeholderData: Partial<Record<PlaceholderDataKey, string>> = {
+            "subscriber.email": subscriber.email,
+            "campaign.name": campaign.title,
+            "campaign.subject": campaign.subject ?? "",
+            "organization.name": organization.name,
+            unsubscribe_url: `${generalSettings.baseURL}/unsubscribe?sid=${subscriber.id}&cid=${campaign.id}&mid=${messageId}`,
+            current_date: new Date().toLocaleDateString("en-CA"),
+          }
 
           if (campaign.openTracking) {
             content += `<img src="${generalSettings.baseURL}/img/${messageId}/img.png" alt="" width="1" height="1" style="display:none" />`
           }
+
+          if (subscriber.name) {
+            placeholderData["subscriber.name"] = subscriber.name
+          }
+
+          if (subscriber.Metadata) {
+            for (const meta of subscriber.Metadata) {
+              placeholderData[`subscriber.metadata.${meta.key}`] = meta.value
+            }
+          }
+
+          content = replacePlaceholders(content, placeholderData)
 
           const { content: finalContent, trackedIds } =
             await linkTracker.replaceMessageContentWithTrackedLinks(
@@ -553,7 +592,7 @@ export const sendTestEmail = authProcedure
     }
 
     const content = campaign.Template
-      ? campaign.Template.content.replace("{{CONTENT}}", campaign.content)
+      ? campaign.Template.content.replace(/{{content}}/g, campaign.content)
       : campaign.content
 
     const mailer = new Mailer(settings)

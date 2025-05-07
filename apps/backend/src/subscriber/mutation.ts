@@ -10,6 +10,15 @@ const createSubscriberSchema = z.object({
   name: z.string().optional(),
   organizationId: z.string(),
   listIds: z.array(z.string()),
+  emailVerified: z.boolean().optional(),
+  metadata: z
+    .array(
+      z.object({
+        key: z.string().min(1).max(64),
+        value: z.string().min(1).max(256),
+      })
+    )
+    .optional(),
 })
 
 export const createSubscriber = authProcedure
@@ -48,6 +57,7 @@ export const createSubscriber = authProcedure
         email: input.email,
         name: input.name,
         organizationId: input.organizationId,
+        emailVerified: input.emailVerified,
         ListSubscribers: {
           create: input.listIds.map((listId) => ({
             List: {
@@ -57,6 +67,14 @@ export const createSubscriber = authProcedure
             },
           })),
         },
+        Metadata: input.metadata
+          ? {
+              create: input.metadata.map((meta) => ({
+                key: meta.key,
+                value: meta.value,
+              })),
+            }
+          : undefined,
       },
     })
 
@@ -69,6 +87,15 @@ const updateSubscriberSchema = z.object({
   name: z.string().optional(),
   organizationId: z.string(),
   listIds: z.array(z.string()),
+  emailVerified: z.boolean().optional(),
+  metadata: z
+    .array(
+      z.object({
+        key: z.string().min(1),
+        value: z.string().min(1),
+      })
+    )
+    .optional(),
 })
 
 export const updateSubscriber = authProcedure
@@ -121,18 +148,26 @@ export const updateSubscriber = authProcedure
       data: {
         email: input.email,
         name: input.name,
+        emailVerified: input.emailVerified,
         ListSubscribers: {
-          // Remove unselected lists
           deleteMany: {
             listId: {
               in: listsToRemove,
             },
           },
-          // Add newly selected lists
           create: listsToAdd.map((listId) => ({
             listId,
           })),
         },
+        Metadata: input.metadata
+          ? {
+              deleteMany: {},
+              create: input.metadata.map((meta) => ({
+                key: meta.key,
+                value: meta.value,
+              })),
+            }
+          : { deleteMany: {} },
       },
       include: {
         ListSubscribers: {
@@ -393,4 +428,39 @@ export const publicUnsubscribe = publicProcedure
         message: "Failed to unsubscribe",
       })
     }
+  })
+
+export const verifyEmail = publicProcedure
+  .input(
+    z.object({
+      token: z.string(),
+    })
+  )
+  .mutation(async ({ input }) => {
+    const subscriber = await prisma.subscriber.findFirst({
+      where: {
+        emailVerificationToken: input.token,
+        emailVerificationTokenExpiresAt: {
+          gt: new Date(),
+        },
+      },
+    })
+
+    if (!subscriber) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Invalid or expired verification token",
+      })
+    }
+
+    await prisma.subscriber.update({
+      where: { id: subscriber.id },
+      data: {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationTokenExpiresAt: null,
+      },
+    })
+
+    return { success: true }
   })

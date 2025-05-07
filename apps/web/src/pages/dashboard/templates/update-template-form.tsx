@@ -23,8 +23,8 @@ const templateSchema = z.object({
     .string()
     .min(1, "HTML content is required")
     .refine(
-      (content) => content.includes("{{CONTENT}}"),
-      "Content must include the {{CONTENT}} placeholder"
+      (content) => content.includes("{{content}}"),
+      "Content must include the {{content}} placeholder"
     ),
 })
 
@@ -58,7 +58,7 @@ export function UpdateTemplateForm({
     const textBefore = textarea.value.substring(0, cursorPos)
     const textAfter = textarea.value.substring(cursorPos)
 
-    const newValue = `${textBefore}{{CONTENT}}${textAfter}`
+    const newValue = `${textBefore}{{content}}${textAfter}`
     form.setValue("content", newValue)
 
     setTimeout(() => {

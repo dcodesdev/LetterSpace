@@ -21,9 +21,9 @@ export function ViewTemplateDialog({
 }: ViewTemplateDialogProps) {
   const [open, setOpen] = useState(false)
 
-  // Replace {{CONTENT}} with sample content for preview
+  // Replace {{content}} with sample content for preview
   const previewContent = template.content.replace(
-    "{{CONTENT}}",
+    /{{content}}/g,
     "<p>This is a sample content placeholder. Your actual content will appear here.</p>"
   )
 

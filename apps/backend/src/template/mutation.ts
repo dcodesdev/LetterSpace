@@ -7,8 +7,8 @@ const contentSchema = z
   .string()
   .min(1, "HTML content is required")
   .refine(
-    (content) => content.includes("{{CONTENT}}"),
-    "Content must include the {{CONTENT}} placeholder"
+    (content) => content.includes("{{content}}"),
+    "Content must include the {{content}} placeholder"
   )
 
 const createTemplateSchema = z.object({

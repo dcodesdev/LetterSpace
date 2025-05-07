@@ -15,9 +15,7 @@ export async function createUser() {
               name: faker.company.name(),
               description: faker.lorem.sentence(),
               GeneralSettings: {
-                create: {
-                  timezone: "UTC",
-                },
+                create: {},
               },
               EmailDeliverySettings: {
                 create: {
@@ -62,6 +60,9 @@ export async function createUser() {
           id: orgId,
         },
       },
+    },
+    select: {
+      key: true,
     },
   })
 

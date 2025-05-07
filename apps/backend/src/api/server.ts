@@ -3,6 +3,11 @@ import { prisma } from "../utils/prisma"
 import { authenticateApiKey } from "./middleware"
 import { z } from "zod"
 import { Prisma } from "../../prisma/client"
+import crypto from "crypto"
+import { Mailer } from "../lib/Mailer"
+import fs from "fs/promises"
+import path from "path"
+import dayjs from "dayjs"
 
 export const apiRouter = express.Router()
 
@@ -40,12 +45,19 @@ apiRouter.use(authenticateApiKey)
  *               description:
  *                 type: string
  *                 nullable: true
+ *         metadata:
+ *           type: object
+ *           additionalProperties:
+ *             type: string
+ *           nullable: true
  *         createdAt:
  *           type: string
  *           format: date-time
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *         emailVerified:
+ *           type: boolean
  */
 
 /**
@@ -76,6 +88,15 @@ apiRouter.use(authenticateApiKey)
  *                 type: array
  *                 items:
  *                   type: string
+ *               doubleOptIn:
+ *                 type: boolean
+ *               emailVerified:
+ *                 type: boolean
+ *               metadata:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: string
+ *                 description: Key-value pairs for subscriber metadata. Providing this will overwrite all existing metadata.
  *     responses:
  *       201:
  *         description: Subscriber created successfully
@@ -90,7 +111,7 @@ apiRouter.use(authenticateApiKey)
  */
 apiRouter.post("/subscribers", async (req, res) => {
   try {
-    const { data: body, error } = z
+    const { data: body, error: validationError } = z
       .object({
         email: z
           .string()
@@ -98,17 +119,27 @@ apiRouter.post("/subscribers", async (req, res) => {
           .email("Invalid email format"),
         name: z.string().optional(),
         lists: z.array(z.string()).min(1, "At least one listId is required"),
+        doubleOptIn: z.boolean().optional(),
+        emailVerified: z.boolean().optional(),
+        metadata: z.record(z.string(), z.string()).optional(),
       })
       .safeParse(req.body)
 
-    if (error) {
-      res
-        .status(400)
-        .json({ error: error.issues[0]?.message || "Invalid input data" })
+    if (validationError) {
+      res.status(400).json({
+        error: validationError.issues[0]?.message || "Invalid input data",
+      })
       return
     }
 
-    const { email, name, lists } = body
+    const {
+      email,
+      name,
+      lists,
+      doubleOptIn,
+      emailVerified,
+      metadata: newMetadata,
+    } = body
 
     const existingLists = await prisma.list.findMany({
       where: {
@@ -137,6 +168,7 @@ apiRouter.post("/subscribers", async (req, res) => {
             List: true,
           },
         },
+        Metadata: true,
       },
     })
 
@@ -146,6 +178,177 @@ apiRouter.post("/subscribers", async (req, res) => {
 
     const uniqueLists = [...new Set(allLists)]
 
+    const isExpired = existingSubscriber?.emailVerificationTokenExpiresAt
+      ? dayjs(existingSubscriber.emailVerificationTokenExpiresAt).isBefore(
+          dayjs()
+        )
+      : true
+
+    const shouldSendVerificationEmail =
+      doubleOptIn && !existingSubscriber?.emailVerified && isExpired
+
+    if (shouldSendVerificationEmail) {
+      const emailVerificationToken = crypto.randomBytes(32).toString("hex")
+      const emailVerificationTokenExpiresAt = dayjs().add(24, "hours").toDate()
+      const emailVerified = false
+
+      try {
+        const smtpSettings = await prisma.smtpSettings.findFirst({
+          where: { organizationId: req.organization.id },
+        })
+
+        if (!smtpSettings) {
+          console.error(
+            `SMTP settings not found for organization ${req.organization.id}.`
+          )
+          res.status(422).json({
+            error:
+              "SMTP settings not configured for this organization. Cannot send verification email.",
+          })
+          return
+        }
+
+        const generalSettings = await prisma.generalSettings.findFirst({
+          where: { organizationId: req.organization.id },
+        })
+
+        if (!generalSettings || !generalSettings.baseURL) {
+          console.error(
+            `General settings (especially baseURL) not found for organization ${req.organization.id}.`
+          )
+          res.status(422).json({
+            error:
+              "Base URL not configured in general settings for this organization. Cannot send verification email.",
+          })
+          return
+        }
+
+        const fromEmailAddress =
+          smtpSettings.fromEmail || generalSettings.defaultFromEmail
+        if (!fromEmailAddress) {
+          console.error(
+            `Sender email (fromEmail/defaultFromEmail) not configured for organization ${req.organization.id}.`
+          )
+          res.status(422).json({
+            error:
+              "Sender email not configured for this organization. Cannot send verification email.",
+          })
+          return
+        }
+
+        const mailer = new Mailer(smtpSettings)
+        const verificationLink = `${generalSettings.baseURL.replace(/\/$/, "")}/verify-email?token=${emailVerificationToken}`
+
+        const templatePath = path.join(
+          __dirname,
+          "../../templates/verificationEmail.html"
+        )
+        let emailHtmlContent = await fs.readFile(templatePath, "utf-8")
+
+        emailHtmlContent = emailHtmlContent
+          .replace(/{{name}}/g, name || "there")
+          .replace(/{{verificationLink}}/g, verificationLink)
+          .replace(/{{currentYear}}/g, new Date().getFullYear().toString())
+
+        await mailer.sendEmail({
+          to: email,
+          from: fromEmailAddress,
+          subject: "Verify Your Email Address",
+          html: emailHtmlContent,
+        })
+
+        const subscriber = await prisma.subscriber.upsert({
+          where: { id: existingSubscriber?.id || "create" },
+          update: {
+            emailVerificationToken,
+            emailVerificationTokenExpiresAt,
+            emailVerified,
+            ListSubscribers: {
+              deleteMany: {},
+              create: uniqueLists.map((listId: string) => ({
+                List: { connect: { id: listId } },
+              })),
+            },
+            Metadata: newMetadata
+              ? {
+                  deleteMany: {},
+                  create: Object.entries(newMetadata).map(([key, value]) => ({
+                    key,
+                    value,
+                  })),
+                }
+              : undefined,
+          },
+          create: {
+            email,
+            name,
+            organizationId: req.organization.id,
+            emailVerified,
+            emailVerificationToken,
+            emailVerificationTokenExpiresAt,
+            ListSubscribers: {
+              create: uniqueLists.map((listId: string) => ({
+                List: { connect: { id: listId } },
+              })),
+            },
+            Metadata: newMetadata
+              ? {
+                  create: Object.entries(newMetadata).map(([key, value]) => ({
+                    key,
+                    value,
+                  })),
+                }
+              : undefined,
+          },
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            ListSubscribers: { include: { List: true } },
+            Metadata: true,
+            emailVerified: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        })
+
+        const data = {
+          id: subscriber.id,
+          email: subscriber.email,
+          name: subscriber.name,
+          lists: subscriber.ListSubscribers.map((list) => ({
+            id: list.List.id,
+            name: list.List.name,
+            description: list.List.description,
+          })),
+          metadata: subscriber.Metadata.reduce(
+            (acc, meta) => {
+              acc[meta.key] = meta.value
+              return acc
+            },
+            {} as Record<string, string>
+          ),
+          emailVerified: subscriber.emailVerified,
+          createdAt: subscriber.createdAt,
+          updatedAt: subscriber.updatedAt,
+        }
+
+        console.log("data", data)
+
+        res.status(201).json(data)
+        return
+      } catch (emailError: any) {
+        console.error(
+          `Error sending verification email to ${email}:`,
+          emailError
+        )
+        res.status(422).json({
+          error: `Failed to send verification email: ${emailError.message || "Unknown reason"}`,
+        })
+        return
+      }
+    }
+
     const subscriber = await prisma.subscriber.upsert({
       where: {
         id: existingSubscriber?.id || "create",
@@ -153,17 +356,28 @@ apiRouter.post("/subscribers", async (req, res) => {
       update: {
         email,
         name,
+        emailVerified,
         ListSubscribers: {
           deleteMany: {},
           create: uniqueLists.map((listId: string) => ({
             List: { connect: { id: listId } },
           })),
         },
+        Metadata: newMetadata
+          ? {
+              deleteMany: {},
+              create: Object.entries(newMetadata).map(([key, value]) => ({
+                key,
+                value,
+              })),
+            }
+          : undefined,
       },
       create: {
         email,
         name,
         organizationId: req.organization.id,
+        emailVerified,
         ListSubscribers: {
           create: uniqueLists.map((listId: string) => ({
             List: {
@@ -173,6 +387,14 @@ apiRouter.post("/subscribers", async (req, res) => {
             },
           })),
         },
+        Metadata: newMetadata
+          ? {
+              create: Object.entries(newMetadata).map(([key, value]) => ({
+                key,
+                value,
+              })),
+            }
+          : undefined,
       },
       include: {
         ListSubscribers: {
@@ -180,6 +402,7 @@ apiRouter.post("/subscribers", async (req, res) => {
             List: true,
           },
         },
+        Metadata: true,
       },
     })
 
@@ -192,6 +415,14 @@ apiRouter.post("/subscribers", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      metadata: subscriber.Metadata.reduce(
+        (acc, meta) => {
+          acc[meta.key] = meta.value
+          return acc
+        },
+        {} as Record<string, string>
+      ),
+      emailVerified: subscriber.emailVerified,
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
     }
@@ -235,6 +466,11 @@ apiRouter.post("/subscribers", async (req, res) => {
  *                 type: array
  *                 items:
  *                   type: string
+ *               metadata:
+ *                 type: object
+ *                 additionalProperties:
+ *                   type: string
+ *                 description: Key-value pairs for subscriber metadata. Providing this will overwrite all existing metadata.
  *     responses:
  *       200:
  *         description: Subscriber updated successfully
@@ -259,6 +495,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
           .array(z.string())
           .min(1, "At least one listId is required")
           .optional(),
+        metadata: z.record(z.string(), z.string()).optional(),
       })
       .safeParse(req.body)
 
@@ -269,7 +506,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
       return
     }
 
-    const { email, name, lists } = body
+    const { email, name, lists, metadata: newMetadata } = body
 
     const id = req.params.id
 
@@ -282,6 +519,14 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
       where: {
         id,
         organizationId: req.organization.id,
+      },
+      include: {
+        ListSubscribers: {
+          include: {
+            List: true,
+          },
+        },
+        Metadata: true,
       },
     })
     if (!subscriber) {
@@ -326,6 +571,15 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
                 : [],
             }
           : undefined,
+        Metadata: newMetadata
+          ? {
+              deleteMany: {},
+              create: Object.entries(newMetadata).map(([key, value]) => ({
+                key,
+                value,
+              })),
+            }
+          : undefined,
       },
       include: {
         ListSubscribers: {
@@ -333,6 +587,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
             List: true,
           },
         },
+        Metadata: true,
       },
     })
 
@@ -345,6 +600,13 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      metadata: updatedSubscriber.Metadata.reduce(
+        (acc, meta) => {
+          acc[meta.key] = meta.value
+          return acc
+        },
+        {} as Record<string, string>
+      ),
       createdAt: updatedSubscriber.createdAt,
       updatedAt: updatedSubscriber.updatedAt,
     }
@@ -473,6 +735,7 @@ apiRouter.get("/subscribers/:id", async (req, res) => {
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           take: 10,
         },
+        Metadata: true,
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     })
@@ -490,6 +753,13 @@ apiRouter.get("/subscribers/:id", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      metadata: subscriber.Metadata.reduce(
+        (acc, meta) => {
+          acc[meta.key] = meta.value
+          return acc
+        },
+        {} as Record<string, string>
+      ),
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
     }
@@ -615,6 +885,7 @@ apiRouter.get("/subscribers", async (req, res) => {
             List: true,
           },
         },
+        Metadata: true,
       },
     })
 
@@ -629,6 +900,13 @@ apiRouter.get("/subscribers", async (req, res) => {
         name: list.List.name,
         description: list.List.description,
       })),
+      metadata: subscriber.Metadata.reduce(
+        (acc, meta) => {
+          acc[meta.key] = meta.value
+          return acc
+        },
+        {} as Record<string, string>
+      ),
       createdAt: subscriber.createdAt,
       updatedAt: subscriber.updatedAt,
     }))

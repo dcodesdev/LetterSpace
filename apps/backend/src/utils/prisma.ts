@@ -6,6 +6,9 @@ export const prisma = new PrismaClient({
       password: true,
       pwdVersion: true,
     },
+    apiKey: {
+      key: true,
+    },
   },
 }).$extends({
   query: {

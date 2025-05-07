@@ -1,0 +1,62 @@
+# Placeholder Parser Utility
+
+Placeholders are special tags you can insert into your emails. When you send an email, our system automatically replaces these tags with real information specific to each recipient, your campaign, or your organization. This helps you personalize your emails and make them more relevant. For example, you can use a placeholder to automatically include a subscriber's name or the name of your latest campaign.
+
+| Placeholder                        | Description                                                                                   | Example                                                           |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `{{subscriber.email}}`             | The email address of the subscriber.                                                          | `john.doe@example.com`                                            |
+| `{{subscriber.name}}`              | The name of the subscriber.                                                                   | `John Doe`                                                        |
+| `{{campaign.name}}`                | The name/title of the campaign.                                                               | `Q3 Newsletter`                                                   |
+| `{{campaign.subject}}`             | The subject line of the campaign.                                                             | `Your Weekly Update!`                                             |
+| `{{organization.name}}`            | The name of the organization sending the campaign.                                            | `MyCompany Inc.`                                                  |
+| `{{unsubscribe_url}}`              | The unique URL for a subscriber to unsubscribe from communications.                           | `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId` |
+| `{{current_date}}`                 | The current date. The format can vary (e.g., "YYYY-MM-DD").                                   | `2023-10-27`                                                      |
+| `{{subscriber.metadata.some_key}}` | A custom metadata field for the subscriber. Replace `some_key` with your actual metadata key. | `custom_value`                                                    |
+
+## Placeholder Format
+
+To use a placeholder, simply type it into your email content or subject line, enclosed in double curly braces. You can include spaces around the placeholder text if you like.
+
+**Examples:**
+
+- `{{subscriber.name}}`
+- `{{ subscriber.email }}`
+- `{{  organization.name  }}`
+
+## How Placeholders Work
+
+When you prepare your email, you'll include these placeholders where you want specific information to appear. Before the email is sent, our system looks for these placeholders and replaces them with the correct data. For instance, `{{subscriber.name}}` will be replaced with the actual name of each subscriber receiving the email. If a placeholder doesn't have corresponding information available, it will be left as is in the email.
+
+## Available Placeholders
+
+Here are the placeholders you can use in your emails:
+
+### Subscriber Data
+
+- `{{subscriber.email}}`: The email address of the subscriber.
+  - Example: `john.doe@example.com`
+- `{{subscriber.name}}`: The name of the subscriber.
+  - Example: `John Doe`
+- `{{subscriber.metadata.some_key}}`: A custom metadata field associated with the subscriber. You can define these custom fields to store additional information about your subscribers. Replace `some_key` with the actual key of your custom metadata.
+  - Example: If you have a custom field `loyalty_level`, you would use `{{subscriber.metadata.loyalty_level}}`. If the value for a subscriber is `gold`, this placeholder would be replaced with `gold`.
+
+### Campaign Data
+
+- `{{campaign.name}}`: The name/title of the campaign.
+  - Example: `Q3 Newsletter`
+- `{{campaign.subject}}`: The subject line of the campaign.
+  - Example: `Your Weekly Update!`
+
+### Organization Data
+
+- `{{organization.name}}`: The name of the organization sending the campaign.
+  - Example: `MyCompany Inc.`
+
+### Utility Placeholders
+
+- `{{unsubscribe_url}}`: The unique URL for a subscriber to unsubscribe from communications. This is important for allowing your subscribers to manage their preferences.
+  - Example: `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId`
+- `{{current_date}}`: The current date when the email is sent. You can use this to include timely information. The format will typically be "YYYY-MM-DD".
+  - Example: `2023-10-27`
+
+**Note**: If you use a placeholder that isn't on this list, or if the information for a valid placeholder isn't available for a specific recipient, the placeholder text itself (e.g., `{{some.key}}`) might appear in the sent email.

@@ -65,12 +65,32 @@ model Subscriber {
   ListSubscribers ListSubscriber[]
   Messages        Message[]
   Clicks          Click[]
+  Metadata        SubscriberMetadata[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  emailVerified                   Boolean   @default(false)
+  emailVerificationToken          String?   @unique
+  emailVerificationTokenExpiresAt DateTime?
+
   @@unique([organizationId, email])
   @@index([createdAt, id])
+}
+
+model SubscriberMetadata {
+  id String @id @default(uuid())
+
+  key   String
+  value String
+
+  subscriberId String
+  Subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([subscriberId, key])
 }
 
 enum CampaignStatus {
@@ -278,6 +298,7 @@ model GeneralSettings {
   defaultFromEmail String?
   defaultFromName  String?
   baseURL          String?
+  cleanupInterval  Int     @default(7)
 
   organizationId String       @unique
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

@@ -79,6 +79,9 @@ app.get("/t/:id", async (req, res) => {
             where: {
               campaignId: trackedLink.campaignId,
               subscriberId,
+              status: {
+                not: "CLICKED",
+              },
             },
           })
 

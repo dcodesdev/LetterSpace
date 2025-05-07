@@ -4,7 +4,7 @@ import path from "path"
 
 export default defineConfig({
   test: {
-    include: ["tests/**/*.test.ts"],
+    include: ["tests/**/*.test.ts", "src/**/*.test.ts"],
     setupFiles: ["tests/integration/helpers/setup.ts"],
     sequence: {
       concurrent: false,
