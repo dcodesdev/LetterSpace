@@ -258,7 +258,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={dashboard?.subscriberGrowth || []}>
+              <LineChart data={dashboard.subscriberGrowth}>
                 <XAxis
                   dataKey="date"
                   stroke="#888888"
