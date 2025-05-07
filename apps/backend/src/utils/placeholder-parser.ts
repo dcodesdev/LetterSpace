@@ -16,7 +16,7 @@ export interface PlaceholderData {
   subscriber: SubscriberPlaceholderData
   campaign: CampaignPlaceholderData
   organization: OrganizationPlaceholderData
-  unsubscribe_url: string
+  unsubscribe_link: string
   current_date?: string
 }
 
@@ -24,7 +24,7 @@ export type PlaceholderDataKey =
   | `subscriber.${keyof SubscriberPlaceholderData}`
   | `campaign.${keyof CampaignPlaceholderData}`
   | `organization.${keyof OrganizationPlaceholderData}`
-  | `unsubscribe_url`
+  | `unsubscribe_link`
   | `current_date`
   | `subscriber.metadata.${string}`
 

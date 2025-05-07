@@ -9,7 +9,7 @@ Placeholders are special tags you can insert into your emails. When you send an 
 | `{{campaign.name}}`                | The name/title of the campaign.                                                               | `Q3 Newsletter`                                                   |
 | `{{campaign.subject}}`             | The subject line of the campaign.                                                             | `Your Weekly Update!`                                             |
 | `{{organization.name}}`            | The name of the organization sending the campaign.                                            | `MyCompany Inc.`                                                  |
-| `{{unsubscribe_url}}`              | The unique URL for a subscriber to unsubscribe from communications.                           | `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId` |
+| `{{unsubscribe_link}}`             | The unique URL for a subscriber to unsubscribe from communications.                           | `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId` |
 | `{{current_date}}`                 | The current date. The format can vary (e.g., "YYYY-MM-DD").                                   | `2023-10-27`                                                      |
 | `{{subscriber.metadata.some_key}}` | A custom metadata field for the subscriber. Replace `some_key` with your actual metadata key. | `custom_value`                                                    |
 
@@ -54,7 +54,7 @@ Here are the placeholders you can use in your emails:
 
 ### Utility Placeholders
 
-- `{{unsubscribe_url}}`: The unique URL for a subscriber to unsubscribe from communications. This is important for allowing your subscribers to manage their preferences.
+- `{{unsubscribe_link}}`: The unique URL for a subscriber to unsubscribe from communications. This is important for allowing your subscribers to manage their preferences.
   - Example: `https://example.com/unsubscribe?sid=subscriberId&cid=campaignId`
 - `{{current_date}}`: The current date when the email is sent. You can use this to include timely information. The format will typically be "YYYY-MM-DD".
   - Example: `2023-10-27`

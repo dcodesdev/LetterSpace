@@ -40,8 +40,8 @@ describe("replacePlaceholders", () => {
   })
 
   it("should handle placeholders with special characters in keys", () => {
-    const template = "Link: {{unsubscribe_url}}"
-    const data = { unsubscribe_url: "http://example.com/unsubscribe" }
+    const template = "Link: {{unsubscribe_link}}"
+    const data = { unsubscribe_link: "http://example.com/unsubscribe" }
     expect(replacePlaceholders(template, data)).toBe(
       "Link: http://example.com/unsubscribe"
     )
@@ -65,12 +65,12 @@ describe("replacePlaceholders", () => {
 
   it("should correctly replace various types of placeholders", () => {
     const template =
-      "Email: {{subscriber.email}}, Campaign: {{campaign.name}}, Org: {{organization.name}}, Unsub: {{unsubscribe_url}}, Date: {{current_date}}"
+      "Email: {{subscriber.email}}, Campaign: {{campaign.name}}, Org: {{organization.name}}, Unsub: {{unsubscribe_link}}, Date: {{current_date}}"
     const data = {
       "subscriber.email": "test@example.com",
       "campaign.name": "Newsletter Q1",
       "organization.name": "MyCompany",
-      unsubscribe_url: "domain.com/unsub",
+      unsubscribe_link: "domain.com/unsub",
       current_date: "2024-01-01",
     }
     expect(replacePlaceholders(template, data)).toBe(
