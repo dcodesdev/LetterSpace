@@ -4,6 +4,7 @@
 
 ### 🐛 Bug Fixes
 
+- Recipient count on campaign page was incorrect.
 - Various bug fixes and optimizations.
 
 ### 📚 Docs
