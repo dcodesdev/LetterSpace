@@ -4,7 +4,6 @@
 
 ### 🐛 Bug Fixes
 
-- Template preview fixed.
 - Various bug fixes and optimizations.
 
 ### 📚 Docs
