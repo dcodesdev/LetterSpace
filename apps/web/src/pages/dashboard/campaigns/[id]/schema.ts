@@ -7,7 +7,7 @@ export const campaignSchema = z.object({
   templateId: z
     .string()
     .optional()
-    .transform((val) => (val === "none" ? null : val)),
+    .transform((val) => (val === "" ? null : val)),
   listIds: z.array(z.string()),
   content: z.string().optional(),
   openTracking: z.boolean().optional(),

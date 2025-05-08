@@ -1,10 +1,10 @@
 ### ✨ Features
 
-- Min value added for subscriber growth chart.
 - New features and improvements.
 
 ### 🐛 Bug Fixes
 
+- Template preview fixed.
 - Various bug fixes and optimizations.
 
 ### 📚 Docs

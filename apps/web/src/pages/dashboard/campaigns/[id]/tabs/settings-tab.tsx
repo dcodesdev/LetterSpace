@@ -57,7 +57,7 @@ export const SettingsTab = () => {
       title: campaignQuery.data?.campaign?.title || "",
       description: campaignQuery.data?.campaign?.description || "",
       subject: campaignQuery.data?.campaign?.subject || "",
-      templateId: campaignQuery.data?.campaign?.templateId || "none",
+      templateId: campaignQuery.data?.campaign?.templateId || "",
       openTracking: campaignQuery.data?.campaign?.openTracking || false,
       listIds:
         campaignQuery.data?.campaign?.CampaignLists?.map(
@@ -164,8 +164,10 @@ export const SettingsTab = () => {
                 <FormItem>
                   <FormLabel>Template</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    value={field.value ?? undefined}
+                    onValueChange={(value) =>
+                      field.onChange(value === "none" ? "" : value)
+                    }
+                    value={field.value || "none"}
                     disabled={!isEditable}
                   >
                     <FormControl>
