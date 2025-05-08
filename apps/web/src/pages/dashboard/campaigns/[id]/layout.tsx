@@ -33,7 +33,7 @@ export const EditCampaignLayout: React.FC<{
       title: campaignQuery.data?.campaign?.title ?? "",
       description: campaignQuery.data?.campaign?.description ?? "",
       subject: campaignQuery.data?.campaign?.subject ?? "",
-      templateId: campaignQuery.data?.campaign?.templateId ?? "",
+      templateId: campaignQuery.data?.campaign?.templateId ?? "none",
       listIds:
         campaignQuery.data?.campaign?.CampaignLists?.map(
           (list) => list.listId
@@ -58,7 +58,10 @@ export const EditCampaignLayout: React.FC<{
           id,
           organizationId: orgId,
           ...values,
-          templateId: values.templateId || null,
+          templateId:
+            values.templateId === "none" || values.templateId === ""
+              ? null
+              : values.templateId,
         },
         {
           onSuccess({ campaign }) {
@@ -68,7 +71,7 @@ export const EditCampaignLayout: React.FC<{
               listIds: campaign.CampaignLists.map((list) => list.listId),
               openTracking: campaign.openTracking,
               subject: campaign.subject || "",
-              templateId: campaign.templateId || "",
+              templateId: campaign.templateId || "none",
               title: campaign.title,
             })
 

@@ -1,5 +1,5 @@
 export * from "./layout"
-export * from "./page"
+export * from "./dashboard"
 export * from "./subscribers"
 export * from "./campaigns"
 export * from "./templates"

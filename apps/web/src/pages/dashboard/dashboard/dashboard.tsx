@@ -13,7 +13,6 @@ import {
   MousePointer,
   RefreshCw,
 } from "lucide-react"
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from "recharts"
 import {
   Card,
   CardContent,
@@ -29,6 +28,7 @@ import { Link } from "react-router"
 import { CardSkeleton, WithTooltip, CenteredLoader } from "@/components"
 import dayjs from "dayjs"
 import { IconExclamationCircle } from "@tabler/icons-react"
+import { SubscriberGrowthChart } from "./subscriber-growth-chart"
 
 const statusConfig = {
   QUEUED: {
@@ -248,48 +248,9 @@ export function DashboardPage() {
 
       {/* Charts */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card hoverEffect className="col-span-4">
-          <CardHeader>
-            <CardTitle>Subscriber Growth</CardTitle>
-            <CardDescription>
-              New subscribers over time{" "}
-              <span className="text-xs text-muted-foreground">(Daily)</span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <LineChart data={dashboard.subscriberGrowth}>
-                <XAxis
-                  dataKey="date"
-                  stroke="#888888"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => {
-                    return new Date(value).toLocaleDateString()
-                  }}
-                />
-                <Tooltip
-                  formatter={(value: number) => [
-                    value.toLocaleString(),
-                    "Subscribers",
-                  ]}
-                  labelFormatter={(label) =>
-                    new Date(label).toLocaleDateString()
-                  }
-                />
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#8884d8"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <SubscriberGrowthChart />
 
-        <Card hoverEffect className="col-span-3">
+        <Card hoverEffect className="col-span-4 md:col-span-3">
           <CardHeader>
             <CardTitle>Message Status</CardTitle>
             <CardDescription>Delivery status of your messages</CardDescription>

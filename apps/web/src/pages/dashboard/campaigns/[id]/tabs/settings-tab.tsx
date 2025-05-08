@@ -57,7 +57,7 @@ export const SettingsTab = () => {
       title: campaignQuery.data?.campaign?.title || "",
       description: campaignQuery.data?.campaign?.description || "",
       subject: campaignQuery.data?.campaign?.subject || "",
-      templateId: campaignQuery.data?.campaign?.templateId || "",
+      templateId: campaignQuery.data?.campaign?.templateId || "none",
       openTracking: campaignQuery.data?.campaign?.openTracking || false,
       listIds:
         campaignQuery.data?.campaign?.CampaignLists?.map(
@@ -174,6 +174,11 @@ export const SettingsTab = () => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="none">
+                        <div className="flex items-center gap-2">
+                          No Template
+                        </div>
+                      </SelectItem>
                       {templates?.templates.map((template) => (
                         <SelectItem key={template.id} value={template.id}>
                           <div className="flex items-center gap-2">

@@ -34,7 +34,7 @@ export function EditCampaignPage() {
         title: campaign.campaign.title,
         description: campaign.campaign.description ?? "",
         subject: campaign.campaign.subject ?? "",
-        templateId: campaign.campaign.templateId ?? "",
+        templateId: campaign.campaign.templateId ?? "none",
         listIds: campaign.campaign.CampaignLists?.map((cl) => cl.List.id) ?? [],
         openTracking: campaign.campaign.openTracking ?? true,
         content: campaign.campaign.content ?? "",

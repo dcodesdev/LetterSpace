@@ -1,5 +1,7 @@
 ### ✨ Features
 
+- Added subscriber growth chart to the dashboard
+- Can send emails without selecting a template
 - New features and improvements.
 
 ### 🐛 Bug Fixes
