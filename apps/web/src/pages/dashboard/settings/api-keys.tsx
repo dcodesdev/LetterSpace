@@ -38,7 +38,7 @@ import { z } from "zod"
 import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
 import { toast } from "sonner"
-import { CopyButton } from "@/components"
+import { CopyButton, Loader } from "@/components"
 import { format } from "date-fns"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
@@ -58,7 +58,7 @@ export function ApiKeys() {
   const [newKey, setNewKey] = useState<string | null>(null)
   const [showKey, setShowKey] = useState(false)
 
-  const { data: apiKeys } = trpc.settings.listApiKeys.useQuery(
+  const { data: apiKeys, isLoading } = trpc.settings.listApiKeys.useQuery(
     {
       organizationId: organization?.id ?? "",
     },
@@ -270,7 +270,11 @@ export function ApiKeys() {
         </div>
       </CardHeader>
       <CardContent>
-        {!apiKeys?.length ? (
+        {isLoading ? (
+          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed">
+            <Loader />
+          </div>
+        ) : !apiKeys?.length ? (
           <div className="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed">
             <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
