@@ -1,5 +1,6 @@
 ### ✨ Features
 
+- Uses cron job to process queued campaigns, processes messages in batches, much more efficient for large campaigns.
 - Theme toggle updated.
 - Loading state for API keys.
 - New features and improvements.
