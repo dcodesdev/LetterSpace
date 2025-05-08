@@ -229,10 +229,23 @@ export const processQueuedCampaigns = cronJob(
                 data: messagesToCreate,
               })
 
-              await tx.campaign.update({
-                where: { id: campaign.id },
-                data: { status: "SENDING" },
+              const subscribersLeft = await tx.subscriber.count({
+                where: {
+                  Messages: { none: { campaignId: campaign.id } },
+                  ListSubscribers: {
+                    some: {
+                      unsubscribedAt: null,
+                    },
+                  },
+                },
               })
+
+              if (subscribersLeft === 0) {
+                await tx.campaign.update({
+                  where: { id: campaign.id },
+                  data: { status: "SENDING" },
+                })
+              }
 
               console.log(
                 `Cron job: Created ${messagesToCreate.length} messages for campaign ${campaign.id}.`
