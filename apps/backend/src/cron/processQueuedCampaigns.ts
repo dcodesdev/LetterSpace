@@ -159,41 +159,43 @@ export const processQueuedCampaigns = cronJob(
           continue
         }
 
-        await prisma.$transaction(async (tx) => {
-          const linkTracker = new LinkTracker(tx)
-          const messagesToCreate: Prisma.MessageCreateManyInput[] = []
+        await prisma.$transaction(
+          async (tx) => {
+            const linkTracker = new LinkTracker(tx)
+            const messagesToCreate: Prisma.MessageCreateManyInput[] = []
 
-          for (const subscriber of subscribersToProcess) {
-            const messageId = uuidV4()
-            if (!campaign.content) {
-              oneTimeLogger(
-                "missingCampaignContent",
-                `Cron job: Campaign ${campaign.id} has no content. Skipping.`
-              )
-              continue
-            }
-
-            turnOnLogger("missingCampaignContent")
-
-            let emailContent = campaign.Template
-              ? campaign.Template.content.replace(
-                  /{{content}}/g,
-                  campaign.content
+            for (const subscriber of subscribersToProcess) {
+              const messageId = uuidV4()
+              if (!campaign.content) {
+                oneTimeLogger(
+                  "missingCampaignContent",
+                  `Cron job: Campaign ${campaign.id} has no content. Skipping.`
                 )
-              : campaign.content
+                continue
+              }
 
-            if (!campaign.subject) {
-              oneTimeLogger(
-                "missingCampaignSubject",
-                `Cron job: Campaign ${campaign.id} has no subject. Skipping.`
-              )
-              continue
-            }
+              turnOnLogger("missingCampaignContent")
 
-            turnOnLogger("missingCampaignSubject")
+              let emailContent = campaign.Template
+                ? campaign.Template.content.replace(
+                    /{{content}}/g,
+                    campaign.content
+                  )
+                : campaign.content
 
-            const placeholderData: Partial<Record<PlaceholderDataKey, string>> =
-              {
+              if (!campaign.subject) {
+                oneTimeLogger(
+                  "missingCampaignSubject",
+                  `Cron job: Campaign ${campaign.id} has no subject. Skipping.`
+                )
+                continue
+              }
+
+              turnOnLogger("missingCampaignSubject")
+
+              const placeholderData: Partial<
+                Record<PlaceholderDataKey, string>
+              > = {
                 "subscriber.email": subscriber.email,
                 "campaign.name": campaign.title,
                 "campaign.subject": campaign.subject,
@@ -202,59 +204,62 @@ export const processQueuedCampaigns = cronJob(
                 current_date: new Date().toLocaleDateString("en-CA"),
               }
 
-            if (campaign.openTracking) {
-              emailContent += `<img src="${generalSettings.baseURL}/img/${messageId}/img.png" alt="" width="1" height="1" style="display:none" />`
-            }
-
-            if (subscriber.name) {
-              placeholderData["subscriber.name"] = subscriber.name
-            }
-            if (subscriber.Metadata) {
-              for (const meta of subscriber.Metadata) {
-                placeholderData[`subscriber.metadata.${meta.key}`] = meta.value
+              if (campaign.openTracking) {
+                emailContent += `<img src="${generalSettings.baseURL}/img/${messageId}/img.png" alt="" width="1" height="1" style="display:none" />`
               }
+
+              if (subscriber.name) {
+                placeholderData["subscriber.name"] = subscriber.name
+              }
+              if (subscriber.Metadata) {
+                for (const meta of subscriber.Metadata) {
+                  placeholderData[`subscriber.metadata.${meta.key}`] =
+                    meta.value
+                }
+              }
+
+              emailContent = replacePlaceholders(emailContent, placeholderData)
+
+              if (!generalSettings.baseURL) {
+                console.error(
+                  `Cron job: Campaign ${campaign.id} has no baseURL. Skipping.`
+                )
+                continue
+              }
+
+              const { content: finalContent } =
+                await linkTracker.replaceMessageContentWithTrackedLinks(
+                  emailContent,
+                  campaign.id,
+                  generalSettings.baseURL
+                )
+
+              messagesToCreate.push({
+                id: messageId,
+                campaignId: campaign.id,
+                subscriberId: subscriber.id,
+                content: finalContent,
+                status: "QUEUED",
+              })
             }
 
-            emailContent = replacePlaceholders(emailContent, placeholderData)
+            if (messagesToCreate.length > 0) {
+              await tx.message.createMany({
+                data: messagesToCreate,
+              })
 
-            if (!generalSettings.baseURL) {
-              console.error(
-                `Cron job: Campaign ${campaign.id} has no baseURL. Skipping.`
+              await tx.campaign.update({
+                where: { id: campaign.id },
+                data: { status: "SENDING" },
+              })
+
+              console.log(
+                `Cron job: Created ${messagesToCreate.length} messages for campaign ${campaign.id}.`
               )
-              continue
             }
-
-            const { content: finalContent } =
-              await linkTracker.replaceMessageContentWithTrackedLinks(
-                emailContent,
-                campaign.id,
-                generalSettings.baseURL
-              )
-
-            messagesToCreate.push({
-              id: messageId,
-              campaignId: campaign.id,
-              subscriberId: subscriber.id,
-              content: finalContent,
-              status: "QUEUED",
-            })
-          }
-
-          if (messagesToCreate.length > 0) {
-            await tx.message.createMany({
-              data: messagesToCreate,
-            })
-
-            await tx.campaign.update({
-              where: { id: campaign.id },
-              data: { status: "SENDING" },
-            })
-
-            console.log(
-              `Cron job: Created ${messagesToCreate.length} messages for campaign ${campaign.id}.`
-            )
-          }
-        }) // End transaction
+          },
+          { timeout: 60_000 }
+        ) // End transaction
 
         turnOnLogger("errorProcessingCampaign")
       } catch (error) {

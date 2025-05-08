@@ -4,7 +4,6 @@
 
 ### 🐛 Bug Fixes
 
-- TypeScript errors fixed.
 - Various bug fixes and optimizations.
 
 ### 📚 Docs
