@@ -10,54 +10,34 @@ import { Subscriber, Prisma, SubscriberMetadata } from "../../prisma/client"
 import { cronJob } from "./cron.utils"
 
 // TODO: Make this a config
-const BATCH_SIZE = 10
+const BATCH_SIZE = 100
 
 async function getSubscribersForCampaign(
   campaignId: string
 ): Promise<Map<string, Subscriber & { Metadata: SubscriberMetadata[] }>> {
-  const lists = await prisma.campaignList.findMany({
+  const subscribers = await prisma.subscriber.findMany({
     where: {
-      campaignId,
-    },
-    take: BATCH_SIZE,
-    include: {
-      List: {
-        include: {
-          ListSubscribers: {
-            where: {
-              unsubscribedAt: null,
-              Subscriber: {
-                Messages: { none: { campaignId } },
-              },
-            },
-            include: {
-              Subscriber: {
-                include: {
-                  Metadata: true,
-                },
-              },
-            },
-          },
+      Messages: { none: { campaignId } },
+      ListSubscribers: {
+        some: {
+          unsubscribedAt: null,
         },
       },
     },
+    take: BATCH_SIZE,
+    include: {
+      Metadata: true,
+    },
   })
 
-  if (!lists.length) return new Map()
+  if (!subscribers.length) return new Map()
 
   const subscribersMap = new Map<
     string,
     Subscriber & { Metadata: SubscriberMetadata[] }
   >()
-  await pMap(lists, async (list) => {
-    await pMap(list.List.ListSubscribers, (listSubscriber) => {
-      if (listSubscriber.Subscriber) {
-        subscribersMap.set(
-          listSubscriber.Subscriber.id,
-          listSubscriber.Subscriber
-        )
-      }
-    })
+  await pMap(subscribers, async (subscriber) => {
+    subscribersMap.set(subscriber.id, subscriber)
   })
 
   return subscribersMap
