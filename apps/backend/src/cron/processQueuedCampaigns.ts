@@ -9,7 +9,8 @@ import pMap from "p-map"
 import { Subscriber, Prisma, SubscriberMetadata } from "../../prisma/client"
 import { cronJob } from "./cron.utils"
 
-const BATCH_SIZE = 100
+// TODO: Make this a config
+const BATCH_SIZE = 50
 
 async function getSubscribersForCampaign(
   campaignId: string
