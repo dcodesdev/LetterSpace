@@ -31,11 +31,7 @@ export const CampaignActions = () => {
   const { organization } = useSession()
   const { id } = useParams()
   const [showUnsubscribeWarning, setShowUnsubscribeWarning] = useState(false)
-  const recipientCount =
-    campaignQuery.data?.campaign.CampaignLists.reduce(
-      (acc, list) => acc + list.List._count.ListSubscribers,
-      0
-    ) || 0
+  const recipientCount = campaignQuery.data?.campaign.uniqueRecipientCount || 0
 
   const utils = trpc.useUtils()
   const startCampaignMutation = trpc.campaign.start.useMutation({
