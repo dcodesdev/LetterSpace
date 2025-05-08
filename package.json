@@ -1,5 +1,5 @@
 {
-  "version": "0.4.8",
+  "version": "0.4.9",
   "name": "letterspace",
   "private": true,
   "scripts": {
@@ -13,7 +13,7 @@
     "turbo": "^2.3.4",
     "typescript": "5.8.3"
   },
-  "packageManager": "pnpm@10.3.0",
+  "packageManager": "pnpm@10.10.0",
   "engines": {
     "node": ">=22"
   },

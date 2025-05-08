@@ -1,6 +1,5 @@
 ### ✨ Features
 
-- Shows unsubscribed count on campaign page
 - New features and improvements.
 
 ### 🐛 Bug Fixes
