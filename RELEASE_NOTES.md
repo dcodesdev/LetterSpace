@@ -1,12 +1,10 @@
 ### ✨ Features
 
-- Unsubscribe count per campaign
-- Vite start URL goes to dashboard
+- Shows unsubscribed count on campaign page
 - New features and improvements.
 
 ### 🐛 Bug Fixes
 
-- Template preview bug fixes
 - Various bug fixes and optimizations.
 
 ### 📚 Docs
