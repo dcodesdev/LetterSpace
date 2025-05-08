@@ -26,7 +26,7 @@ const dailyMaintenanceJob: CronJob = {
 
 const processQueuedCampaignsJob: CronJob = {
   name: "process-queued-campaigns",
-  schedule: "* * * * * *", // Runs every second
+  schedule: "*/10 * * * * *", // Runs every 10 seconds
   job: processQueuedCampaigns,
   enabled: true,
 }
