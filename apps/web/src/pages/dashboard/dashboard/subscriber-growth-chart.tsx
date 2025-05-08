@@ -15,10 +15,10 @@ import {
 } from "@repo/ui"
 import dayjs from "dayjs"
 import { ArrowDown, TrendingUp } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 const chartConfig = {
-  totalSubscribers: {
+  count: {
     label: "Total Subscribers",
     color: "hsl(var(--chart-1))",
   },
@@ -48,6 +48,10 @@ export const SubscriberGrowthChart = () => {
     )
 
   const isLoading = analyticsLoading || dashboardLoading
+
+  const maxCount = Math.max(
+    ...(dashboard?.subscriberGrowth.map((item) => item.count) || [])
+  )
 
   return (
     <Card hoverEffect className="col-span-4">
@@ -79,6 +83,13 @@ export const SubscriberGrowthChart = () => {
                 tickMargin={8}
                 tickFormatter={(value) => dayjs(value).format("DD MMM")}
               />
+              <YAxis
+                tickFormatter={(value) => value.toLocaleString()}
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickCount={Math.min(maxCount, 10)}
+              />
               <ChartTooltip
                 cursor={false}
                 content={<ChartTooltipContent indicator="dot" />}
@@ -86,9 +97,9 @@ export const SubscriberGrowthChart = () => {
               <Area
                 dataKey="count"
                 type="natural"
-                fill="var(--color-totalSubscribers)"
+                fill="var(--color-count)"
                 fillOpacity={0.4}
-                stroke="var(--color-totalSubscribers)"
+                stroke="var(--color-count)"
                 stackId="a"
               />
             </AreaChart>
