@@ -10,7 +10,7 @@ import { Subscriber, Prisma, SubscriberMetadata } from "../../prisma/client"
 import { cronJob } from "./cron.utils"
 
 // TODO: Make this a config
-const BATCH_SIZE = 50
+const BATCH_SIZE = 10
 
 async function getSubscribersForCampaign(
   campaignId: string
