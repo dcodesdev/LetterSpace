@@ -375,7 +375,7 @@ export const startCampaign = authProcedure
     const status =
       campaign.scheduledAt && campaign.scheduledAt > new Date()
         ? "SCHEDULED"
-        : "SENDING"
+        : "CREATING"
 
     const updatedCampaign = await prisma.campaign.update({
       where: { id: campaign.id },

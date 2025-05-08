@@ -18,6 +18,7 @@ async function getSubscribersForCampaign(
     where: {
       campaignId,
     },
+    take: BATCH_SIZE,
     include: {
       List: {
         include: {
@@ -86,7 +87,7 @@ export const processQueuedCampaigns = cronJob(
   async () => {
     const queuedCampaigns = await prisma.campaign.findMany({
       where: {
-        status: "SENDING",
+        status: "CREATING",
       },
       include: {
         Organization: {
@@ -154,9 +155,7 @@ export const processQueuedCampaigns = cronJob(
           allSubscribersMap.values()
         ).filter((sub) => !subscribersWithMessage.has(sub.id))
 
-        const batchSubscribers = subscribersToProcess.slice(0, BATCH_SIZE)
-
-        if (batchSubscribers.length === 0) {
+        if (subscribersToProcess.length === 0) {
           continue
         }
 
@@ -164,7 +163,7 @@ export const processQueuedCampaigns = cronJob(
           const linkTracker = new LinkTracker(tx)
           const messagesToCreate: Prisma.MessageCreateManyInput[] = []
 
-          for (const subscriber of batchSubscribers) {
+          for (const subscriber of subscribersToProcess) {
             const messageId = uuidV4()
             if (!campaign.content) {
               oneTimeLogger(
@@ -245,6 +244,12 @@ export const processQueuedCampaigns = cronJob(
             await tx.message.createMany({
               data: messagesToCreate,
             })
+
+            await tx.campaign.update({
+              where: { id: campaign.id },
+              data: { status: "SENDING" },
+            })
+
             console.log(
               `Cron job: Created ${messagesToCreate.length} messages for campaign ${campaign.id}.`
             )

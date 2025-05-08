@@ -1,13 +1,11 @@
 ### ✨ Features
 
-- Uses cron job to process queued campaigns, processes messages in batches, much more efficient for large campaigns.
-- Theme toggle updated.
-- Loading state for API keys.
 - New features and improvements.
 
 ### 🐛 Bug Fixes
 
-- Recipient count on campaign page was incorrect.
+- Fixed the issue of campaigns not sending because of incorrect status.
+- Fixed the batch size for processing campaigns.
 - Various bug fixes and optimizations.
 
 ### 📚 Docs

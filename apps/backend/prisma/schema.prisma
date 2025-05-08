@@ -96,6 +96,7 @@ model SubscriberMetadata {
 enum CampaignStatus {
   DRAFT
   SCHEDULED
+  CREATING
   SENDING
   COMPLETED
   CANCELLED
