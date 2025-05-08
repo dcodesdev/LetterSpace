@@ -6,6 +6,7 @@ export const campaignSchema = z.object({
   subject: z.string().optional(),
   templateId: z
     .string()
+    .nullable()
     .optional()
     .transform((val) => (val === "" ? null : val)),
   listIds: z.array(z.string()),

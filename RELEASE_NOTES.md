@@ -4,8 +4,7 @@
 
 ### 🐛 Bug Fixes
 
-- Fixed the issue of campaigns not sending because of incorrect status.
-- Fixed the batch size for processing campaigns.
+- TypeScript errors fixed.
 - Various bug fixes and optimizations.
 
 ### 📚 Docs
