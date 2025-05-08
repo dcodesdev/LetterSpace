@@ -1,5 +1,6 @@
 ### ✨ Features
 
+- Feature to duplicate a campaign.
 - New features and improvements.
 
 ### 🐛 Bug Fixes

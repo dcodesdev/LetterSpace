@@ -518,3 +518,76 @@ export const sendTestEmail = authProcedure
 
     return { success: true }
   })
+
+const duplicateCampaignSchema = z.object({
+  id: z.string(),
+  organizationId: z.string(),
+})
+
+export const duplicateCampaign = authProcedure
+  .input(duplicateCampaignSchema)
+  .mutation(async ({ ctx, input }) => {
+    const userOrganization = await prisma.userOrganization.findFirst({
+      where: {
+        userId: ctx.user.id,
+        organizationId: input.organizationId,
+      },
+    })
+
+    if (!userOrganization) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Organization not found",
+      })
+    }
+
+    const originalCampaign = await prisma.campaign.findFirst({
+      where: {
+        id: input.id,
+        organizationId: input.organizationId,
+      },
+      include: {
+        Template: true,
+        CampaignLists: {
+          include: {
+            List: true,
+          },
+        },
+      },
+    })
+
+    if (!originalCampaign) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Campaign not found",
+      })
+    }
+
+    const newCampaign = await prisma.campaign.create({
+      data: {
+        title: `Copy of ${originalCampaign.title}`,
+        description: originalCampaign.description,
+        subject: originalCampaign.subject,
+        content: originalCampaign.content,
+        templateId: originalCampaign.templateId,
+        organizationId: originalCampaign.organizationId,
+        status: "DRAFT",
+        openTracking: originalCampaign.openTracking,
+        CampaignLists: {
+          create: originalCampaign.CampaignLists.map((cl) => ({
+            listId: cl.listId,
+          })),
+        },
+      },
+      include: {
+        Template: true,
+        CampaignLists: {
+          include: {
+            List: true,
+          },
+        },
+      },
+    })
+
+    return { campaign: newCampaign }
+  })

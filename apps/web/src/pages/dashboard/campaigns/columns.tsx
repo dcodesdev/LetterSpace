@@ -1,6 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Button, cn } from "@repo/ui"
-import { Trash } from "lucide-react"
+import { Trash, Copy } from "lucide-react"
 import { CampaignStatus } from "backend"
 import { Link } from "react-router"
 import { displayDateTime } from "@/utils"
@@ -51,9 +51,13 @@ type Campaign = {
 
 type ColumnsProps = {
   onDelete: (id: string) => void
+  onDuplicate: (id: string) => void
 }
 
-export const columns = ({ onDelete }: ColumnsProps): ColumnDef<Campaign>[] => [
+export const columns = ({
+  onDelete,
+  onDuplicate,
+}: ColumnsProps): ColumnDef<Campaign>[] => [
   {
     accessorKey: "title",
     header: "Campaign Name",
@@ -110,6 +114,14 @@ export const columns = ({ onDelete }: ColumnsProps): ColumnDef<Campaign>[] => [
     id: "actions",
     cell: ({ row }) => (
       <div className="flex space-x-2" onClick={(e) => e.stopPropagation()}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => onDuplicate(row.original.id)}
+          className="text-primary hover:text-primary/80"
+        >
+          <Copy className="h-4 w-4" />
+        </Button>
         <Button
           variant="ghost"
           size="icon"

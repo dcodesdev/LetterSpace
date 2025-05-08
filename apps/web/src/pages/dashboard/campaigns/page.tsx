@@ -31,7 +31,7 @@ import {
   cn,
   DataTable,
 } from "@repo/ui"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router"
 import { usePaginationWithQueryState, useSession } from "@/hooks"
 import { trpc } from "@/trpc"
@@ -40,7 +40,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
 import z from "zod"
 import { CardSkeleton, Pagination } from "@/components"
-import { columns } from "./columns"
+import { columns as getColumns } from "./columns"
 import { CampaignSearch } from "./campaign-search"
 
 const createCampaignSchema = z.object({
@@ -82,6 +82,17 @@ export function CampaignsPage() {
       toast.success("Campaign deleted!")
       setCampaignToDelete(null)
       utils.campaign.list.invalidate()
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
+
+  const duplicateCampaignMutation = trpc.campaign.duplicate.useMutation({
+    onSuccess: (data) => {
+      toast.success("Campaign duplicated!")
+      utils.campaign.list.invalidate()
+      navigate(`/dashboard/campaigns/${data.campaign.id}`)
     },
     onError: (error) => {
       toast.error(error.message)
@@ -132,6 +143,27 @@ export function CampaignsPage() {
       organizationId: organization.id,
     })
   }
+
+  const handleDuplicateCampaign = useCallback(
+    (id: string) => {
+      if (!organization?.id) return
+
+      duplicateCampaignMutation.mutate({
+        id,
+        organizationId: organization.id,
+      })
+    },
+    [organization, duplicateCampaignMutation]
+  )
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        onDelete: setCampaignToDelete,
+        onDuplicate: handleDuplicateCampaign,
+      }),
+    [handleDuplicateCampaign, setCampaignToDelete]
+  )
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -354,9 +386,7 @@ export function CampaignsPage() {
           </div>
         </div>
         <DataTable
-          columns={columns({
-            onDelete: (id) => setCampaignToDelete(id),
-          })}
+          columns={columns}
           data={campaigns}
           title="Campaigns"
           className="h-[calc(100vh-440px)]"

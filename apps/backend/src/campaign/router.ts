@@ -6,6 +6,7 @@ import {
   startCampaign,
   cancel,
   sendTestEmail,
+  duplicateCampaign,
 } from "./mutation"
 import { getCampaign, listCampaigns } from "./query"
 
@@ -18,4 +19,5 @@ export const campaignRouter = router({
   start: startCampaign,
   cancel,
   sendTestEmail,
+  duplicate: duplicateCampaign,
 })
