@@ -1,6 +1,6 @@
 ### ✨ Features
 
-- Chart updated
+- Min value added for subscriber growth chart.
 - New features and improvements.
 
 ### 🐛 Bug Fixes

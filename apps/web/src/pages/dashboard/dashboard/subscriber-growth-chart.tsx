@@ -15,6 +15,7 @@ import {
 } from "@repo/ui"
 import dayjs from "dayjs"
 import { ArrowDown, TrendingUp } from "lucide-react"
+import { useMemo } from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 const chartConfig = {
@@ -49,9 +50,12 @@ export const SubscriberGrowthChart = () => {
 
   const isLoading = analyticsLoading || dashboardLoading
 
-  const maxCount = Math.max(
-    ...(dashboard?.subscriberGrowth.map((item) => item.count) || [])
+  const countMapped = useMemo(
+    () => dashboard?.subscriberGrowth.map((item) => item.count) || [],
+    [dashboard?.subscriberGrowth]
   )
+  const maxCount = useMemo(() => Math.max(...countMapped), [countMapped])
+  const minCount = useMemo(() => Math.min(...countMapped), [countMapped])
 
   return (
     <Card hoverEffect className="col-span-4">
@@ -88,7 +92,8 @@ export const SubscriberGrowthChart = () => {
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
-                tickCount={Math.min(maxCount, 10)}
+                domain={[minCount, maxCount]}
+                allowDataOverflow={true}
               />
               <ChartTooltip
                 cursor={false}

@@ -1,6 +1,7 @@
 import { hashPassword } from "../src/utils/auth"
 import { prisma } from "../src/utils/prisma"
 import { SmtpEncryption } from "./client"
+import dayjs from "dayjs"
 
 async function seed() {
   if (!(await prisma.organization.findFirst())) {
@@ -53,6 +54,37 @@ async function seed() {
           },
         },
       },
+    })
+  }
+
+  // Create 5000 subscribers
+  const subscribers = Array.from({ length: 5000 }, (_, i) => ({
+    name: `Subscriber ${i + 1}`,
+    email: `subscriber${i + 1}@example.com`,
+    organizationId: orgId,
+    createdAt: dayjs().subtract(12, "days").toDate(),
+  }))
+  await prisma.subscriber.createMany({
+    data: subscribers,
+    skipDuplicates: true,
+  })
+  // Then 10 more for each day for 10 days
+  const now = new Date()
+  for (let d = 0; d < 10; d++) {
+    const day = dayjs(now)
+      .subtract(d + 1, "day")
+      .toDate()
+
+    const dailySubs = Array.from({ length: 10 }, (_, i) => ({
+      name: `DailySub ${d + 1}-${i + 1}`,
+      email: `dailysub${d + 1}-${i + 1}@example.com`,
+      organizationId: orgId,
+      createdAt: day,
+      updatedAt: day,
+    }))
+    await prisma.subscriber.createMany({
+      data: dailySubs,
+      skipDuplicates: true,
     })
   }
 }
