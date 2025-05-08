@@ -127,21 +127,18 @@ export const getCampaign = authProcedure
       })
     }
 
-    let uniqueSubscriberCount = 0
-
-    // Only run the query if there are lists associated with the campaign
-    if (campaign.CampaignLists.length > 0) {
-      // Fetch unique subscriber count across all lists in the campaign
-      const [{ count } = {}] = await prisma.$queryRaw<{ count: number }[]>`
-        SELECT COUNT(DISTINCT s.id) as count
-        FROM "Subscriber" s
-        JOIN "ListSubscriber" ls ON s.id = ls."subscriberId"
-        WHERE ls."listId" IN (${Prisma.join(campaign.CampaignLists.map((cl) => cl.listId))})
-        AND ls."unsubscribedAt" IS NULL
-      `
-
-      uniqueSubscriberCount = count ?? 0
-    }
+    const listSubscribers = await prisma.listSubscriber.findMany({
+      where: {
+        listId: {
+          in: campaign.CampaignLists.map((cl) => cl.listId),
+        },
+        unsubscribedAt: null,
+      },
+      select: {
+        id: true,
+      },
+      distinct: ["subscriberId"],
+    })
 
     // Add the count to each list for backward compatibility
     const campaignWithCounts = {
@@ -167,7 +164,7 @@ export const getCampaign = authProcedure
         })
       ),
       // Add the unique subscriber count directly to the campaign object
-      uniqueRecipientCount: Number(uniqueSubscriberCount),
+      uniqueRecipientCount: listSubscribers.length,
     }
 
     const promises = {
