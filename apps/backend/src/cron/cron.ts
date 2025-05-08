@@ -1,6 +1,7 @@
 import cron from "node-cron"
 import { sendMessagesCron } from "./sendMessages"
 import { dailyMaintenanceCron } from "./dailyMaintenance"
+import { processQueuedCampaigns } from "./processQueuedCampaigns"
 
 type CronJob = {
   name: string
@@ -23,7 +24,18 @@ const dailyMaintenanceJob: CronJob = {
   enabled: true,
 }
 
-const cronJobs: CronJob[] = [sendMessagesJob, dailyMaintenanceJob]
+const processQueuedCampaignsJob: CronJob = {
+  name: "process-queued-campaigns",
+  schedule: "* * * * * *", // Runs every second
+  job: processQueuedCampaigns,
+  enabled: true,
+}
+
+const cronJobs: CronJob[] = [
+  sendMessagesJob,
+  dailyMaintenanceJob,
+  processQueuedCampaignsJob,
+]
 
 export const initializeCronJobs = () => {
   const scheduledJobs = cronJobs

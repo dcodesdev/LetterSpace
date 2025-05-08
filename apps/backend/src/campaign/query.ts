@@ -114,19 +114,7 @@ export const getCampaign = authProcedure
         Template: true,
         CampaignLists: {
           include: {
-            List: {
-              include: {
-                _count: {
-                  select: {
-                    ListSubscribers: {
-                      where: {
-                        unsubscribedAt: null,
-                      },
-                    },
-                  },
-                },
-              },
-            },
+            List: true,
           },
         },
       },
@@ -137,6 +125,46 @@ export const getCampaign = authProcedure
         code: "NOT_FOUND",
         message: "Campaign not found",
       })
+    }
+
+    const listSubscribers = await prisma.listSubscriber.findMany({
+      where: {
+        listId: {
+          in: campaign.CampaignLists.map((cl) => cl.listId),
+        },
+        unsubscribedAt: null,
+      },
+      select: {
+        id: true,
+      },
+      distinct: ["subscriberId"],
+    })
+
+    // Add the count to each list for backward compatibility
+    const campaignWithCounts = {
+      ...campaign,
+      CampaignLists: await Promise.all(
+        campaign.CampaignLists.map(async (cl) => {
+          const count = await prisma.listSubscriber.count({
+            where: {
+              listId: cl.listId,
+              unsubscribedAt: null,
+            },
+          })
+
+          return {
+            ...cl,
+            List: {
+              ...cl.List,
+              _count: {
+                ListSubscribers: count,
+              },
+            },
+          }
+        })
+      ),
+      // Add the unique subscriber count directly to the campaign object
+      uniqueRecipientCount: listSubscribers.length,
     }
 
     const promises = {
@@ -198,7 +226,7 @@ export const getCampaign = authProcedure
     const result = await resolveProps(promises)
 
     return {
-      campaign,
+      campaign: campaignWithCounts,
       stats: {
         totalMessages: result.totalMessages,
         queuedMessages: result.queuedMessages,

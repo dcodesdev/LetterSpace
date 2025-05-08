@@ -9,7 +9,7 @@ type LoaderProps = {
 
 export function Loader({
   size = 8,
-  text = "Loading...",
+  text,
   className = "",
   height = "h-[300px]",
 }: LoaderProps) {
