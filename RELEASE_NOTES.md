@@ -1,6 +1,7 @@
 ### ✨ Features
 
 - Theme toggle updated.
+- Loading state for API keys.
 - New features and improvements.
 
 ### 🐛 Bug Fixes
