@@ -8,6 +8,7 @@ import {
   countDistinctRecipients,
   countDistinctRecipientsInTimeRange,
 } from "../../prisma/client/sql"
+import { MessageStatus } from "../../prisma/client"
 
 export const getStats = authProcedure
   .input(
@@ -19,6 +20,13 @@ export const getStats = authProcedure
     const now = new Date()
     const thirtyDaysAgo = subDays(now, 30)
     const sixtyDaysAgo = subDays(now, 60)
+
+    const processedMessageStatuses: MessageStatus[] = [
+      "SENT",
+      "CLICKED",
+      "OPENED",
+      "FAILED",
+    ]
 
     // Check auth
     const hasAccess = await prisma.userOrganization.findFirst({
@@ -43,6 +51,7 @@ export const getStats = authProcedure
             Campaign: {
               organizationId: input.organizationId,
             },
+            status: { in: processedMessageStatuses },
           },
         }),
         prisma.message.count({
@@ -54,6 +63,7 @@ export const getStats = authProcedure
               gte: thirtyDaysAgo,
               lt: now,
             },
+            status: { in: processedMessageStatuses },
           },
         }),
         prisma.message.count({
@@ -65,6 +75,7 @@ export const getStats = authProcedure
               gte: sixtyDaysAgo,
               lt: thirtyDaysAgo,
             },
+            status: { in: processedMessageStatuses },
           },
         }),
       ])
@@ -177,12 +188,20 @@ export const getStats = authProcedure
         where: {
           organizationId: input.organizationId,
           status: "COMPLETED",
+          createdAt: {
+            gte: thirtyDaysAgo,
+            lt: now,
+          },
         },
       }),
       completedCampaignsLastMonth: prisma.campaign.count({
         where: {
           organizationId: input.organizationId,
           status: "COMPLETED",
+          createdAt: {
+            gte: sixtyDaysAgo,
+            lt: thirtyDaysAgo,
+          },
         },
       }),
       deliveryRateThisMonth: (async () => {
@@ -194,7 +213,7 @@ export const getStats = authProcedure
             Campaign: {
               organizationId: input.organizationId,
             },
-            createdAt: {
+            sentAt: {
               gte: thirtyDaysAgo,
               lt: now,
             },
@@ -215,7 +234,7 @@ export const getStats = authProcedure
             Campaign: {
               organizationId: input.organizationId,
             },
-            createdAt: {
+            sentAt: {
               gte: sixtyDaysAgo,
               lt: thirtyDaysAgo,
             },
@@ -234,7 +253,7 @@ export const getStats = authProcedure
             Campaign: {
               organizationId: input.organizationId,
             },
-            createdAt: {
+            sentAt: {
               gte: thirtyDaysAgo,
               lt: now,
             },
@@ -253,7 +272,7 @@ export const getStats = authProcedure
             Campaign: {
               organizationId: input.organizationId,
             },
-            createdAt: {
+            sentAt: {
               gte: sixtyDaysAgo,
               lt: thirtyDaysAgo,
             },
@@ -320,7 +339,7 @@ export const getStats = authProcedure
       },
       messages: {
         total: totalMessages,
-        Last30Days: totalMessagesLast30Days,
+        last30Days: totalMessagesLast30Days,
         lastPeriod: totalMessagesLastPeriod,
       },
       recipients: {
