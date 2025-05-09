@@ -105,9 +105,11 @@ export const Stats = () => {
           <CardContent>
             <div className="space-y-2">
               <div className="text-2xl font-bold">
-                {(
-                  (campaign.stats.sentMessages / campaign.stats.totalMessages) *
-                  100
+                {(campaign.stats.totalMessages > 0
+                  ? (campaign.stats.sentMessages /
+                      campaign.stats.totalMessages) *
+                    100
+                  : 0
                 ).toFixed(1)}
                 %
               </div>

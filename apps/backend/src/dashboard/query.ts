@@ -112,7 +112,7 @@ export const getDashboardStats = authProcedure
         title: campaign.title,
         status: campaign.status,
         completedAt: campaign.completedAt,
-        deliveryRate: (deliveredCount / totalCount) * 100,
+        deliveryRate: totalCount > 0 ? (deliveredCount / totalCount) * 100 : 0,
         totalMessages: totalCount,
         sentMessages: deliveredCount,
         createdAt: campaign.createdAt,
