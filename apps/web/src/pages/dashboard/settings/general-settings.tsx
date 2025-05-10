@@ -50,7 +50,7 @@ export function GeneralSettings() {
       defaultFromEmail: "",
       defaultFromName: "",
       baseURL: "",
-      cleanupInterval: 7,
+      cleanupInterval: 90,
     },
   })
 
@@ -62,7 +62,7 @@ export function GeneralSettings() {
         defaultFromEmail: settings.defaultFromEmail ?? "",
         defaultFromName: settings.defaultFromName ?? "",
         baseURL: settings.baseURL ?? "",
-        cleanupInterval: settings.cleanupInterval ?? 7,
+        cleanupInterval: settings.cleanupInterval ?? 90,
       })
     }
   }, [settings, form])
@@ -73,7 +73,7 @@ export function GeneralSettings() {
         defaultFromEmail: settings.defaultFromEmail ?? "",
         defaultFromName: settings.defaultFromName ?? "",
         baseURL: settings.baseURL ?? "",
-        cleanupInterval: settings.cleanupInterval ?? 7,
+        cleanupInterval: settings.cleanupInterval ?? 90,
       })
       utils.settings.getGeneral.invalidate()
     },
@@ -192,10 +192,10 @@ export function GeneralSettings() {
               control={form.control}
               name="cleanupInterval"
               label="Cleanup Interval (days)"
-              description="Number of days after which to cleanup old data (e.g. sent messages, logs). Default is 7 days."
+              description="Number of days after which to cleanup old data (e.g. sent messages, logs). Default is 90 days."
               inputProps={{
                 type: "number",
-                placeholder: "7",
+                placeholder: "90",
               }}
             />
           </form>
