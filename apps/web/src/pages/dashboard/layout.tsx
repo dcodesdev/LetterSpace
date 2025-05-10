@@ -25,6 +25,7 @@ import {
   Building2,
   LogOut,
   LucideIcon,
+  ArrowUpCircle,
 } from "lucide-react"
 import { useSession } from "@/hooks"
 import { useLocation } from "react-router"
@@ -35,6 +36,7 @@ import {
   LetterSpaceText,
 } from "@/components"
 import { APP_VERSION } from "@repo/shared"
+import { useUpdateCheck } from "@/hooks/use-update-check"
 
 const sidebarItems = [
   {
@@ -116,6 +118,7 @@ function NavItem({
 export function DashboardLayout() {
   const { orgId, user, organization, logout } = useSession()
   const location = useLocation()
+  const { hasUpdate, latestVersion } = useUpdateCheck()
 
   // Helper function to check if a menu item is active
   const isActive = (itemUrl: string) => {
@@ -166,10 +169,6 @@ export function DashboardLayout() {
                         >
                           {item.title}
                         </NavItem>
-                        {/* <Link to={item.url}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link> */}
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
@@ -210,6 +209,17 @@ export function DashboardLayout() {
                     v{APP_VERSION}
                   </span>
                 </WithTooltip>
+                {hasUpdate && (
+                  <a
+                    href="https://github.com/dcodesdev/LetterSpace/releases/latest"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-500 transition-colors"
+                  >
+                    <ArrowUpCircle className="h-3 w-3" />
+                    <span>Update available v{latestVersion}</span>
+                  </a>
+                )}
               </div>
             </SidebarMenu>
           </SidebarFooter>
