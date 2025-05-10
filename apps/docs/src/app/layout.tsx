@@ -6,6 +6,7 @@ import "nextra-theme-docs/style.css"
 import Link from "next/link"
 import Image from "next/image"
 import type { Metadata } from "next"
+import { Analytics } from "@/components"
 
 export const metadata: Metadata = {
   title: "LetterSpace Documentation | Self-hosted Newsletter Platform",
@@ -127,6 +128,7 @@ export default async function RootLayout({
           // ... Your additional layout options
         >
           {children}
+          <Analytics />
         </Layout>
       </body>
     </html>
