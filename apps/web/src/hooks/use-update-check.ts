@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { APP_VERSION } from "@repo/shared"
+import semver from "semver"
 
 type UpdateInfo = {
   hasUpdate: boolean
@@ -27,7 +28,7 @@ export function useUpdateCheck(): UpdateInfo {
   })
 
   const latestVersion = data?.tag_name?.replace("v", "") || APP_VERSION
-  const hasUpdate = latestVersion !== APP_VERSION
+  const hasUpdate = semver.gt(latestVersion, APP_VERSION)
 
   return { hasUpdate, latestVersion }
 }
