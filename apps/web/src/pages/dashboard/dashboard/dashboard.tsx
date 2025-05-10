@@ -148,9 +148,9 @@ export function DashboardPage() {
                 <div className="text-xs text-muted-foreground inline-flex items-center gap-1">
                   <span className="text-emerald-500 inline-flex items-center">
                     <ArrowUp className="mr-1 h-4 w-4" />
-                    {analytics.messages.Last30Days >= 0 ? "+" : "-"}
+                    {analytics.messages.last30Days >= 0 ? "+" : "-"}
                     {Math.abs(
-                      analytics.messages.Last30Days
+                      analytics.messages.last30Days
                     ).toLocaleString()}{" "}
                     This month
                   </span>
