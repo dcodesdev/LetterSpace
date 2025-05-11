@@ -20,7 +20,7 @@ RUN cd apps/backend && pnpm run generate
 
 ENV NODE_ENV=production
 
-RUN cd apps/web && bunx vite build
+RUN cd apps/web && bun run build
 
 EXPOSE 5000
 WORKDIR /app/apps/backend

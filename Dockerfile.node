@@ -23,7 +23,7 @@ RUN pnpm run build
 ENV NODE_ENV=production
 
 WORKDIR /app/apps/web
-RUN pnpm exec vite build
+RUN pnpm run build
 
 EXPOSE 5000
 WORKDIR /app/apps/backend
