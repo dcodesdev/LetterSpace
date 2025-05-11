@@ -25,6 +25,7 @@ export function useUpdateCheck(): UpdateInfo {
     queryFn: fetchLatestRelease,
     staleTime: 1000 * 60 * 10,
     retry: false,
+    refetchInterval: 1000 * 60, // Every minute
   })
 
   const latestVersion = data?.tag_name?.replace("v", "") || APP_VERSION

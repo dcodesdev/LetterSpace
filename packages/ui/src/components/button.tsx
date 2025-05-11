@@ -62,8 +62,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        {/* TODO: Please fix this ASAP */}
-        {/* @ts-ignore */}
         {loading && <Loader2 className="w-4 h-4 animate-spin" />}
         {children}
       </Comp>
