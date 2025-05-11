@@ -6,6 +6,7 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "watchexec -r -e ts bun run src/index.ts",
+    "build": "rm -rf dist && tsc -b tsconfig.build.json",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "generate": "prisma generate",

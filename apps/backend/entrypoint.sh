@@ -3,4 +3,8 @@
 pnpm exec prisma migrate deploy
 pnpm exec prisma generate
 
-bun run src/index.ts
+if [ "$1" = "--bun" ]; then
+  bun run src/index.ts
+else
+  node dist/index.js
+fi
