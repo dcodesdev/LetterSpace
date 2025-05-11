@@ -28,5 +28,9 @@
       "prisma",
       "sharp"
     ]
+  },
+  "resolutions": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19"
   }
 }
