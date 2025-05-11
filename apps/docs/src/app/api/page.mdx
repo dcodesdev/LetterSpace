@@ -20,13 +20,21 @@ This endpoint is **idempotent**: sending the same request multiple times with th
 {
   "email": "subscriber@example.com",
   "name": "Subscriber Name (Optional)",
-  "lists": ["listId1", "listId2"]
+  "lists": ["listId1", "listId2"],
+  "doubleOptIn": true,
+  "emailVerified": false,
+  "metadata": {
+    "custom_field": "value"
+  }
 }
 ```
 
 - `email` (string, required): The email address of the subscriber.
 - `name` (string, optional): The name of the subscriber.
 - `lists` (array of strings, required): An array of List IDs to associate the subscriber with. Must contain at least one ID.
+- `doubleOptIn` (boolean, optional): If true, a verification email will be sent to the subscriber. The subscriber will not be marked as `emailVerified` until they confirm through the email.
+- `emailVerified` (boolean, optional): Manually set the email verification status. This can be useful if importing subscribers already verified elsewhere.
+- `metadata` (object, optional): Key-value pairs for subscriber metadata. Providing this will overwrite all existing metadata for the subscriber.
 
 **Responses:**
 
@@ -44,6 +52,10 @@ This endpoint is **idempotent**: sending the same request multiple times with th
       },
       { "id": "listId2", "name": "List 2 Name", "description": null }
     ],
+    "metadata": {
+      "custom_field": "value"
+    },
+    "emailVerified": false,
     "createdAt": "2023-10-27T10:00:00.000Z",
     "updatedAt": "2023-10-27T10:00:00.000Z"
   }
@@ -68,13 +80,19 @@ Update an existing subscriber's details or list associations.
 {
   "email": "new_email@example.com",
   "name": "Updated Name",
-  "lists": ["newListId1", "newListId2"]
+  "lists": ["newListId1", "newListId2"],
+  "metadata": {
+    "new_key": "new_value"
+  },
+  "emailVerified": true
 }
 ```
 
 - `email` (string, optional): The new email address.
 - `name` (string, optional): The new name.
 - `lists` (array of strings, optional): An array of List IDs to **replace** the subscriber's current list associations. Must contain at least one ID if provided.
+- `metadata` (object, optional): Key-value pairs for subscriber metadata. Providing this will overwrite all existing metadata for the subscriber.
+- `emailVerified` (boolean, optional): Explicitly set the email verification status of the subscriber.
 
 **Responses:**
 
@@ -132,6 +150,10 @@ Retrieve a specific subscriber by their ID.
         "description": "List 1 Description"
       }
     ],
+    "metadata": {
+      "existing_field": "value"
+    },
+    "emailVerified": true,
     "createdAt": "2023-10-27T10:00:00.000Z",
     "updatedAt": "2023-10-27T10:00:00.000Z"
   }

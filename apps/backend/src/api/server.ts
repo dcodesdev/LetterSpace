@@ -496,6 +496,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
           .min(1, "At least one listId is required")
           .optional(),
         metadata: z.record(z.string(), z.string()).optional(),
+        emailVerified: z.boolean().optional(),
       })
       .safeParse(req.body)
 
@@ -506,7 +507,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
       return
     }
 
-    const { email, name, lists, metadata: newMetadata } = body
+    const { email, name, lists, metadata: newMetadata, emailVerified } = body
 
     const id = req.params.id
 
@@ -561,6 +562,7 @@ apiRouter.put("/subscribers/:id", async (req, res) => {
       data: {
         email,
         name,
+        emailVerified,
         ListSubscribers: lists?.length
           ? {
               deleteMany: {},
