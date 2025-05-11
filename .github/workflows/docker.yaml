@@ -46,8 +46,8 @@ jobs:
           push: true
           tags: ${{ steps.meta-bun.outputs.tags }}
           # platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=bun
+          cache-to: type=gha,mode=max,scope=bun
 
   build-and-push-node:
     name: Build and Push Node Image
