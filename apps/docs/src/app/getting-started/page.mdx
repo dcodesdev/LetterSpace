@@ -29,8 +29,10 @@ We've made LetterSpace for simplicity and ease of use. The easiest way to get st
           - app_network
 
       backend:
-        image: ghcr.io/dcodesdev/letterspace:latest
-        # image: ghcr.io/dcodesdev/letterspace:latest-node # Or if you want to use NodeJS
+        # For Bun runtime
+        image: ghcr.io/dcodesdev/letterspace:bun
+        # For NodeJS runtime
+        # image: ghcr.io/dcodesdev/letterspace:node
         pull_policy: always
         restart: always
         depends_on:
