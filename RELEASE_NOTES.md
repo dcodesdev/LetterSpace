@@ -1,6 +1,5 @@
 ### ✨ Features
 
-- Added support for NodeJS.
 - New features and improvements.
 
 ### 🐛 Bug Fixes

@@ -38,6 +38,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value=latest,enable=${{ !contains(github.ref, '-') }}
+            type=raw,value=bun,enable=${{ !contains(github.ref, '-') }}
 
       - name: Build and push Docker image (Bun)
         uses: docker/build-push-action@v6
@@ -75,11 +76,13 @@ jobs:
         with:
           images: ghcr.io/dcodesdev/letterspace
           tags: |
-            type=ref,event=tag
+            type=ref,event=tag,suffix=-node
             type=semver,pattern={{version}}-node
             type=semver,pattern={{major}}.{{minor}}-node
             type=semver,pattern={{major}}-node
             type=raw,value=latest-node,enable=${{ !contains(github.ref, '-') }}
+            type=raw,value=node,enable=${{ !contains(github.ref, '-') }}
+            type=raw,value=latest,enable=false
 
       - name: Build and push Docker image (Node)
         uses: docker/build-push-action@v6
