@@ -10,7 +10,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@repo/ui"
-import { Eye, AlertCircle, Send } from "lucide-react"
+import { Eye, AlertCircle, Send, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
@@ -62,6 +62,10 @@ export function MessageActions({
   })
 
   const handleResend = () => {
+    if (resendMutation.isPending) {
+      return
+    }
+
     if (!organization?.id) {
       toast.error("Organization ID not found. Cannot resend.")
       return
@@ -91,6 +95,9 @@ export function MessageActions({
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleResend}>
+              {resendMutation.isPending && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
               Confirm Resend
             </AlertDialogAction>
           </AlertDialogFooter>
