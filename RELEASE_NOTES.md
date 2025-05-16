@@ -1,5 +1,6 @@
 ### ✨ Features
 
+- Maintenance only deletes the message content now, not the message entries.
 - New features and improvements.
 
 ### 🐛 Bug Fixes
