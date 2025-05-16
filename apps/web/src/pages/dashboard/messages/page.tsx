@@ -1,12 +1,10 @@
-"use client"
-
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle, DataTable } from "@repo/ui"
 import { Mail, Send, Users, ArrowUp } from "lucide-react"
 import { useSession, usePaginationWithQueryState } from "@/hooks"
 import { trpc } from "@/trpc"
 import { CardSkeleton, StatCard, Pagination } from "@/components"
-import { columns } from "./columns"
+import { columns as getColumns } from "./columns"
 import { MessageSearch } from "./message-search"
 import {
   MessageStatusFilter,
@@ -41,21 +39,33 @@ export function MessagesPage() {
     setPagination("totalPages", data?.pagination.totalPages)
   }, [data]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleOpenPreview = (messageId: string) => {
-    setOpenPreviews((prev) => ({ ...prev, [messageId]: true }))
-  }
+  const handleOpenPreview = useCallback(
+    (messageId: string) => {
+      setOpenPreviews((prev) => ({ ...prev, [messageId]: true }))
+    },
+    [setOpenPreviews]
+  )
 
-  const handleClosePreview = (messageId: string) => {
-    setOpenPreviews((prev) => ({ ...prev, [messageId]: false }))
-  }
+  const handleClosePreview = useCallback(
+    (messageId: string) => {
+      setOpenPreviews((prev) => ({ ...prev, [messageId]: false }))
+    },
+    [setOpenPreviews]
+  )
 
-  const handleOpenError = (messageId: string) => {
-    setOpenErrors((prev) => ({ ...prev, [messageId]: true }))
-  }
+  const handleOpenError = useCallback(
+    (messageId: string) => {
+      setOpenErrors((prev) => ({ ...prev, [messageId]: true }))
+    },
+    [setOpenErrors]
+  )
 
-  const handleCloseError = (messageId: string) => {
-    setOpenErrors((prev) => ({ ...prev, [messageId]: false }))
-  }
+  const handleCloseError = useCallback(
+    (messageId: string) => {
+      setOpenErrors((prev) => ({ ...prev, [messageId]: false }))
+    },
+    [setOpenErrors]
+  )
 
   const { data: analytics, isLoading: analyticsLoading } =
     trpc.stats.getStats.useQuery(
@@ -66,6 +76,26 @@ export function MessagesPage() {
         enabled: !!organization?.id,
       }
     )
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        onOpenPreview: handleOpenPreview,
+        onOpenError: handleOpenError,
+        onClosePreview: handleClosePreview,
+        onCloseError: handleCloseError,
+        openPreviews,
+        openErrors,
+      }),
+    [
+      handleOpenPreview,
+      handleOpenError,
+      handleClosePreview,
+      handleCloseError,
+      openPreviews,
+      openErrors,
+    ]
+  )
 
   return (
     <>
@@ -155,14 +185,7 @@ export function MessagesPage() {
 
           <DataTable
             title="Messages"
-            columns={columns({
-              onOpenPreview: handleOpenPreview,
-              onOpenError: handleOpenError,
-              onClosePreview: handleClosePreview,
-              onCloseError: handleCloseError,
-              openPreviews,
-              openErrors,
-            })}
+            columns={columns}
             data={data?.messages ?? []}
             className="h-[calc(100vh-452px)]"
             isLoading={isLoading}
