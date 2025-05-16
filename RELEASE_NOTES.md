@@ -1,5 +1,7 @@
 ### ✨ Features
 
+- Filter messages by status.
+- Messages are now ordered by last updated time.
 - Maintenance only deletes the message content now, not the message entries.
 - New features and improvements.
 

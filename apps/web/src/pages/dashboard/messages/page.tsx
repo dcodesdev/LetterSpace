@@ -8,10 +8,15 @@ import { trpc } from "@/trpc"
 import { CardSkeleton, StatCard, Pagination } from "@/components"
 import { columns } from "./columns"
 import { MessageSearch } from "./message-search"
+import {
+  MessageStatusFilter,
+  type MessageStatus,
+} from "./message-status-filter"
 
 export function MessagesPage() {
   const [openPreviews, setOpenPreviews] = useState<Record<string, boolean>>({})
   const [openErrors, setOpenErrors] = useState<Record<string, boolean>>({})
+  const [statusFilter, setStatusFilter] = useState<MessageStatus | undefined>()
   const { pagination, setPagination } = usePaginationWithQueryState({
     perPage: 100,
   })
@@ -24,6 +29,7 @@ export function MessagesPage() {
       page: pagination.page,
       perPage: pagination.perPage,
       search: pagination.searchQuery,
+      status: statusFilter,
     },
     {
       enabled: !!organization?.id,
@@ -138,6 +144,10 @@ export function MessagesPage() {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <MessageSearch />
+            <MessageStatusFilter
+              selectedStatus={statusFilter}
+              onStatusChange={setStatusFilter}
+            />
             {/* <Button variant="outline" size="icon" className="ml-auto">
               <Download className="h-4 w-4" />
             </Button> */}

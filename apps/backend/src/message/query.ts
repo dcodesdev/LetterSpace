@@ -5,6 +5,16 @@ import { TRPCError } from "@trpc/server"
 import { paginationSchema } from "../utils/schemas"
 import { Prisma } from "../../prisma/client"
 
+const messageStatusEnum = z.enum([
+  "QUEUED",
+  "PENDING",
+  "SENT",
+  "OPENED",
+  "CLICKED",
+  "FAILED",
+  "RETRYING",
+])
+
 export const listMessages = authProcedure
   .input(
     z
@@ -12,6 +22,7 @@ export const listMessages = authProcedure
         organizationId: z.string(),
         campaignId: z.string().optional(),
         subscriberId: z.string().optional(),
+        status: messageStatusEnum.optional(),
       })
       .merge(paginationSchema)
   )
@@ -36,6 +47,7 @@ export const listMessages = authProcedure
       },
       ...(input.campaignId ? { campaignId: input.campaignId } : {}),
       ...(input.subscriberId ? { subscriberId: input.subscriberId } : {}),
+      ...(input.status ? { status: input.status } : {}),
       ...(input.search
         ? {
             OR: [
@@ -72,7 +84,7 @@ export const listMessages = authProcedure
       prisma.message.count({ where }),
       prisma.message.findMany({
         where,
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
         skip: (input.page - 1) * input.perPage,
         take: input.perPage,
         include: {
