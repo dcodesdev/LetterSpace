@@ -11,9 +11,9 @@ import {
   FormMessage,
   FormDescription,
   Switch,
-  Textarea,
   Button,
 } from "@repo/ui"
+import { CodeEditor } from "@/components/code-editor"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -122,11 +122,10 @@ export function WebhookForm({
             <FormItem>
               <FormLabel>Authorization Code (Optional)</FormLabel>
               <FormControl>
-                <Textarea
+                <CodeEditor
+                  value={field.value || ""}
+                  onChange={field.onChange}
                   placeholder="JavaScript code to authorize webhook requests"
-                  className="font-mono text-sm"
-                  rows={10}
-                  {...field}
                 />
               </FormControl>
               <FormDescription>
@@ -145,11 +144,10 @@ export function WebhookForm({
             <FormItem>
               <FormLabel>Transform Code (Optional)</FormLabel>
               <FormControl>
-                <Textarea
+                <CodeEditor
+                  value={field.value || ""}
+                  onChange={field.onChange}
                   placeholder="JavaScript code to transform webhook payload"
-                  className="font-mono text-sm"
-                  rows={10}
-                  {...field}
                 />
               </FormControl>
               <FormDescription>
