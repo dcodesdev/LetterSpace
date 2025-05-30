@@ -39,6 +39,10 @@ const statusConfig: Record<
     className:
       "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
   },
+  CANCELLED: {
+    label: "Cancelled",
+    className: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+  },
 }
 
 interface MessageStatusBadgeProps {
