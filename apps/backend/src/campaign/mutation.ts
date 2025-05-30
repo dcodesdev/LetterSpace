@@ -198,6 +198,7 @@ export const deleteCampaign = authProcedure
       })
     }
 
+    // On Delete: Cascade delete all messages
     await prisma.campaign.delete({
       where: { id: input.id },
     })
@@ -387,7 +388,7 @@ export const startCampaign = authProcedure
     return { campaign: updatedCampaign }
   })
 
-export const cancel = authProcedure
+export const cancelCampaign = authProcedure
   .input(
     z.object({
       id: z.string(),
@@ -409,21 +410,34 @@ export const cancel = authProcedure
       })
     }
 
-    if (campaign.status !== "SENDING") {
+    if (!["CREATING", "SENDING", "SCHEDULED"].includes(campaign.status)) {
       throw new TRPCError({
         code: "BAD_REQUEST",
-        message: "Campaign is not in sending state",
+        message: "Campaign cannot be cancelled",
       })
     }
 
-    await prisma.campaign.update({
-      where: {
-        id: input.id,
-      },
-      data: {
-        status: "CANCELLED",
-      },
-    })
+    await prisma.$transaction([
+      prisma.campaign.update({
+        where: {
+          id: input.id,
+        },
+        data: {
+          status: "CANCELLED",
+        },
+      }),
+      prisma.message.updateMany({
+        where: {
+          campaignId: input.id,
+          status: {
+            in: ["QUEUED", "PENDING", "RETRYING"],
+          },
+        },
+        data: {
+          status: "CANCELLED",
+        },
+      }),
+    ])
 
     return { success: true }
   })

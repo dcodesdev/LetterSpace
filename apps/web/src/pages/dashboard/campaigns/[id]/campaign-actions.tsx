@@ -200,7 +200,9 @@ export const CampaignActions = () => {
           </AlertDialog>
         </>
       )
+    case "CREATING":
     case "SENDING":
+    case "SCHEDULED":
       return (
         <Button
           variant="destructive"

@@ -198,6 +198,7 @@ enum MessageStatus {
   CLICKED
   FAILED
   RETRYING
+  CANCELLED
 }
 
 model Message {
