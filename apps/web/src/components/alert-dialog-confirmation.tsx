@@ -12,7 +12,9 @@ import {
 import { ReactNode } from "react"
 
 interface AlertDialogConfirmationProps {
-  trigger: ReactNode
+  trigger?: ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
   title: string
   description: string
   cancelText?: string
@@ -23,6 +25,8 @@ interface AlertDialogConfirmationProps {
 
 export function AlertDialogConfirmation({
   trigger,
+  open,
+  onOpenChange,
   title,
   description,
   cancelText = "Cancel",
@@ -31,8 +35,8 @@ export function AlertDialogConfirmation({
   variant = "default",
 }: AlertDialogConfirmationProps) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>

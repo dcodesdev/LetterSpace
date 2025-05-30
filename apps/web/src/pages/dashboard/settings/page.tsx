@@ -6,6 +6,7 @@ import { GeneralSettings } from "./general-settings"
 import { ApiKeys } from "./api-keys"
 import { EmailSettings } from "./email-delivery-settings"
 import { OrganizationSettings } from "./organization-settings"
+import { WebhookSettings } from "./webhook-settings"
 import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
 import { Loader } from "@/components"
@@ -48,7 +49,7 @@ export function SettingsPage() {
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
           <TabsTrigger value="email">Email Delivery</TabsTrigger>
           <TabsTrigger value="api">API Keys</TabsTrigger>
-          {/* <TabsTrigger value="webhooks">Webhooks</TabsTrigger> */}
+          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
         </TabsList>
         <TabsContent value="profile">
           <ProfileSettings />
@@ -74,9 +75,9 @@ export function SettingsPage() {
         <TabsContent value="api">
           <ApiKeys />
         </TabsContent>
-        {/* <TabsContent value="webhooks">
-            <WebhookSettings />
-          </TabsContent> */}
+        <TabsContent value="webhooks">
+          <WebhookSettings />
+        </TabsContent>
       </Tabs>
     </div>
   )

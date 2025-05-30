@@ -24,6 +24,7 @@ model Organization {
   ApiKeys               ApiKey[]
   GeneralSettings       GeneralSettings?
   EmailDeliverySettings EmailDeliverySettings?
+  Webhooks              Webhook[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -322,6 +323,22 @@ model EmailDeliverySettings {
   connectionTimeout Int @default(30000)
 
   organizationId String       @unique
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Webhook {
+  id String @id @default(uuid())
+
+  name          String
+  url           String
+  isActive      Boolean @default(true)
+  authCode      String? @db.Text
+  transformCode String? @db.Text
+
+  organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
