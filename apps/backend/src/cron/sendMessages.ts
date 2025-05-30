@@ -33,7 +33,7 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
     const sentInWindow = await prisma.message.count({
       where: {
         status: {
-          in: ["PENDING", "SENT", "OPENED", "CLICKED"],
+          in: ["PENDING", "SENT", "OPENED", "CLICKED", "COMPLAINED"],
         },
         sentAt: {
           gte: windowStart,
@@ -100,7 +100,14 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
           Messages: {
             every: {
               status: {
-                in: ["SENT", "FAILED", "OPENED", "CLICKED", "CANCELLED"],
+                in: [
+                  "SENT",
+                  "FAILED",
+                  "OPENED",
+                  "CLICKED",
+                  "CANCELLED",
+                  "COMPLAINED",
+                ],
               },
             },
           },

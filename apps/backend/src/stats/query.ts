@@ -26,6 +26,7 @@ export const getStats = authProcedure
       "CLICKED",
       "OPENED",
       "FAILED",
+      "COMPLAINED",
     ]
 
     // Check auth

@@ -199,6 +199,7 @@ enum MessageStatus {
   FAILED
   RETRYING
   CANCELLED
+  COMPLAINED
 }
 
 model Message {

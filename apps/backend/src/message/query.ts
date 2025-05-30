@@ -13,6 +13,8 @@ const messageStatusEnum = z.enum([
   "CLICKED",
   "FAILED",
   "RETRYING",
+  "CANCELLED",
+  "COMPLAINED",
 ])
 
 export const listMessages = authProcedure
