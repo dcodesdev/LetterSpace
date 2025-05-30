@@ -227,6 +227,7 @@ model Message {
   updatedAt DateTime @updatedAt
 
   @@index([updatedAt, id])
+  @@index([messageId])
 }
 
 model TrackedLink {
