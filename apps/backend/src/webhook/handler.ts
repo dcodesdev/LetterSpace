@@ -50,7 +50,9 @@ export const handleWebhook = async (
           },
         })
 
-        const authResult = vm.run(webhook.authCode)
+        const code = `function handler() { ${webhook.authCode} };handler()`
+        const authResult = vm.run(code)
+
         if (!authResult) {
           logger.warn(`Webhook ${webhookId} authorization failed`)
           res.status(401).json({ error: "Unauthorized" })
@@ -76,7 +78,9 @@ export const handleWebhook = async (
           },
         })
 
-        transformedData = vm.run(webhook.transformCode)
+        const code = `function handler() { ${webhook.transformCode} };handler()`
+
+        transformedData = vm.run(code)
       } catch (error) {
         logger.error(`Webhook ${webhookId} transform error:`, error)
         res.status(500).json({ error: "Transform code error" })
