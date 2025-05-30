@@ -50,7 +50,7 @@ export const handleWebhook = async (
           },
         })
 
-        const code = `function handler() { ${webhook.authCode} };handler()`
+        const code = `function authorize() { ${webhook.authCode} };authorize()`
         const authResult = vm.run(code)
 
         if (!authResult) {
