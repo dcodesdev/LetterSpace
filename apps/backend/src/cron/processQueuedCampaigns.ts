@@ -77,6 +77,9 @@ export const processQueuedCampaigns = cronJob(
         status: "CREATING",
       },
       include: {
+        CampaignLists: {
+          select: { listId: true },
+        },
         Organization: {
           include: {
             GeneralSettings: true,
@@ -119,17 +122,7 @@ export const processQueuedCampaigns = cronJob(
 
         const generalSettings = campaign.Organization.GeneralSettings
 
-        const campaignLists = await prisma.campaign.findUnique({
-          where: { id: campaign.id },
-          select: {
-            CampaignLists: {
-              select: { listId: true },
-            },
-          },
-        })
-
-        const selectedListIds =
-          campaignLists?.CampaignLists.map((cl) => cl.listId) || []
+        const selectedListIds = campaign.CampaignLists.map((cl) => cl.listId)
 
         const allSubscribersMap = await getSubscribersForCampaign(
           campaign.id,
