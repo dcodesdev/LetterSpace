@@ -4,13 +4,33 @@ export type * from "./types"
 
 import { app } from "./app"
 import { initializeCronJobs } from "./cron/cron"
+import { prisma } from "./utils/prisma"
 
 const cronController = initializeCronJobs()
 
 const PORT = process.env.PORT || 5000
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`)
+prisma.$connect().then(async () => {
+  console.log("Connected to database")
+
+  // For backwards compatibility, set all messages that have campaign status === "CANCELLED" to "CANCELLED"
+  await prisma.message.updateMany({
+    where: {
+      Campaign: {
+        status: "CANCELLED",
+      },
+      status: {
+        in: ["QUEUED", "PENDING", "RETRYING"],
+      },
+    },
+    data: {
+      status: "CANCELLED",
+    },
+  })
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
+  })
 })
 
 // Handle graceful shutdown

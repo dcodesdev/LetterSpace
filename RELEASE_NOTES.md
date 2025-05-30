@@ -1,14 +1,11 @@
 ### ✨ Features
 
-- Ability to manually resend messages.
-- Filter messages by status.
-- Messages are now ordered by last updated time.
-- Maintenance only deletes the message content now, not the message entries.
-- New features and improvements.
+- Message status independence - retry individual messages regardless of campaign status
 
 ### 🐛 Bug Fixes
 
-- Various bug fixes and optimizations.
+- Fixed campaign creation targeting wrong subscribers (now filters by selected lists only)
+- Fixed campaign cancellation
 
 ### 📚 Docs
 

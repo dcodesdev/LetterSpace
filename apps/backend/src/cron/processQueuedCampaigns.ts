@@ -13,13 +13,19 @@ import { cronJob } from "./cron.utils"
 const BATCH_SIZE = 100
 
 async function getSubscribersForCampaign(
-  campaignId: string
+  campaignId: string,
+  selectedListIds: string[]
 ): Promise<Map<string, Subscriber & { Metadata: SubscriberMetadata[] }>> {
+  if (selectedListIds.length === 0) {
+    return new Map()
+  }
+
   const subscribers = await prisma.subscriber.findMany({
     where: {
       Messages: { none: { campaignId } },
       ListSubscribers: {
         some: {
+          listId: { in: selectedListIds },
           unsubscribedAt: null,
         },
       },
@@ -71,6 +77,9 @@ export const processQueuedCampaigns = cronJob(
         status: "CREATING",
       },
       include: {
+        CampaignLists: {
+          select: { listId: true },
+        },
         Organization: {
           include: {
             GeneralSettings: true,
@@ -113,7 +122,12 @@ export const processQueuedCampaigns = cronJob(
 
         const generalSettings = campaign.Organization.GeneralSettings
 
-        const allSubscribersMap = await getSubscribersForCampaign(campaign.id)
+        const selectedListIds = campaign.CampaignLists.map((cl) => cl.listId)
+
+        const allSubscribersMap = await getSubscribersForCampaign(
+          campaign.id,
+          selectedListIds
+        )
         if (allSubscribersMap.size === 0) {
           oneTimeLogger(
             "noSubscribers",
@@ -234,6 +248,7 @@ export const processQueuedCampaigns = cronJob(
                   Messages: { none: { campaignId: campaign.id } },
                   ListSubscribers: {
                     some: {
+                      listId: { in: selectedListIds },
                       unsubscribedAt: null,
                     },
                   },

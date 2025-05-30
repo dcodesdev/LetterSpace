@@ -50,25 +50,21 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
       continue
     }
 
+    // Message status is now independent of campaign status.
+    // This allows retrying individual messages even for completed campaigns.
+    // We only filter by QUEUED and RETRYING message statuses.
     const messages = await prisma.message.findMany({
       where: {
-        AND: [
+        Campaign: {
+          organizationId: organization.id,
+        },
+        OR: [
+          { status: "QUEUED" },
           {
-            Campaign: {
-              status: "SENDING",
-              organizationId: organization.id,
+            status: "RETRYING",
+            lastTriedAt: {
+              lte: subSeconds(new Date(), emailSettings.retryDelay),
             },
-          },
-          {
-            OR: [
-              { status: "QUEUED" },
-              {
-                status: "RETRYING",
-                lastTriedAt: {
-                  lte: subSeconds(new Date(), emailSettings.retryDelay),
-                },
-              },
-            ],
           },
         ],
       },
@@ -90,6 +86,9 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
     const noMoreRetryingMessages = await prisma.message.count({
       where: {
         status: "RETRYING",
+        Campaign: {
+          organizationId: organization.id,
+        },
       },
     })
 
@@ -101,7 +100,7 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
           Messages: {
             every: {
               status: {
-                in: ["SENT", "FAILED", "OPENED", "CLICKED"],
+                in: ["SENT", "FAILED", "OPENED", "CLICKED", "CANCELLED"],
               },
             },
           },
