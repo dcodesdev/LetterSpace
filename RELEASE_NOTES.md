@@ -1,10 +1,11 @@
 ### ✨ Features
 
-- New features and improvements.
+- Message status independence - retry individual messages regardless of campaign status
 
 ### 🐛 Bug Fixes
 
-- Various bug fixes and optimizations.
+- Fixed campaign creation targeting wrong subscribers (now filters by selected lists only)
+- Fixed campaign cancellation
 
 ### 📚 Docs
 
