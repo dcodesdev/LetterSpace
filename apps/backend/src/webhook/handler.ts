@@ -50,7 +50,7 @@ export const handleWebhook = async (
           },
         })
 
-        const code = `function authorize() { ${webhook.authCode} };authorize()`
+        const code = `${webhook.authCode}\nauthorize()`
         const authResult = vm.run(code)
 
         if (!authResult) {
@@ -78,9 +78,10 @@ export const handleWebhook = async (
           },
         })
 
-        const code = `function handler() { ${webhook.transformCode} };handler()`
+        const code = `${webhook.transformCode}\ntransform()`
 
-        transformedData = vm.run(code)
+        // Required for deserializing the object from vm2
+        transformedData = JSON.parse(JSON.stringify(vm.run(code)))
       } catch (error) {
         logger.error(`Webhook ${webhookId} transform error:`, error)
         res.status(500).json({ error: "Transform code error" })
