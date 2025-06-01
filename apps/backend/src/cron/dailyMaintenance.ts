@@ -24,7 +24,7 @@ export const dailyMaintenanceCron = cronJob("daily-maintenance", async () => {
             organizationId: org.id,
           },
           status: {
-            in: ["SENT", "OPENED", "CLICKED", "FAILED"],
+            notIn: ["QUEUED", "PENDING", "RETRYING"],
           },
           createdAt: {
             lt: cleanupOlderThanDate,
