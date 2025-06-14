@@ -39,6 +39,7 @@
     "p-map": "^7.0.3",
     "superjson": "^2.2.2",
     "uuid": "^11.0.5",
+    "vm2": "^3.9.19",
     "zod": "^3.24.2"
   },
   "devDependencies": {

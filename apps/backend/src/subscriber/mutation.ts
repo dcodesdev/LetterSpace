@@ -366,11 +366,40 @@ export const unsubscribeToggle = authProcedure
       })
     }
 
-    const updated = await prisma.listSubscriber.update({
-      where: { id: input.listSubscriberId },
-      data: {
-        unsubscribedAt: listSubscriber.unsubscribedAt ? null : new Date(),
-      },
+    const isUnsubscribing = !listSubscriber.unsubscribedAt
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const updatedListSubscriber = await tx.listSubscriber.update({
+        where: { id: input.listSubscriberId },
+        data: {
+          unsubscribedAt: listSubscriber.unsubscribedAt ? null : new Date(),
+        },
+      })
+
+      // If unsubscribing, cancel pending messages for campaigns using this list
+      if (isUnsubscribing) {
+        await tx.message.updateMany({
+          where: {
+            subscriberId: listSubscriber.subscriberId,
+            status: {
+              in: ["QUEUED", "PENDING", "RETRYING"],
+            },
+            Campaign: {
+              CampaignLists: {
+                some: {
+                  listId: listSubscriber.listId,
+                },
+              },
+            },
+          },
+          data: {
+            status: "CANCELLED",
+            error: "Subscriber unsubscribed from list",
+          },
+        })
+      }
+
+      return updatedListSubscriber
     })
 
     return {
@@ -380,20 +409,26 @@ export const unsubscribeToggle = authProcedure
   })
 
 export const publicUnsubscribe = publicProcedure
-  .input(z.object({ sid: z.string(), cid: z.string() }))
+  .input(z.object({ sid: z.string(), cid: z.string().nullable().optional() }))
   .mutation(async ({ input }) => {
     try {
+      // If no campaign ID provided, unsubscribe from all lists
+      // If campaign ID provided, only unsubscribe from lists associated with that campaign
       const listSubscribers = await prisma.listSubscriber.findMany({
         where: {
           subscriberId: input.sid,
-          List: {
-            CampaignLists: {
-              some: {
-                campaignId: input.cid,
-              },
-            },
-          },
           unsubscribedAt: null,
+          ...(input.cid
+            ? {
+                List: {
+                  CampaignLists: {
+                    some: {
+                      campaignId: input.cid,
+                    },
+                  },
+                },
+              }
+            : {}), // If no cid, get all subscribed lists
         },
       })
 
@@ -403,23 +438,54 @@ export const publicUnsubscribe = publicProcedure
         }
       }
 
-      await prisma.listSubscriber.updateMany({
-        where: {
-          id: {
-            in: listSubscribers.map((ls) => ls.id),
+      await prisma.$transaction(async (tx) => {
+        // Unsubscribe from lists
+        await tx.listSubscriber.updateMany({
+          where: {
+            id: {
+              in: listSubscribers.map((ls) => ls.id),
+            },
           },
-        },
-        data: {
-          unsubscribedAt: new Date(),
-        },
-      })
-
-      await prisma.campaign
-        .update({
-          where: { id: input.cid },
-          data: { unsubscribedCount: { increment: 1 } },
+          data: {
+            unsubscribedAt: new Date(),
+          },
         })
-        .catch(() => {})
+
+        // Cancel all pending/queued messages for this subscriber from campaigns using these lists
+        await tx.message.updateMany({
+          where: {
+            subscriberId: input.sid,
+            status: {
+              in: ["QUEUED", "PENDING", "RETRYING"],
+            },
+            Campaign: {
+              CampaignLists: {
+                some: {
+                  listId: {
+                    in: listSubscribers.map((ls) => ls.listId),
+                  },
+                },
+              },
+            },
+          },
+          data: {
+            status: "CANCELLED",
+            error: "Subscriber unsubscribed",
+          },
+        })
+
+        // Update campaign unsubscribed count only if campaign ID is provided and campaign exists
+        if (input.cid) {
+          await tx.campaign
+            .update({
+              where: { id: input.cid },
+              data: { unsubscribedCount: { increment: 1 } },
+            })
+            .catch(() => {
+              // Campaign might have been deleted, ignore the error
+            })
+        }
+      })
 
       return {
         success: true,

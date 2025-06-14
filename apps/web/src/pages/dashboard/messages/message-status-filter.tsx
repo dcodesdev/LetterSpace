@@ -17,6 +17,8 @@ const messageStatuses = [
   "CLICKED",
   "FAILED",
   "RETRYING",
+  "CANCELLED",
+  "COMPLAINED",
 ] as const
 
 export type MessageStatus = (typeof messageStatuses)[number]

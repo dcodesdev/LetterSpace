@@ -14,11 +14,13 @@ import { templateRouter } from "./template/router"
 import { campaignRouter } from "./campaign/router"
 import { messageRouter } from "./message/router"
 import { settingsRouter } from "./settings/router"
+import { webhookRouter } from "./webhook/router"
 import swaggerSpec from "./swagger"
 import { apiRouter } from "./api/server"
 import { dashboardRouter } from "./dashboard/router"
 import { statsRouter } from "./stats/router"
 import { ONE_PX_PNG } from "./constants"
+import { handleWebhook } from "./webhook/handler"
 
 const appRouter = router({
   user: userRouter,
@@ -29,6 +31,7 @@ const appRouter = router({
   campaign: campaignRouter,
   message: messageRouter,
   settings: settingsRouter,
+  webhook: webhookRouter,
   dashboard: dashboardRouter,
   stats: statsRouter,
 })
@@ -146,6 +149,8 @@ app.get("/img/:id/img.png", async (req, res) => {
 })
 
 app.use("/api", apiRouter)
+
+app.post("/webhook/:webhookId", handleWebhook)
 
 app.use(
   "/trpc",
