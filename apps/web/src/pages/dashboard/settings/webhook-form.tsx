@@ -25,18 +25,17 @@ const webhookSchema = z.object({
 
 export type WebhookFormData = z.infer<typeof webhookSchema>
 
-const DEFAULT_AUTH_CODE = `function authorize() {
+const DEFAULT_AUTH_CODE = `function authorize(headers, body, query, params) {
   // Return true to allow the request, false to deny
-  // Available variables: request (headers, body, query, params)
   
   // Example: Check for a specific header
-  // const signature = request.headers['x-signature'];
+  // const signature = headers['x-signature'];
   // return signature === 'expected-signature';
   
   return true;
 }`
 
-const DEFAULT_TRANSFORM_CODE = `function transform() {
+const DEFAULT_TRANSFORM_CODE = `function transform(payload, headers, query) {
   // Transform the webhook payload to LetterSpace format
   // Available variables: payload, headers, query
   // Must return an object with messageId and event fields
@@ -129,8 +128,9 @@ export function WebhookForm({
                 />
               </FormControl>
               <FormDescription>
-                JavaScript code to verify webhook authenticity. The authorize()
-                function should return true to allow the request.
+                JavaScript code to verify webhook authenticity. The
+                authorize(headers, body, query, params) function should return
+                true to allow the request.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -152,8 +152,8 @@ export function WebhookForm({
               </FormControl>
               <FormDescription>
                 JavaScript code to transform the webhook payload to LetterSpace
-                format. The transform() function must return an object with
-                messageId and event fields.
+                format. The transform(payload, headers, query) function must
+                return an object with messageId and event fields.
               </FormDescription>
               <FormMessage />
             </FormItem>

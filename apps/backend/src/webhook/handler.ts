@@ -41,16 +41,14 @@ export const handleWebhook = async (
         const vm = new VM({
           timeout: 5000,
           sandbox: {
-            request: {
-              headers: req.headers,
-              body: req.body,
-              query: req.query,
-              params: req.params,
-            },
+            headers: req.headers,
+            body: req.body,
+            query: req.query,
+            params: req.params,
           },
         })
 
-        const code = `${webhook.authCode}\nauthorize()`
+        const code = `${webhook.authCode}\nauthorize(headers, body, query, params)`
         const authResult = vm.run(code)
 
         if (!authResult) {
@@ -78,7 +76,7 @@ export const handleWebhook = async (
           },
         })
 
-        const code = `${webhook.transformCode}\ntransform()`
+        const code = `${webhook.transformCode}\ntransform(payload, headers, query)`
 
         // Required for deserializing the object from vm2
         transformedData = JSON.parse(JSON.stringify(vm.run(code)))
