@@ -74,3 +74,53 @@ export const getWebhook = authProcedure
 
     return webhook
   })
+
+export const getWebhookLogs = authProcedure
+  .input(
+    z.object({
+      webhookId: z.string(),
+      organizationId: z.string(),
+      limit: z.number().min(1).max(100).default(50),
+      cursor: z.string().optional(),
+    })
+  )
+  .query(async ({ ctx, input }) => {
+    const userOrganization = await prisma.userOrganization.findFirst({
+      where: {
+        userId: ctx.user.id,
+        organizationId: input.organizationId,
+      },
+    })
+
+    if (!userOrganization) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Organization not found",
+      })
+    }
+
+    const logs = await prisma.webhookLog.findMany({
+      where: {
+        webhookId: input.webhookId,
+        Webhook: {
+          organizationId: input.organizationId,
+        },
+      },
+      take: input.limit + 1,
+      cursor: input.cursor ? { id: input.cursor } : undefined,
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    let nextCursor: typeof input.cursor | undefined = undefined
+    if (logs.length > input.limit) {
+      const nextItem = logs.pop()
+      nextCursor = nextItem!.id
+    }
+
+    return {
+      items: logs,
+      nextCursor,
+    }
+  })

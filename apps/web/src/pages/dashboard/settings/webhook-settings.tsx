@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Link } from "react-router"
 import {
   Card,
   CardHeader,
@@ -20,7 +21,7 @@ import {
   DialogDescription,
   Badge,
 } from "@repo/ui"
-import { Plus, Webhook, Trash2, Edit } from "lucide-react"
+import { Plus, Webhook, Trash2, Edit, Eye } from "lucide-react"
 import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
 import { toast } from "sonner"
@@ -187,7 +188,12 @@ export function WebhookSettings() {
                 {webhooks?.map((webhook) => (
                   <TableRow key={webhook.id}>
                     <TableCell className="font-medium">
-                      {webhook.name}
+                      <Link
+                        to={`/dashboard/settings/webhooks/${webhook.id}`}
+                        className="hover:underline"
+                      >
+                        {webhook.name}
+                      </Link>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -214,6 +220,11 @@ export function WebhookSettings() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
+                        <Link to={`/dashboard/settings/webhooks/${webhook.id}`}>
+                          <Button variant="ghost" size="icon">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
                         <Dialog
                           key={`edit-${webhook.id}`}
                           open={editingWebhook === webhook.id}

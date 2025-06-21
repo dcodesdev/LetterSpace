@@ -343,9 +343,28 @@ model Webhook {
   organizationId String
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  WebhookLogs WebhookLog[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([organizationId, url])
   @@index([organizationId])
+}
+
+model WebhookLog {
+  id String @id @default(uuid())
+
+  webhookId String
+  Webhook   Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  requestBody  Json
+  responseCode Int?
+  responseBody String? @db.Text
+  error        String? @db.Text
+  duration     Int? // in milliseconds
+
+  createdAt DateTime @default(now())
+
+  @@index([webhookId, createdAt(sort: Desc)])
 }
