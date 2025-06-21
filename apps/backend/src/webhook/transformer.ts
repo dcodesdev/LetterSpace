@@ -81,7 +81,7 @@ export async function transformPayload(
         }
         setupResult.value.dispose()
 
-        // Execute the transform code
+        // Execute the transform code with timeout protection
         const code = `
           ${webhook.transformCode}
           const result = transform(payload, headers, query);
@@ -95,7 +95,40 @@ export async function transformPayload(
           JSON.stringify(cleanResult);
         `
 
-        const result = context.evalCode(code)
+        // Set up timeout mechanism using QuickJS interrupt handler
+        const TIMEOUT_MS = 5000 // 5 seconds timeout
+        // eslint-disable-next-line no-undef
+        let timeoutId: NodeJS.Timeout | null = null
+        let isTimedOut = false
+
+        // Set interrupt handler
+        runtime.setInterruptHandler(() => {
+          if (isTimedOut) {
+            return true // Interrupt execution
+          }
+          return false // Continue execution
+        })
+
+        // Start timeout timer
+        timeoutId = setTimeout(() => {
+          isTimedOut = true
+        }, TIMEOUT_MS)
+
+        let result
+        try {
+          result = context.evalCode(code)
+        } finally {
+          // Clear timeout and interrupt handler
+          if (timeoutId) {
+            clearTimeout(timeoutId)
+          }
+          runtime.setInterruptHandler(() => false)
+        }
+
+        // Check if execution was interrupted due to timeout
+        if (isTimedOut) {
+          throw new Error("Transform code execution timed out")
+        }
 
         if (result.error) {
           const error = context.dump(result.error)
