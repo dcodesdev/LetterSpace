@@ -198,9 +198,16 @@ export const deleteCampaign = authProcedure
       })
     }
 
-    // On Delete: Cascade delete all messages
-    await prisma.campaign.delete({
-      where: { id: input.id },
+    await prisma.$transaction(async (tx) => {
+      await tx.message.deleteMany({
+        where: {
+          campaignId: input.id,
+        },
+      })
+
+      await tx.campaign.delete({
+        where: { id: input.id },
+      })
     })
 
     return { success: true }

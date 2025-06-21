@@ -6,6 +6,7 @@ import { MessageStatus } from "../../prisma/client"
 import { countDbSize, subscriberGrowthQuery } from "../../prisma/client/sql"
 import pMap from "p-map"
 import { subMonths } from "date-fns"
+import { messageStatus } from "../utils/message-status"
 
 export const getDashboardStats = authProcedure
   .input(
@@ -98,7 +99,7 @@ export const getDashboardStats = authProcedure
           where: {
             campaignId: campaign.id,
             status: {
-              in: ["SENT", "OPENED", "CLICKED"],
+              in: messageStatus.deliveredMessages,
             },
           },
         }),
