@@ -23,6 +23,8 @@ function generateTags(version: string, runtime: "bun" | "node"): string[] {
       tags.push(`${baseImage}:${major}`)
       tags.push(`${baseImage}:latest`)
       tags.push(`${baseImage}:bun`)
+    } else {
+      tags.push(`${baseImage}:beta`)
     }
   } else {
     // Node tags (always suffixed with -node, never gets latest)
