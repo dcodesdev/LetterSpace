@@ -1,14 +1,18 @@
-# Webhook API Reference
+# Incoming Webhooks API Reference
 
-LetterSpace's webhook system allows you to receive real-time notifications about email delivery events from your SMTP provider.
+LetterSpace's incoming webhook system allows you to receive real-time notifications about email delivery events from your SMTP provider. These are webhooks that your SMTP service (like SendGrid, Mailgun, Amazon SES, etc.) sends to LetterSpace to notify about email events.
+
+> **Note**: These are incoming webhooks that LetterSpace receives from SMTP providers, not outgoing webhooks that LetterSpace sends to your application.
 
 ## Webhook Endpoint
 
-Create webhooks in the dashboard to receive a unique URL for your webhook endpoint.
+Create webhooks in the LetterSpace dashboard to receive a unique URL that your SMTP provider will send events to.
 
 ```
 POST /webhook/{webhookId}
 ```
+
+Configure this URL in your SMTP provider's webhook settings to receive delivery events.
 
 ## Authentication
 
@@ -39,17 +43,18 @@ The function receives:
 
 ## Transform Function
 
-Since LetterSpace works with all SMTP providers, it provides a transform function to normalize payloads from different providers into a consistent format.
+Since different SMTP providers send webhook payloads in different formats, LetterSpace provides a transform function to normalize incoming payloads from various providers into a consistent format that LetterSpace can process.
 
 Your transform function should be named `transform` and return an object with `messageId` and `event` fields:
 
 ```javascript
 function transform(payload, headers, query) {
-  // Transform the provider-specific payload into LetterSpace format
+  // Transform the SMTP provider's webhook payload into LetterSpace format
+  // Example for a hypothetical SMTP provider:
 
   return {
-    messageId: payload.messageId, // Required: External message ID
-    event: payload.event, // Required: Event type
+    messageId: payload.messageId, // Required: External message ID from SMTP provider
+    event: payload.event, // Required: Event type (delivered, opened, clicked, etc.)
     timestamp: payload.timestamp, // Optional: Event timestamp
     reason: payload.reason, // Optional: Failure/bounce reason
   }
@@ -58,16 +63,28 @@ function transform(payload, headers, query) {
 
 The function receives:
 
-- `payload`: The raw webhook payload from your SMTP provider
-- `headers`: Request headers
-- `query`: Query parameters
+- `payload`: The raw webhook payload sent by your SMTP provider
+- `headers`: HTTP request headers from the SMTP provider
+- `query`: Query parameters from the webhook URL
 
 ### Required Fields
 
-The transformed payload must include:
+The transformed payload returned by your transform function must include:
 
-- `messageId`: The external message ID from your SMTP provider
-- `event`: The event type (see supported events below)
+- `messageId`: The external message ID provided by your SMTP provider
+- `event`: The event type that occurred (see supported events below)
+
+## Common SMTP Providers
+
+This incoming webhook system works with popular SMTP providers including:
+
+- **SendGrid**: Configure the webhook URL in your SendGrid Event Webhook settings
+- **Mailgun**: Set up the webhook URL in your Mailgun webhook configuration
+- **Amazon SES**: Configure SNS notifications to send to your webhook URL
+- **Postmark**: Add the webhook URL to your Postmark webhook settings
+- **Mailjet**: Configure the webhook URL in your Mailjet event tracking
+
+Each provider sends webhook data in a different format, which is why the transform function is necessary to normalize the data.
 
 ### Webhook Events
 
