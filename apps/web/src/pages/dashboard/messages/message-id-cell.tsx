@@ -9,10 +9,16 @@ import {
 } from "@repo/ui"
 import { Copy, Hash } from "lucide-react"
 
-export function MessageIdCell({ messageId }: { messageId: string }) {
+export function MessageIdCell({ messageId }: { messageId: string | null }) {
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(messageId)
-    toast.success("Message ID copied to clipboard")
+    if (messageId) {
+      navigator.clipboard.writeText(messageId)
+      toast.success("Message ID copied to clipboard")
+    }
+  }
+
+  if (!messageId) {
+    return <span className="text-muted-foreground text-sm">-</span>
   }
 
   return (

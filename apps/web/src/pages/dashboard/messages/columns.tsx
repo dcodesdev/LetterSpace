@@ -72,8 +72,8 @@ export const columns = ({
     },
     {
       id: "messageId",
-      header: "ID",
-      cell: ({ row }) => <MessageIdCell messageId={row.original.id} />,
+      header: "Message ID",
+      cell: ({ row }) => <MessageIdCell messageId={row.original.messageId} />,
     },
     {
       id: "actions",
