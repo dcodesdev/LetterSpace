@@ -12,6 +12,7 @@ import {
   FormDescription,
   Switch,
   Button,
+  WebhookEventsReference,
 } from "@repo/ui"
 import { CodeEditor } from "@/components/code-editor"
 
@@ -76,7 +77,7 @@ export function WebhookForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
@@ -113,6 +114,8 @@ export function WebhookForm({
             </FormItem>
           )}
         />
+
+        <WebhookEventsReference />
 
         <FormField
           control={form.control}
@@ -153,7 +156,9 @@ export function WebhookForm({
               <FormDescription>
                 JavaScript code to transform the webhook payload to LetterSpace
                 format. The transform(payload, headers, query) function must
-                return an object with messageId and event fields.
+                return an object with <code>messageId</code> and{" "}
+                <code>event</code> fields. The event must be one of the accepted
+                types shown above.
               </FormDescription>
               <FormMessage />
             </FormItem>

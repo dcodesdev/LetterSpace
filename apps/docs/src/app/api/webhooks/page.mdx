@@ -1,0 +1,83 @@
+# Webhook API Reference
+
+LetterSpace's webhook system allows you to receive real-time notifications about email delivery events from your SMTP provider.
+
+## Webhook Events
+
+import { WebhookEventsReference } from "@repo/ui"
+
+<WebhookEventsReference
+  title="Supported Webhook Events"
+  description="LetterSpace recognizes the following event types from SMTP providers:"
+/>
+
+## Webhook Endpoint
+
+All webhooks are sent to your unique webhook URL:
+
+```
+POST /webhook/{webhookId}
+```
+
+## Event Processing
+
+When your SMTP provider sends a webhook, LetterSpace:
+
+1. Validates the webhook exists and is active
+2. Runs your authorization code (if provided) to verify authenticity
+3. Runs your transform code to normalize the payload
+4. Finds the message by `messageId`
+5. Updates the message status based on the event type
+
+## Transform Function
+
+Your transform function must return an object with these fields:
+
+```typescript
+interface WebhookEvent {
+  messageId: string // Must match Message.messageId in database
+  event: string // One of the accepted event types above
+  timestamp?: string // Optional event timestamp
+  reason?: string // Optional error reason for failed events
+}
+```
+
+## SMTP Provider Examples
+
+### Resend
+
+```javascript
+function transform(payload, headers, query) {
+  return {
+    messageId: payload.data.message_id,
+    event: payload.type.replace("email.", ""), // 'email.delivered' -> 'delivered'
+    reason: payload.data.reason,
+  }
+}
+```
+
+### SendGrid
+
+```javascript
+function transform(payload, headers, query) {
+  // SendGrid sends arrays of events
+  const event = payload[0]
+  return {
+    messageId: event.sg_message_id,
+    event: event.event, // 'delivered', 'open', 'click', etc.
+    reason: event.reason,
+  }
+}
+```
+
+### Mailgun
+
+```javascript
+function transform(payload, headers, query) {
+  return {
+    messageId: payload["message-id"],
+    event: payload.event, // 'delivered', 'opened', 'clicked', etc.
+    reason: payload.reason || payload.description,
+  }
+}
+```
