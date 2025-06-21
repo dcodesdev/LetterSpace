@@ -20,6 +20,7 @@ export const handleWebhook = async (
   let responseCode: number | undefined
   let responseBody: string | undefined
   let errorMessage: string | undefined
+  let transformResult: any = null
 
   try {
     const webhookId = req.params.webhookId
@@ -58,7 +59,7 @@ export const handleWebhook = async (
     }
 
     // Transform the payload
-    const transformResult = await transformPayload(webhook, req, webhookId)
+    transformResult = await transformPayload(webhook, req, webhookId)
     if (!transformResult.success) {
       responseCode = transformResult.status || 500
       responseBody = JSON.stringify({ error: transformResult.error })
@@ -93,6 +94,7 @@ export const handleWebhook = async (
         data: {
           webhookId: req.params.webhookId!,
           requestBody: req.body,
+          transformedPayload: transformResult?.data || null,
           responseCode,
           responseBody,
           error: errorMessage,

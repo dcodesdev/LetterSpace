@@ -215,6 +215,7 @@ export function WebhookDetails() {
                     <TableHead>Timestamp</TableHead>
                     <TableHead>Duration</TableHead>
                     <TableHead>Request Body</TableHead>
+                    <TableHead>Transformed Payload</TableHead>
                     <TableHead>Response</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -253,6 +254,22 @@ export function WebhookDetails() {
                             {JSON.stringify(log.requestBody, null, 2)}
                           </pre>
                         </details>
+                      </TableCell>
+                      <TableCell>
+                        {log.transformedPayload ? (
+                          <details className="cursor-pointer">
+                            <summary className="text-sm text-muted-foreground hover:text-foreground">
+                              View transformed
+                            </summary>
+                            <pre className="mt-2 max-w-[300px] overflow-auto rounded bg-muted p-2 text-xs">
+                              {JSON.stringify(log.transformedPayload, null, 2)}
+                            </pre>
+                          </details>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">
+                            -
+                          </span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {log.error ? (
