@@ -17,6 +17,12 @@ CREATE TABLE "Webhook" (
 );
 
 -- CreateIndex
+CREATE INDEX "Webhook_organizationId_idx" ON "Webhook"("organizationId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Webhook_organizationId_url_key" ON "Webhook"("organizationId", "url");
+
+-- CreateIndex
 CREATE INDEX "Message_messageId_idx" ON "Message"("messageId");
 
 -- AddForeignKey

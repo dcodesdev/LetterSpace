@@ -344,4 +344,7 @@ model Webhook {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, url])
+  @@index([organizationId])
 }
