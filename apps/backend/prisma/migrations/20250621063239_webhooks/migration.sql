@@ -16,5 +16,8 @@ CREATE TABLE "Webhook" (
     CONSTRAINT "Webhook_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateIndex
+CREATE INDEX "Message_messageId_idx" ON "Message"("messageId");
+
 -- AddForeignKey
 ALTER TABLE "Webhook" ADD CONSTRAINT "Webhook_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
