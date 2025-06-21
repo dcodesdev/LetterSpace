@@ -51,6 +51,7 @@ export const handleWebhook = async (
       if (!authorized.success) {
         responseCode = authorized.status || 500
         responseBody = JSON.stringify({ error: authorized.error })
+        errorMessage = authorized.error
         res.status(authorized.status || 500).json({ error: authorized.error })
         return
       }
@@ -61,6 +62,7 @@ export const handleWebhook = async (
     if (!transformResult.success) {
       responseCode = transformResult.status || 500
       responseBody = JSON.stringify({ error: transformResult.error })
+      errorMessage = transformResult.error
       res
         .status(transformResult.status || 500)
         .json({ error: transformResult.error })

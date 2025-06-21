@@ -159,14 +159,17 @@ export async function transformPayload(
           const fallbackValidation = WebhookEventSchema.safeParse(req.body)
 
           if (!fallbackValidation.success) {
+            const validationErrors = fallbackValidation.error.errors
+              .map((e) => `${e.path.join(".")}: ${e.message}`)
+              .join(", ")
             logger.error(
               `Invalid webhook payload for webhook ${webhookId} (fallback):`,
-              fallbackValidation.error.errors[0]?.message || "Unknown error"
+              validationErrors
             )
             return {
               success: false,
               status: 400,
-              error: `Payload validation error: ${fallbackValidation.error.errors[0]?.message || "Unknown error"}`,
+              error: `Payload validation error (transform returned undefined, using fallback): ${validationErrors}`,
             }
           }
 
@@ -178,26 +181,33 @@ export async function transformPayload(
           const validation = WebhookEventSchema.safeParse(parsedData)
 
           if (!validation.success) {
+            const validationErrors = validation.error.errors
+              .map((e) => `${e.path.join(".")}: ${e.message}`)
+              .join(", ")
             logger.error(
               `Invalid transform result for webhook ${webhookId}:`,
-              validation.error.errors[0]?.message || "Unknown error"
+              validationErrors
             )
             return {
               success: false,
               status: 500,
-              error: `Transform validation error: ${validation.error.errors[0]?.message || "Unknown error"}`,
+              error: `Transform validation error (transformed data invalid): ${validationErrors}`,
             }
           }
 
           return { success: true, data: validation.data }
         } catch (parseError) {
+          const parseErrorMessage =
+            parseError instanceof Error
+              ? parseError.message
+              : String(parseError)
           logger.error(
-            `Failed to parse transform result for webhook ${webhookId}: ${transformedJson}`
+            `Failed to parse transform result for webhook ${webhookId}: ${transformedJson}. Parse error: ${parseErrorMessage}`
           )
           return {
             success: false,
             status: 500,
-            error: "Invalid transform result",
+            error: `Invalid transform result (JSON parse failed): ${parseErrorMessage}`,
           }
         }
       } finally {
@@ -206,11 +216,13 @@ export async function transformPayload(
         runtime.dispose()
       }
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
       logger.error(`Webhook ${webhookId} transform error:`, error)
       return {
         success: false,
         status: 500,
-        error: "Transform code error",
+        error: `Transform code error: ${errorMessage}`,
       }
     }
   } else {
@@ -218,14 +230,17 @@ export async function transformPayload(
     const validation = WebhookEventSchema.safeParse(req.body)
 
     if (!validation.success) {
+      const validationErrors = validation.error.errors
+        .map((e) => `${e.path.join(".")}: ${e.message}`)
+        .join(", ")
       logger.error(
         `Invalid webhook payload for webhook ${webhookId}:`,
-        validation.error.errors[0]?.message || "Unknown error"
+        validationErrors
       )
       return {
         success: false,
         status: 400,
-        error: `Payload validation error: ${validation.error.errors[0]?.message || "Unknown error"}`,
+        error: `Payload validation error (no transform code): ${validationErrors}`,
       }
     }
 
