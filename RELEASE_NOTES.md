@@ -3,6 +3,7 @@
 - **Webhooks Support** - Receive real-time notifications for email events (delivered, opened, clicked, bounced, complained)
   - Custom webhook endpoints with authentication and transformation code support
   - Process email status updates from external email service providers
+  - **Webhook Request Logging** - View detailed logs of all webhook requests with status codes, payloads, responses, and timing information
 - **Complained Message Status** - Track when recipients mark emails as spam
 - **Monaco Code Editor** - Enhanced code editing experience for webhook configuration
 - **Awaiting Webhook Status** - Track when messages are awaiting webhook processing
