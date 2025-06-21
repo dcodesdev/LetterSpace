@@ -71,6 +71,8 @@ export const handleWebhook = async (
 
     const transformedData = transformResult.data!
 
+    logger.debug("transformedData", transformedData)
+
     // Process the webhook event
     await processWebhookEvent(webhook, transformedData, webhookId)
 
