@@ -1,11 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle, Badge } from "../components"
+"use client"
 
-export interface WebhookEvent {
-  name: string
-  aliases: string[]
-  status: string
-  description: string
-}
+import { Card, CardContent, CardHeader, CardTitle, Badge } from "@repo/ui"
+import { WEBHOOK_EVENTS, type WebhookEvent } from "@repo/shared"
 
 interface WebhookEventsReferenceProps {
   title?: string
@@ -14,43 +10,10 @@ interface WebhookEventsReferenceProps {
   className?: string
 }
 
-const DEFAULT_EVENTS: WebhookEvent[] = [
-  {
-    name: "delivered",
-    aliases: ["sent"],
-    status: "SENT",
-    description: "Email was successfully delivered",
-  },
-  {
-    name: "opened",
-    aliases: ["open"],
-    status: "OPENED",
-    description: "Email was opened by recipient",
-  },
-  {
-    name: "clicked",
-    aliases: ["click"],
-    status: "CLICKED",
-    description: "Link in email was clicked",
-  },
-  {
-    name: "bounced",
-    aliases: ["bounce", "failed"],
-    status: "FAILED",
-    description: "Email bounced or failed to deliver",
-  },
-  {
-    name: "complained",
-    aliases: ["complaint", "spam"],
-    status: "COMPLAINED",
-    description: "Recipient marked email as spam",
-  },
-]
-
 export function WebhookEventsReference({
   title = "Accepted Event Types",
   description = "Your webhook transform code must return one of these event types:",
-  events = DEFAULT_EVENTS,
+  events = WEBHOOK_EVENTS,
   className,
 }: WebhookEventsReferenceProps) {
   return (

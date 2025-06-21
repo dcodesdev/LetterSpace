@@ -12,9 +12,9 @@ import {
   FormDescription,
   Switch,
   Button,
-  WebhookEventsReference,
 } from "@repo/ui"
 import { CodeEditor } from "@/components/code-editor"
+import { WebhookEventsReference } from "@/components"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),
