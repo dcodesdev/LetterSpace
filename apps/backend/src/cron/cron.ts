@@ -2,6 +2,7 @@ import cron from "node-cron"
 import { sendMessagesCron } from "./sendMessages"
 import { dailyMaintenanceCron } from "./dailyMaintenance"
 import { processQueuedCampaigns } from "./processQueuedCampaigns"
+import { cleanupWebhookLogsCron } from "./cleanupWebhookLogs"
 
 type CronJob = {
   name: string
@@ -31,10 +32,18 @@ const processQueuedCampaignsJob: CronJob = {
   enabled: true,
 }
 
+const cleanupWebhookLogsJob: CronJob = {
+  name: "cleanup-webhook-logs",
+  schedule: "0 1 * * *", // Runs daily at 1 AM
+  job: cleanupWebhookLogsCron,
+  enabled: true,
+}
+
 const cronJobs: CronJob[] = [
   sendMessagesJob,
   dailyMaintenanceJob,
   processQueuedCampaignsJob,
+  cleanupWebhookLogsJob,
 ]
 
 export const initializeCronJobs = () => {
