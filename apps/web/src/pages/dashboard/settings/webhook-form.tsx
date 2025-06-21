@@ -37,12 +37,21 @@ const DEFAULT_AUTH_CODE = `function authorize(headers, body, query, params) {
 const DEFAULT_TRANSFORM_CODE = `function transform(payload, headers, query) {
   // Transform the webhook payload to LetterSpace format
   // Available variables: payload, headers, query
-  // Must return an object with messageId and event fields
+  // Must return an object with messageId, event, reason, and timestamp fields
+  
+  // Extract timestamp from payload, headers, or generate current timestamp
+  const timestamp = payload.timestamp || 
+                   payload.sent_at || 
+                   payload.created_at || 
+                   headers.date || 
+                   headers.timestamp || 
+                   new Date().toISOString();
   
   return {
-    messageId: payload.message_id || payload.messageId,
-    event: payload.event_type || payload.event,
-    reason: payload.reason || payload.error_message
+    messageId: payload.messageId || payload.message_id,
+    event: payload.event || payload.event_type,
+    reason: payload.reason || payload.error_message,
+    timestamp: timestamp
   };
 }`
 
