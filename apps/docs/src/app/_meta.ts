@@ -4,6 +4,7 @@ const meta: MetaRecord = {
   index: "Introduction",
   "getting-started": "Getting Started",
   api: "API Reference",
+  webhooks: "Webhooks",
   placeholders: "Placeholders",
   todo: "To-Do List",
   "---": {
