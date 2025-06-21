@@ -481,8 +481,13 @@ export const publicUnsubscribe = publicProcedure
               where: { id: input.cid },
               data: { unsubscribedCount: { increment: 1 } },
             })
-            .catch(() => {
-              // Campaign might have been deleted, ignore the error
+            .catch((error) => {
+              // IF not found
+              if (error?.code === "P2025") {
+                return
+              }
+
+              throw error
             })
         }
       })
