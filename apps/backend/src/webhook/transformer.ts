@@ -2,6 +2,7 @@ import express from "express"
 import { logger } from "../utils/logger"
 import { WebhookEventSchema, WebhookResult } from "./types"
 import { getQuickJS } from "quickjs-emscripten"
+import { env } from "../constants"
 
 // Transform webhook payload using custom code or default schema
 export async function transformPayload(
@@ -15,11 +16,8 @@ export async function transformPayload(
       const QuickJS = await getQuickJS()
       const runtime = QuickJS.newRuntime()
 
-      // Set memory limit (in bytes)
-      runtime.setMemoryLimit(128 * 1024 * 1024) // 128MB
-
-      // Set max stack size
-      runtime.setMaxStackSize(1024 * 1024) // 1MB
+      runtime.setMemoryLimit(parseInt(env.WEBHOOK_MEMORY_LIMIT, 10))
+      runtime.setMaxStackSize(parseInt(env.WEBHOOK_MAX_STACK_SIZE, 10))
 
       const context = runtime.newContext()
 

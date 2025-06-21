@@ -12,8 +12,11 @@ import {
   FormDescription,
   Switch,
   Button,
+  Alert,
+  AlertDescription,
 } from "@repo/ui"
 import { MonacoEditor, WebhookEventsReference } from "@/components"
+import { AlertTriangle } from "lucide-react"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -107,6 +110,15 @@ export function WebhookForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Authorization Code (Optional)</FormLabel>
+              <Alert className="mb-3">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Security Notice:</strong> This code will be stored in
+                  plain text in the database, including any secrets or API keys
+                  you include. This may change in the future for better
+                  security.
+                </AlertDescription>
+              </Alert>
               <FormControl>
                 <MonacoEditor
                   value={field.value || ""}

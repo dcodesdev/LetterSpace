@@ -25,6 +25,18 @@ LetterSpace is an open source newsletter application that gives you complete con
 - TRPC
 - Prisma
 
+## Environment Variables
+
+### Required Variables
+
+- `JWT_SECRET` - Secret key for JWT token signing
+- `DATABASE_URL` - PostgreSQL database connection string
+
+### Optional Variables
+
+- `WEBHOOK_MEMORY_LIMIT` - Memory limit for webhook transformer runtime in bytes (default: 16777216 = 16MB)
+- `WEBHOOK_MAX_STACK_SIZE` - Maximum stack size for webhook transformer in bytes (default: 262144 = 256KB)
+
 ## Getting Started
 
 ## Deployment
