@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "generate": "prisma generate",
-    "generate:sql": "prisma generate --sql && pnpm exec prettier --write prisma/client",
+    "generate:sql": "prisma generate --sql",
     "test": "dotenv -e .env.test -- vitest"
   },
   "exports": {
