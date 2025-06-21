@@ -56,6 +56,19 @@ list_storage AS (
   FROM "List" l
   WHERE l."organizationId" = $1
   GROUP BY l."organizationId"
+),
+webhook_log_storage AS (
+  -- Webhook log data size
+  SELECT
+    w."organizationId",
+    COALESCE(SUM(LENGTH(wl."requestBody"::text)), 0) as webhook_request_size,
+    COALESCE(SUM(LENGTH(wl."responseBody")), 0) as webhook_response_size,
+    COALESCE(SUM(LENGTH(wl.error)), 0) as webhook_error_size,
+    COUNT(*) as webhook_log_count
+  FROM "WebhookLog" wl
+  JOIN "Webhook" w ON w.id = wl."webhookId"
+  WHERE w."organizationId" = $1
+  GROUP BY w."organizationId"
 )
 
 SELECT 
@@ -66,6 +79,7 @@ SELECT
   COALESCE(ms.message_count, 0) as message_count,
   COALESCE(ss.subscriber_count, 0) as subscriber_count,
   COALESCE(ls.list_count, 0) as list_count,
+  COALESCE(wls.webhook_log_count, 0) as webhook_log_count,
   (
     COALESCE(os.campaign_content_size, 0) + 
     COALESCE(os.campaign_subject_size, 0) + 
@@ -79,7 +93,10 @@ SELECT
     COALESCE(ss.subscriber_email_size, 0) +
     COALESCE(ss.subscriber_name_size, 0) +
     COALESCE(ls.list_name_size, 0) +
-    COALESCE(ls.list_description_size, 0)
+    COALESCE(ls.list_description_size, 0) +
+    COALESCE(wls.webhook_request_size, 0) +
+    COALESCE(wls.webhook_response_size, 0) +
+    COALESCE(wls.webhook_error_size, 0)
   ) / 1024.0 / 1024.0 as total_size_mb
 FROM "Organization" o
 LEFT JOIN organization_storage os ON o.id = os."organizationId"
@@ -87,4 +104,5 @@ LEFT JOIN template_storage ts ON o.id = ts."organizationId"
 LEFT JOIN message_storage ms ON o.id = ms."organizationId"
 LEFT JOIN subscriber_storage ss ON o.id = ss."organizationId"
 LEFT JOIN list_storage ls ON o.id = ls."organizationId"
+LEFT JOIN webhook_log_storage wls ON o.id = wls."organizationId"
 WHERE o.id = $1;
