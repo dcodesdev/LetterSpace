@@ -115,8 +115,6 @@ export function WebhookForm({
           )}
         />
 
-        <WebhookEventsReference />
-
         <FormField
           control={form.control}
           name="authCode"
@@ -164,6 +162,8 @@ export function WebhookForm({
             </FormItem>
           )}
         />
+
+        <WebhookEventsReference />
 
         <FormField
           control={form.control}
