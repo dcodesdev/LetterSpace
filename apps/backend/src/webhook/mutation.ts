@@ -5,15 +5,6 @@ import { TRPCError } from "@trpc/server"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  url: z
-    .string()
-    .url("Must be a valid HTTP or HTTPS URL")
-    .refine(
-      (url) => url.startsWith("http://") || url.startsWith("https://"),
-      "URL must start with http:// or https://"
-    )
-    .or(z.literal(""))
-    .default(""),
   isActive: z.boolean().default(true),
   authCode: z.string().optional(),
   transformCode: z.string().optional(),
@@ -44,7 +35,6 @@ export const createWebhook = authProcedure
     const webhook = await prisma.webhook.create({
       data: {
         name: input.name,
-        url: input.url,
         isActive: input.isActive,
         authCode: input.authCode,
         transformCode: input.transformCode,
@@ -96,7 +86,6 @@ export const updateWebhook = authProcedure
       where: { id: input.id },
       data: {
         name: input.name,
-        url: input.url,
         isActive: input.isActive,
         authCode: input.authCode,
         transformCode: input.transformCode,

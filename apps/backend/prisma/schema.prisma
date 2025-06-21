@@ -335,7 +335,6 @@ model Webhook {
   id String @id @default(uuid())
 
   name          String
-  url           String
   isActive      Boolean @default(true)
   authCode      String? @db.Text
   transformCode String? @db.Text
@@ -348,7 +347,6 @@ model Webhook {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([organizationId, url])
   @@index([organizationId])
 }
 
