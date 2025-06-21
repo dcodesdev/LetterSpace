@@ -5,6 +5,7 @@
   - Process email status updates from external email service providers
 - **Complained Message Status** - Track when recipients mark emails as spam
 - **Monaco Code Editor** - Enhanced code editing experience for webhook configuration
+- **Awaiting Webhook Status** - Track when messages are awaiting webhook processing
 
 ### 🐛 Bug Fixes
 

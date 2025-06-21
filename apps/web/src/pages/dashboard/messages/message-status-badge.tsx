@@ -20,6 +20,11 @@ const statusConfig: Record<
     className:
       "bg-success text-success-foreground dark:bg-success dark:text-success-foreground",
   },
+  AWAITING_WEBHOOK: {
+    label: "Awaiting Webhook",
+    className:
+      "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  },
   FAILED: {
     label: "Failed",
     className:

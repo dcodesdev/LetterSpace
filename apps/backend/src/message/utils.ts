@@ -1,5 +1,6 @@
 import { prisma } from "../utils/prisma"
 import { MessageStatus } from "../../prisma/client"
+import { messageStatus } from "../utils/message-status"
 
 interface MessageQueryOptions {
   campaignId?: string
@@ -35,7 +36,7 @@ export async function getDeliveredMessages({
   return findMessagesByStatus({
     campaignId,
     organizationId,
-    status: ["SENT", "CLICKED", "OPENED"],
+    status: messageStatus.deliveredMessages,
   })
 }
 
@@ -57,7 +58,7 @@ export async function getOpenedMessages({
   return findMessagesByStatus({
     campaignId,
     organizationId,
-    status: ["OPENED", "CLICKED"], // Clicked implies opened
+    status: messageStatus.openedMessages,
   })
 }
 

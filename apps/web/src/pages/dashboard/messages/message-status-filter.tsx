@@ -13,6 +13,7 @@ const messageStatuses = [
   "QUEUED",
   "PENDING",
   "SENT",
+  "AWAITING_WEBHOOK",
   "OPENED",
   "CLICKED",
   "FAILED",

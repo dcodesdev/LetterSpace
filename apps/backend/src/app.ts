@@ -134,7 +134,9 @@ app.get("/img/:id/img.png", async (req, res) => {
         return
       }
 
-      if (message.status !== "SENT") return
+      if (message.status !== "SENT" && message.status !== "AWAITING_WEBHOOK") {
+        return
+      }
 
       await tx.message.update({
         where: { id },

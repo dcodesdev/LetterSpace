@@ -2,6 +2,7 @@ import pMap from "p-map"
 import { Mailer } from "../lib/Mailer"
 import { logger } from "../utils/logger"
 import { prisma } from "../utils/prisma"
+import { messageStatus } from "../utils/message-status"
 
 import { cronJob } from "./cron.utils"
 import { subSeconds } from "date-fns"
@@ -10,17 +11,24 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
   const organizations = await prisma.organization.findMany()
 
   for (const organization of organizations) {
-    const [smtpSettings, emailSettings, generalSettings] = await Promise.all([
-      prisma.smtpSettings.findFirst({
-        where: { organizationId: organization.id },
-      }),
-      prisma.emailDeliverySettings.findFirst({
-        where: { organizationId: organization.id },
-      }),
-      prisma.generalSettings.findFirst({
-        where: { organizationId: organization.id },
-      }),
-    ])
+    const [smtpSettings, emailSettings, generalSettings, activeWebhooks] =
+      await Promise.all([
+        prisma.smtpSettings.findFirst({
+          where: { organizationId: organization.id },
+        }),
+        prisma.emailDeliverySettings.findFirst({
+          where: { organizationId: organization.id },
+        }),
+        prisma.generalSettings.findFirst({
+          where: { organizationId: organization.id },
+        }),
+        prisma.webhook.count({
+          where: {
+            organizationId: organization.id,
+            isActive: true,
+          },
+        }),
+      ])
 
     if (!smtpSettings || !emailSettings) {
       logger.warn(
@@ -33,7 +41,7 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
     const sentInWindow = await prisma.message.count({
       where: {
         status: {
-          in: ["PENDING", "SENT", "OPENED", "CLICKED", "COMPLAINED"],
+          in: messageStatus.processedMessages,
         },
         sentAt: {
           gte: windowStart,
@@ -100,14 +108,7 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
           Messages: {
             every: {
               status: {
-                in: [
-                  "SENT",
-                  "FAILED",
-                  "OPENED",
-                  "CLICKED",
-                  "CANCELLED",
-                  "COMPLAINED",
-                ],
+                in: messageStatus.completedMessages,
               },
             },
           },
@@ -158,12 +159,15 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
             from: `${fromName} <${fromEmail}>`,
           })
 
+          // If webhooks are active, set status to AWAITING_WEBHOOK, otherwise SENT
+          const successStatus = activeWebhooks > 0 ? "AWAITING_WEBHOOK" : "SENT"
+
           await prisma.message.update({
             where: { id: message.id },
             data: {
               messageId: result.messageId,
               status: result.success
-                ? "SENT"
+                ? successStatus
                 : message.tries >= emailSettings.maxRetries
                   ? "FAILED"
                   : "RETRYING",
