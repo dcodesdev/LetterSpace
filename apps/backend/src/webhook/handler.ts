@@ -57,18 +57,7 @@ export const handleWebhook = async (
     const transformedData = transformResult.data!
 
     // Process the webhook event
-    const processResult = await processWebhookEvent(
-      webhook,
-      transformedData,
-      webhookId
-    )
-
-    if (!processResult.success) {
-      res
-        .status(processResult.status || 500)
-        .json({ error: processResult.error })
-      return
-    }
+    await processWebhookEvent(webhook, transformedData, webhookId)
 
     res.status(200).json({ success: true })
   } catch (error) {

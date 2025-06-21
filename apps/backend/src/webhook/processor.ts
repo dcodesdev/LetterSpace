@@ -19,7 +19,6 @@ export async function processWebhookEvent(
   })
 
   if (!message) {
-    logger.warn(`Message not found for messageId: ${transformedData.messageId}`)
     return {
       success: false,
       status: 404,
