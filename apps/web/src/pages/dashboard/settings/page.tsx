@@ -58,7 +58,14 @@ export function SettingsPage() {
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
           <TabsTrigger value="email">Email Delivery</TabsTrigger>
           <TabsTrigger value="api">API Keys</TabsTrigger>
-          <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
+          <TabsTrigger value="webhooks">
+            <span className="flex items-center gap-1">
+              Webhooks
+              <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-medium text-yellow-700 dark:text-yellow-400">
+                BETA
+              </span>
+            </span>
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="profile">
           <ProfileSettings />

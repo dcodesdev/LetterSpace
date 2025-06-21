@@ -142,7 +142,15 @@ export function WebhookDetails() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{webhook.name}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            {webhook.name}
+            <Badge
+              variant="outline"
+              className="bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30 text-xs"
+            >
+              BETA
+            </Badge>
+          </CardTitle>
           <CardDescription>
             Webhook endpoint details and request logs
           </CardDescription>

@@ -120,7 +120,15 @@ export function WebhookSettings() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Receiving Webhooks</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                Receiving Webhooks
+                <Badge
+                  variant="outline"
+                  className="bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30"
+                >
+                  BETA
+                </Badge>
+              </CardTitle>
               <CardDescription>
                 Configure endpoints to receive webhook notifications from SMTP
                 providers and automatically update message delivery statuses
@@ -135,10 +143,18 @@ export function WebhookSettings() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Add Webhook</DialogTitle>
+                  <DialogTitle className="flex items-center gap-2">
+                    Add Webhook
+                    <Badge
+                      variant="outline"
+                      className="bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30 text-xs"
+                    >
+                      BETA
+                    </Badge>
+                  </DialogTitle>
                   <DialogDescription>
                     Create a new webhook endpoint to receive events from SMTP
-                    servers
+                    servers. This feature is in beta.
                   </DialogDescription>
                 </DialogHeader>
                 <WebhookForm
@@ -244,10 +260,18 @@ export function WebhookSettings() {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Edit Webhook</DialogTitle>
+                              <DialogTitle className="flex items-center gap-2">
+                                Edit Webhook
+                                <Badge
+                                  variant="outline"
+                                  className="bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30 text-xs"
+                                >
+                                  BETA
+                                </Badge>
+                              </DialogTitle>
                               <DialogDescription>
                                 Update your webhook configuration for receiving
-                                SMTP events
+                                SMTP events. This feature is in beta.
                               </DialogDescription>
                             </DialogHeader>
                             <WebhookForm
