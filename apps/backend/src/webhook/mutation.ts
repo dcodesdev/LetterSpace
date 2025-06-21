@@ -5,7 +5,7 @@ import { TRPCError } from "@trpc/server"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  url: z.string().url("Invalid URL"),
+  url: z.string().default(""),
   isActive: z.boolean().default(true),
   authCode: z.string().optional(),
   transformCode: z.string().optional(),

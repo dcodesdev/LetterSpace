@@ -18,7 +18,6 @@ import { CodeEditor } from "@/components/code-editor"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  url: z.string().url("Must be a valid URL"),
   isActive: z.boolean(),
   authCode: z.string().optional(),
   transformCode: z.string().optional(),
@@ -67,7 +66,6 @@ export function WebhookForm({
     resolver: zodResolver(webhookSchema),
     defaultValues: {
       name: "",
-      url: "",
       isActive: true,
       authCode: DEFAULT_AUTH_CODE,
       transformCode: DEFAULT_TRANSFORM_CODE,
@@ -89,26 +87,6 @@ export function WebhookForm({
               </FormControl>
               <FormDescription>
                 A descriptive name for this webhook
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>URL</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="https://smtp-provider.com/webhook"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                The URL where your SMTP provider will send webhook events
               </FormDescription>
               <FormMessage />
             </FormItem>

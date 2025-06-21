@@ -118,10 +118,10 @@ export function WebhookSettings() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Webhooks</CardTitle>
+              <CardTitle>Receiving Webhooks</CardTitle>
               <CardDescription>
-                Configure webhooks to receive SMTP server events and update
-                message statuses automatically
+                Configure endpoints to receive webhook notifications from SMTP
+                providers and automatically update message delivery statuses
               </CardDescription>
             </div>
             <Dialog open={isCreating} onOpenChange={setIsCreating}>
@@ -135,7 +135,8 @@ export function WebhookSettings() {
                 <DialogHeader>
                   <DialogTitle>Add Webhook</DialogTitle>
                   <DialogDescription>
-                    Create a new webhook endpoint to receive SMTP server events
+                    Create a new webhook endpoint to receive events from SMTP
+                    servers
                   </DialogDescription>
                 </DialogHeader>
                 <WebhookForm
@@ -162,8 +163,8 @@ export function WebhookSettings() {
                 <h3 className="mt-4 text-lg font-semibold">No webhooks</h3>
                 <p className="mb-4 mt-2 text-sm text-muted-foreground">
                   You haven't created any webhooks yet. Add one to start
-                  receiving SMTP server events and automatically update message
-                  statuses.
+                  receiving events from SMTP servers and automatically update
+                  message statuses.
                 </p>
                 <Button onClick={() => setIsCreating(true)}>
                   <Plus className="mr-2 h-4 w-4" />
@@ -176,7 +177,6 @@ export function WebhookSettings() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>URL</TableHead>
                   <TableHead>Webhook URL</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
@@ -188,9 +188,6 @@ export function WebhookSettings() {
                   <TableRow key={webhook.id}>
                     <TableCell className="font-medium">
                       {webhook.name}
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate">
-                      {webhook.url}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -237,7 +234,8 @@ export function WebhookSettings() {
                             <DialogHeader>
                               <DialogTitle>Edit Webhook</DialogTitle>
                               <DialogDescription>
-                                Update your webhook configuration
+                                Update your webhook configuration for receiving
+                                SMTP events
                               </DialogDescription>
                             </DialogHeader>
                             <WebhookForm
@@ -248,7 +246,6 @@ export function WebhookSettings() {
                               onCancel={() => setEditingWebhook(null)}
                               defaultValues={{
                                 name: webhook.name,
-                                url: webhook.url,
                                 isActive: webhook.isActive,
                                 authCode: webhook.authCode || undefined,
                                 transformCode:
