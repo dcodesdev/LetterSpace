@@ -15,4 +15,9 @@ export const logger = {
   warn(...messages: unknown[]) {
     console.warn(formatLog(messages))
   },
+  debug(...messages: unknown[]) {
+    if (process.env.DEBUG) {
+      console.debug(formatLog(messages))
+    }
+  },
 }
