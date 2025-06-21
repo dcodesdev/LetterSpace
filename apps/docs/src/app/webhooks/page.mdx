@@ -2,77 +2,83 @@
 
 LetterSpace's webhook system allows you to receive real-time notifications about email delivery events from your SMTP provider.
 
-## Webhook Events
-
-<WebhookEventsReference />
-
 ## Webhook Endpoint
 
-All webhooks are sent to your unique webhook URL:
+Create webhooks in the dashboard to receive a unique URL for your webhook endpoint.
 
 ```
 POST /webhook/{webhookId}
 ```
 
-## Event Processing
+## Authentication
 
-When your SMTP provider sends a webhook, LetterSpace:
+LetterSpace supports custom authentication for webhooks through JavaScript code. You can write your own authentication function that validates incoming webhook requests.
 
-1. Validates the webhook exists and is active
-2. Runs your authorization code (if provided) to verify authenticity
-3. Runs your transform code to normalize the payload
-4. Finds the message by `messageId`
-5. Updates the message status based on the event type
+Your authentication function should be named `authorize` and return `true` for valid requests:
+
+```javascript
+function authorize(headers, body, query, params) {
+  // Your custom authentication logic
+  // Return true if the request is valid, false otherwise
+
+  // Example: Check for a specific header
+  if (headers["x-api-key"] === "your-secret-key") {
+    return true
+  }
+
+  return false
+}
+```
+
+The function receives:
+
+- `headers`: Request headers object
+- `body`: Request body (parsed JSON)
+- `query`: Query parameters
+- `params`: URL parameters
 
 ## Transform Function
 
-Your transform function must return an object with these fields:
+Since LetterSpace works with all SMTP providers, it provides a transform function to normalize payloads from different providers into a consistent format.
 
-```typescript
-interface WebhookEvent {
-  messageId: string // Must match Message.messageId in database
-  event: string // One of the accepted event types above
-  timestamp?: string // Optional event timestamp
-  reason?: string // Optional error reason for failed events
-}
-```
-
-## SMTP Provider Examples
-
-### Resend
+Your transform function should be named `transform` and return an object with `messageId` and `event` fields:
 
 ```javascript
 function transform(payload, headers, query) {
+  // Transform the provider-specific payload into LetterSpace format
+
   return {
-    messageId: payload.data.message_id,
-    event: payload.type.replace("email.", ""), // 'email.delivered' -> 'delivered'
-    reason: payload.data.reason,
+    messageId: payload.messageId, // Required: External message ID
+    event: payload.event, // Required: Event type
+    timestamp: payload.timestamp, // Optional: Event timestamp
+    reason: payload.reason, // Optional: Failure/bounce reason
   }
 }
 ```
 
-### SendGrid
+The function receives:
 
-```javascript
-function transform(payload, headers, query) {
-  // SendGrid sends arrays of events
-  const event = payload[0]
-  return {
-    messageId: event.sg_message_id,
-    event: event.event, // 'delivered', 'open', 'click', etc.
-    reason: event.reason,
-  }
-}
-```
+- `payload`: The raw webhook payload from your SMTP provider
+- `headers`: Request headers
+- `query`: Query parameters
 
-### Mailgun
+### Required Fields
 
-```javascript
-function transform(payload, headers, query) {
-  return {
-    messageId: payload["message-id"],
-    event: payload.event, // 'delivered', 'opened', 'clicked', etc.
-    reason: payload.reason || payload.description,
-  }
-}
-```
+The transformed payload must include:
+
+- `messageId`: The external message ID from your SMTP provider
+- `event`: The event type (see supported events below)
+
+### Webhook Events
+
+<WebhookEventsReference />
+
+### Response Codes
+
+The webhook endpoint returns the following HTTP status codes:
+
+- **200 OK**: Webhook processed successfully
+- **400 Bad Request**: Missing webhook ID, required fields, or unknown event type
+- **401 Unauthorized**: Authorization function returned false
+- **404 Not Found**: Webhook not found, inactive, or message not found
+- **500 Internal Server Error**: Authorization/transform code error or server error

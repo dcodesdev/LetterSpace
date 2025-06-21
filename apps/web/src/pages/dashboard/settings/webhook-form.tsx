@@ -13,8 +13,7 @@ import {
   Switch,
   Button,
 } from "@repo/ui"
-import { CodeEditor } from "@/components/code-editor"
-import { WebhookEventsReference } from "@/components"
+import { MonacoEditor, WebhookEventsReference } from "@/components"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -100,10 +99,12 @@ export function WebhookForm({
             <FormItem>
               <FormLabel>Authorization Code (Optional)</FormLabel>
               <FormControl>
-                <CodeEditor
+                <MonacoEditor
                   value={field.value || ""}
                   onChange={field.onChange}
                   placeholder="JavaScript code to authorize webhook requests"
+                  height={200}
+                  language="javascript"
                 />
               </FormControl>
               <FormDescription>
@@ -123,10 +124,12 @@ export function WebhookForm({
             <FormItem>
               <FormLabel>Transform Code (Optional)</FormLabel>
               <FormControl>
-                <CodeEditor
+                <MonacoEditor
                   value={field.value || ""}
                   onChange={field.onChange}
                   placeholder="JavaScript code to transform webhook payload"
+                  height={200}
+                  language="javascript"
                 />
               </FormControl>
               <FormDescription>
