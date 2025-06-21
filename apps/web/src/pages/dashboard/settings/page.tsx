@@ -1,6 +1,5 @@
-"use client"
-
 import { TabsContent, TabsTrigger, TabsList, Tabs } from "@repo/ui"
+import { useNavigate, useSearchParams } from "react-router"
 import { SmtpSettings } from "./smtp-settings"
 import { GeneralSettings } from "./general-settings"
 import { ApiKeys } from "./api-keys"
@@ -14,6 +13,10 @@ import { ProfileSettings } from "./profile-settings"
 
 export function SettingsPage() {
   const { organization } = useSession()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const defaultTab = searchParams.get("tab") || "profile"
+
   const { isLoading } = trpc.settings.getSmtp.useQuery(
     {
       organizationId: organization?.id ?? "",
@@ -41,7 +44,13 @@ export function SettingsPage() {
         <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-4">
+      <Tabs
+        defaultValue={defaultTab}
+        onValueChange={(value) => {
+          navigate(`/dashboard/settings?tab=${value}`)
+        }}
+        className="space-y-4"
+      >
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
