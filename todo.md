@@ -1,5 +1,7 @@
 # Todos
 
+- [ ] the webhook url in the settings page shouldn't be showing, should have an eye icon and when pressed view it and when pressed the link it should copy to clipboard with a feedback icon when clicked, no toast.
+
 ## For later
 
 Anything in this list, do not touch them or do them.
