@@ -5,43 +5,31 @@ interface PackageJson {
   version: string
 }
 
-function generateTags(
-  version: string,
-  runtime: "bun" | "node",
-  isBeta = false
-): string[] {
+function generateTags(version: string, runtime: "bun" | "node"): string[] {
   const tags: string[] = []
   const baseImage = "ghcr.io/dcodesdev/letterspace"
 
-  // Add -beta suffix if this is a beta build
-  const finalVersion = isBeta ? `${version}-beta` : version
-
-  // Parse version (e.g., "0.9.2")
-  const [major, minor] = version.split(".")
-  const isPrerelease = version.includes("-") || isBeta
+  // Parse version (e.g., "0.9.2" or "0.9.2-beta")
+  const versionParts = version.split(".")
+  const major = versionParts[0].split("-")[0]
+  const minor = versionParts[1]?.split("-")[0]
+  const isPrerelease = version.includes("-")
 
   if (runtime === "bun") {
-    // Bun tags
-    tags.push(`${baseImage}:${finalVersion}`)
-    if (!isBeta) {
+    // Bun tags (default runtime - gets clean tags)
+    tags.push(`${baseImage}:${version}`)
+    if (!isPrerelease) {
       tags.push(`${baseImage}:${major}.${minor}`)
       tags.push(`${baseImage}:${major}`)
-    }
-
-    if (!isPrerelease) {
       tags.push(`${baseImage}:latest`)
       tags.push(`${baseImage}:bun`)
     }
   } else {
-    // Node tags
-    tags.push(`${baseImage}:${finalVersion}-node`)
-    if (!isBeta) {
+    // Node tags (always suffixed with -node, never gets latest)
+    tags.push(`${baseImage}:${version}-node`)
+    if (!isPrerelease) {
       tags.push(`${baseImage}:${major}.${minor}-node`)
       tags.push(`${baseImage}:${major}-node`)
-    }
-
-    if (!isPrerelease) {
-      tags.push(`${baseImage}:latest-node`)
       tags.push(`${baseImage}:node`)
     }
   }
@@ -51,10 +39,9 @@ function generateTags(
 
 function main() {
   const runtime = process.argv[2] as "bun" | "node"
-  const isBeta = process.argv[3] === "--beta"
 
   if (!runtime || !["bun", "node"].includes(runtime)) {
-    console.error("Usage: bun gen-container-img-tags.ts <bun|node> [--beta]")
+    console.error("Usage: bun gen-container-img-tags.ts <bun|node>")
     process.exit(1)
   }
 
@@ -64,7 +51,7 @@ function main() {
       readFileSync(packageJsonPath, "utf-8")
     )
 
-    const tags = generateTags(packageJson.version, runtime, isBeta)
+    const tags = generateTags(packageJson.version, runtime)
     console.log(tags.join(","))
   } catch (error) {
     console.error("Error reading package.json:", error)
