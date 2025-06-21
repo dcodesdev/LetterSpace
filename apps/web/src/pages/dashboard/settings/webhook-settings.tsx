@@ -109,7 +109,8 @@ export function WebhookSettings() {
   }
 
   const getWebhookUrl = (webhookId: string) => {
-    const baseUrl = window.location.origin
+    // Get backend URL from environment or API configuration
+    const baseUrl = import.meta.env.VITE_API_URL || window.location.origin
     return `${baseUrl}/webhook/${webhookId}`
   }
 

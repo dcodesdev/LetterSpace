@@ -61,7 +61,8 @@ export function WebhookDetails() {
   const logs = logsData?.pages.flatMap((page) => page.items) ?? []
 
   const getWebhookUrl = () => {
-    const baseUrl = window.location.origin
+    // Get backend URL from environment or API configuration
+    const baseUrl = import.meta.env.VITE_API_URL || window.location.origin
     return `${baseUrl}/webhook/${id}`
   }
 
