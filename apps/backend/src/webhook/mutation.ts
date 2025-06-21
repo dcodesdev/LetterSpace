@@ -5,7 +5,15 @@ import { TRPCError } from "@trpc/server"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  url: z.string().default(""),
+  url: z
+    .string()
+    .url("Must be a valid HTTP or HTTPS URL")
+    .refine(
+      (url) => url.startsWith("http://") || url.startsWith("https://"),
+      "URL must start with http:// or https://"
+    )
+    .or(z.literal(""))
+    .default(""),
   isActive: z.boolean().default(true),
   authCode: z.string().optional(),
   transformCode: z.string().optional(),
