@@ -9,6 +9,7 @@ const messageStatusEnum = z.enum([
   "QUEUED",
   "PENDING",
   "SENT",
+  "AWAITING_WEBHOOK",
   "OPENED",
   "CLICKED",
   "FAILED",
