@@ -56,7 +56,7 @@ function transform(payload, headers, query) {
     messageId: payload.messageId, // Required: External message ID from SMTP provider
     event: payload.event, // Required: Event type (delivered, opened, clicked, etc.)
     timestamp: payload.timestamp, // Optional: Event timestamp
-    reason: payload.reason, // Optional: Failure/bounce reason
+    error: payload.error, // Optional: Failure/bounce error message
   }
 }
 ```

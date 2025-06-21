@@ -53,7 +53,7 @@ const DEFAULT_TRANSFORM_CODE = `function transform(payload, headers, query) {
   return {
     messageId: payload.messageId || payload.message_id,
     event: payload.event || payload.event_type,
-    reason: payload.reason || payload.error_message,
+    error: payload.error || payload.error_message,
     timestamp: timestamp
   };
 }`

@@ -7,7 +7,7 @@ export const WebhookEventSchema = z
     messageId: z.string(),
     event: z.string(),
     timestamp: z.string().optional(),
-    reason: z.string().optional(),
+    error: z.string().optional(),
   })
   .passthrough() // Allow additional fields
 
@@ -18,7 +18,7 @@ export interface WebhookEvent {
   messageId: string
   event: string
   timestamp?: string
-  reason?: string
+  error?: string
   [key: string]: unknown
 }
 

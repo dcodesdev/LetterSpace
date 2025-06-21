@@ -40,7 +40,7 @@ export async function processWebhookEvent(
 
   const newStatus = eventMapping.status
   const errorMessage =
-    transformedData.reason || eventMapping.errorDefault || null
+    transformedData.error || eventMapping.errorDefault || null
 
   // Update the message
   await prisma.message.update({
