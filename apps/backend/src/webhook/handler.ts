@@ -4,6 +4,7 @@ import { logger } from "../utils/logger"
 import { runAuthorization } from "./authorization"
 import { transformPayload } from "./transformer"
 import { processWebhookEvent } from "./processor"
+import { WebhookResult } from "./types"
 
 // TODO: Consider these improvements:
 // 1. Add rate limiting to prevent webhook flooding
@@ -20,7 +21,7 @@ export const handleWebhook = async (
   let responseCode: number | undefined
   let responseBody: string | undefined
   let errorMessage: string | undefined
-  let transformResult: any = null
+  let transformResult: WebhookResult | null = null
 
   try {
     const webhookId = req.params.webhookId
@@ -94,7 +95,7 @@ export const handleWebhook = async (
         data: {
           webhookId: req.params.webhookId!,
           requestBody: req.body,
-          transformedPayload: transformResult?.data || null,
+          transformedPayload: transformResult?.data,
           responseCode,
           responseBody,
           error: errorMessage,
