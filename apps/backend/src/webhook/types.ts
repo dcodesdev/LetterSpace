@@ -2,25 +2,16 @@ import { z } from "zod"
 import { MessageStatus } from "../../prisma/client"
 
 // Schema for transformed webhook event
-export const WebhookEventSchema = z
-  .object({
-    messageId: z.string(),
-    event: z.string(),
-    timestamp: z.string().optional(),
-    error: z.string().optional(),
-  })
-  .passthrough() // Allow additional fields
+export const WebhookEventSchema = z.object({
+  messageId: z.string(),
+  event: z.string(),
+  error: z.string().nullable().optional(),
+})
 
 // Schema for authorization result (must be boolean)
 export const AuthorizationResultSchema = z.boolean()
 
-export interface WebhookEvent {
-  messageId: string
-  event: string
-  timestamp?: string
-  error?: string
-  [key: string]: unknown
-}
+export type WebhookEvent = z.infer<typeof WebhookEventSchema>
 
 // Event mapping configuration
 export const EVENT_STATUS_MAP: Record<
