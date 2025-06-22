@@ -23,6 +23,7 @@ services:
     environment:
       DATABASE_URL: "postgresql://user:password@db:5432/letterspace?schema=public"
       JWT_SECRET: your_super_secret_jwt_key
+      NODE_ENV: production
     networks:
       - app_network
 
