@@ -1,0 +1,200 @@
+# Incoming Webhooks API Reference (Beta)
+
+<div className="rounded-lg border bg-yellow-50 dark:bg-yellow-900/20 p-4 my-4">
+  <p className="font-semibold">⚠️ Beta Feature</p>
+  <p className="text-sm mt-1">
+    Webhooks are currently in beta. The API and functionality may change based
+    on user feedback.
+  </p>
+</div>
+
+LetterSpace's incoming webhook system allows you to receive real-time notifications about email delivery events from your SMTP provider. These are webhooks that your SMTP service (like SendGrid, Mailgun, Amazon SES, etc.) sends to LetterSpace to notify about email events.
+
+> **Note**: These are incoming webhooks that LetterSpace receives from SMTP providers, not outgoing webhooks that LetterSpace sends to your application.
+
+## Webhook Endpoint
+
+Create webhooks in the LetterSpace dashboard to receive a unique URL that your SMTP provider will send events to.
+
+```
+POST /webhook/{webhookId}
+```
+
+Configure this URL in your SMTP provider's webhook settings to receive delivery events.
+
+## Authentication
+
+LetterSpace supports custom authentication for webhooks through JavaScript code. You can write your own authentication function that validates incoming webhook requests.
+
+> **Security Warning**: Authentication and transform code is stored in plain text in the database, including any secrets or API keys you include. This may change in future versions for better security.
+
+Your authentication function should be named `authorize` and return `true` for valid requests:
+
+```javascript
+function authorize(headers, body, query, params) {
+  // Your custom authentication logic
+  // Return true if the request is valid, false otherwise
+
+  // Example: Check for a specific header
+  if (headers["x-api-key"] === "your-secret-key") {
+    return true
+  }
+
+  return false
+}
+```
+
+The function receives:
+
+- `headers`: Request headers object
+- `body`: Request body (parsed JSON)
+- `query`: Query parameters
+- `params`: URL parameters
+
+## Transform Function
+
+Since different SMTP providers send webhook payloads in different formats, LetterSpace provides a transform function to normalize incoming payloads from various providers into a consistent format that LetterSpace can process.
+
+### Runtime Limits
+
+Transform functions run in a sandboxed JavaScript environment with the following limits:
+
+- **Execution Timeout**: 5 seconds maximum
+- **Memory Limit**: 16MB (configurable via `WEBHOOK_MEMORY_LIMIT` environment variable)
+- **Stack Size**: 256KB (configurable via `WEBHOOK_MAX_STACK_SIZE` environment variable)
+
+If the transform function exceeds these limits, the webhook request will fail with a 500 error.
+
+Your transform function should be named `transform` and return an object with `messageId` and `event` fields:
+
+```javascript
+function transform(payload, headers, query) {
+  // Transform the SMTP provider's webhook payload into LetterSpace format
+  // Example for a hypothetical SMTP provider:
+
+  return {
+    messageId: payload.messageId, // Required: External message ID from SMTP provider
+    event: payload.event, // Required: Event type (pending, delayed, delivered, opened, clicked, etc.)
+    timestamp: payload.timestamp, // Optional: Event timestamp
+    error: payload.error, // Optional: Failure/bounce error message
+  }
+}
+```
+
+The function receives:
+
+- `payload`: The raw webhook payload sent by your SMTP provider
+- `headers`: HTTP request headers from the SMTP provider
+- `query`: Query parameters from the webhook URL
+
+### Required Fields
+
+The transformed payload returned by your transform function must include:
+
+- `messageId`: The external message ID provided by your SMTP provider
+- `event`: The event type that occurred (see supported events below)
+
+## Common SMTP Providers
+
+This incoming webhook system works with popular SMTP providers including:
+
+- **SendGrid**: Configure the webhook URL in your SendGrid Event Webhook settings
+- **Mailgun**: Set up the webhook URL in your Mailgun webhook configuration
+- **Amazon SES**: Configure SNS notifications to send to your webhook URL
+- **Postmark**: Add the webhook URL to your Postmark webhook settings
+- **Mailjet**: Configure the webhook URL in your Mailjet event tracking
+
+Each provider sends webhook data in a different format, which is why the transform function is necessary to normalize the data.
+
+### Webhook Events
+
+<WebhookEventsReference />
+
+## Message Statuses & Events
+
+LetterSpace tracks the lifecycle of every email message through various statuses. These statuses are updated automatically when webhook events are received from your SMTP provider.
+
+### Status Overview
+
+| Status       | Description                                                     | Triggered By                                        |
+| ------------ | --------------------------------------------------------------- | --------------------------------------------------- |
+| `PENDING`    | Email is queued or delayed for sending                          | Initial state, webhook events: `pending`, `delayed` |
+| `SENT`       | Email was successfully delivered to the recipient's mail server | Webhook events: `delivered`, `sent`                 |
+| `OPENED`     | Recipient opened the email                                      | Webhook events: `opened`, `open`                    |
+| `CLICKED`    | Recipient clicked a link in the email                           | Webhook events: `clicked`, `click`                  |
+| `FAILED`     | Email delivery failed (bounced, rejected, etc.)                 | Webhook events: `bounced`, `bounce`, `failed`       |
+| `COMPLAINED` | Recipient marked the email as spam                              | Webhook events: `complained`, `complaint`, `spam`   |
+
+### Transform Function Examples
+
+Here are examples of how to map common SMTP provider events to LetterSpace statuses:
+
+#### Example 1
+
+```javascript
+function transform(payload, headers, query) {
+  const eventMap = {
+    processed: "pending",
+    deferred: "delayed",
+    delivered: "delivered",
+    open: "opened",
+    click: "clicked",
+    bounce: "bounced",
+    spamreport: "complained",
+  }
+
+  return {
+    messageId: payload.smtp_message_id,
+    event: eventMap[payload.event] || payload.event,
+    error: payload.reason,
+  }
+}
+```
+
+#### Example 2
+
+```javascript
+function transform(payload, headers, query) {
+  const eventData = payload["event-data"]
+  const eventMap = {
+    accepted: "pending",
+    delivered: "delivered",
+    opened: "opened",
+    clicked: "clicked",
+    failed: "failed",
+    complained: "complained",
+  }
+
+  return {
+    messageId: eventData.message.headers["message-id"],
+    event: eventMap[eventData.event] || eventData.event,
+    error: eventData.reason,
+  }
+}
+```
+
+## Webhook Status
+
+Webhooks must be **active** to receive and process events. Inactive webhooks will return a 404 error. You can enable/disable webhooks in the dashboard settings.
+
+## Request Logging
+
+All webhook requests are automatically logged for debugging purposes, including:
+
+- Request payload
+- Transformed payload (if transform function is used)
+- Response status and body
+- Execution duration
+- Any errors that occurred
+
+You can view these logs in the webhook details page in your dashboard.
+
+## Response Codes
+
+The webhook endpoint returns the following HTTP status codes:
+
+- **200 OK**: Webhook processed successfully
+- **400 Bad Request**: Missing webhook ID, required fields, or unknown event type
+- **401 Unauthorized**: Authorization function returned false
+- **404 Not Found**: Webhook not found, inactive, or message not found
+- **500 Internal Server Error**: Authorization/transform code error or server error

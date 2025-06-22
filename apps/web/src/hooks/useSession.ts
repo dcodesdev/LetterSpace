@@ -6,7 +6,10 @@ import { useLocalStorage } from "usehooks-ts"
 
 export function useSession() {
   const [orgId, setOrgId, removeOrgId] = useLocalStorage("orgId", "")
-  const user = trpc.user.me.useQuery()
+  const user = trpc.user.me.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  })
 
   const organization = useMemo(() => {
     return (

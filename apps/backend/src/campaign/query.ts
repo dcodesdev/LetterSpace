@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server"
 import { paginationSchema } from "../utils/schemas"
 import { Prisma } from "../../prisma/client"
 import { resolveProps } from "../utils/pProps"
+import { messageStatus } from "../utils/message-status"
 
 export const listCampaigns = authProcedure
   .input(z.object({ organizationId: z.string() }).merge(paginationSchema))
@@ -189,7 +190,7 @@ export const getCampaign = authProcedure
         where: {
           campaignId: campaign.id,
           status: {
-            in: ["SENT", "OPENED", "CLICKED"],
+            in: messageStatus.deliveredMessages,
           },
         },
       }),
@@ -203,7 +204,7 @@ export const getCampaign = authProcedure
         where: {
           campaignId: campaign.id,
           status: {
-            not: "QUEUED",
+            in: messageStatus.processedMessages,
           },
         },
       }),
@@ -217,7 +218,7 @@ export const getCampaign = authProcedure
         where: {
           campaignId: campaign.id,
           status: {
-            in: ["OPENED", "CLICKED"],
+            in: messageStatus.openedMessages,
           },
         },
       }),

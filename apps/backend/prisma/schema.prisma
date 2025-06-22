@@ -24,6 +24,7 @@ model Organization {
   ApiKeys               ApiKey[]
   GeneralSettings       GeneralSettings?
   EmailDeliverySettings EmailDeliverySettings?
+  Webhooks              Webhook[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -194,11 +195,13 @@ enum MessageStatus {
   QUEUED
   PENDING
   SENT
+  AWAITING_WEBHOOK
   OPENED
   CLICKED
   FAILED
   RETRYING
   CANCELLED
+  COMPLAINED
 }
 
 model Message {
@@ -225,6 +228,7 @@ model Message {
   updatedAt DateTime @updatedAt
 
   @@index([updatedAt, id])
+  @@index([messageId])
 }
 
 model TrackedLink {
@@ -325,4 +329,41 @@ model EmailDeliverySettings {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Webhook {
+  id String @id @default(uuid())
+
+  name          String
+  isActive      Boolean @default(true)
+  authCode      String? @db.Text
+  transformCode String? @db.Text
+
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  WebhookLogs WebhookLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
+}
+
+model WebhookLog {
+  id String @id @default(uuid())
+
+  webhookId String
+  Webhook   Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  requestBody        Json
+  transformedPayload Json?
+  responseCode       Int?
+  responseBody       String? @db.Text
+  error              String? @db.Text
+  duration           Int? // in milliseconds
+
+  createdAt DateTime @default(now())
+
+  @@index([webhookId, createdAt(sort: Desc)])
 }

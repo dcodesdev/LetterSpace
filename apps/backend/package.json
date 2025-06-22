@@ -10,7 +10,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "generate": "prisma generate",
-    "generate:sql": "prisma generate --sql && pnpm exec prettier --write prisma/client",
+    "generate:sql": "prisma generate --sql",
     "test": "dotenv -e .env.test -- vitest"
   },
   "exports": {
@@ -37,6 +37,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.10.0",
     "p-map": "^7.0.3",
+    "quickjs-emscripten": "^0.31.0",
     "superjson": "^2.2.2",
     "uuid": "^11.0.5",
     "zod": "^3.24.2"
