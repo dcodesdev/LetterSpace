@@ -7,7 +7,16 @@ import Cookies from "js-cookie"
 import SuperJSON from "superjson"
 
 export function TrpcProvider({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 60 * 1000,
+          },
+        },
+      })
+  )
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
