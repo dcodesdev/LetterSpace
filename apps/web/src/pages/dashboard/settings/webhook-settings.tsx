@@ -28,7 +28,7 @@ import { toast } from "sonner"
 import { format } from "date-fns"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
-import { AlertDialogConfirmation, CopyButton } from "@/components"
+import { AlertDialogConfirmation, WebhookUrlDisplay } from "@/components"
 import { WebhookForm, WebhookFormData } from "./webhook-form"
 
 dayjs.extend(relativeTime)
@@ -213,12 +213,10 @@ export function WebhookSettings() {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <code className="rounded bg-muted px-2 py-1 text-xs">
-                          {getWebhookUrl(webhook.id)}
-                        </code>
-                        <CopyButton text={getWebhookUrl(webhook.id)} />
-                      </div>
+                      <WebhookUrlDisplay
+                        url={getWebhookUrl(webhook.id)}
+                        variant="table"
+                      />
                     </TableCell>
                     <TableCell>
                       <Badge

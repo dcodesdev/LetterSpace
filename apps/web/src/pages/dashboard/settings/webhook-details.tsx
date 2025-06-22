@@ -21,7 +21,7 @@ import { useSession } from "@/hooks"
 import { format } from "date-fns"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
-import { CopyButton } from "@/components"
+import { WebhookUrlDisplay } from "@/components"
 
 dayjs.extend(relativeTime)
 
@@ -157,15 +157,7 @@ export function WebhookDetails() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Webhook URL</label>
-              <div className="mt-1 flex items-center gap-2">
-                <code className="flex-1 rounded bg-muted px-3 py-2 text-sm">
-                  {getWebhookUrl()}
-                </code>
-                <CopyButton text={getWebhookUrl()} />
-              </div>
-            </div>
+            <WebhookUrlDisplay url={getWebhookUrl()} variant="details" />
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Created</label>
