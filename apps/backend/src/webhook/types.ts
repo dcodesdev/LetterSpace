@@ -36,9 +36,13 @@ export const EVENT_STATUS_MAP: Record<
 export const MEMORY_LIMIT = 128 * 1024 * 1024 // 128MB
 export const MAX_STACK_SIZE = 1024 * 1024 // 1MB
 
-export interface WebhookResult {
-  success: boolean
-  status?: number
-  error?: string
-  data?: WebhookEvent
-}
+export type WebhookResult =
+  | {
+      success: false
+      status: number
+      error: string
+    }
+  | {
+      success: true
+      data: WebhookEvent
+    }

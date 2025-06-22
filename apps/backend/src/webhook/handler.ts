@@ -71,7 +71,7 @@ export const handleWebhook = async (
       return
     }
 
-    const transformedData = transformResult.data!
+    const transformedData = transformResult.data
 
     logger.debug("transformedData", transformedData)
 
@@ -95,7 +95,9 @@ export const handleWebhook = async (
         data: {
           webhookId: req.params.webhookId!,
           requestBody: req.body,
-          transformedPayload: transformResult?.data,
+          transformedPayload: transformResult?.success
+            ? transformResult?.data
+            : undefined,
           responseCode,
           responseBody,
           error: errorMessage,
