@@ -74,7 +74,7 @@ function transform(payload, headers, query) {
 
   return {
     messageId: payload.messageId, // Required: External message ID from SMTP provider
-    event: payload.event, // Required: Event type (delivered, opened, clicked, etc.)
+    event: payload.event, // Required: Event type (pending, delayed, delivered, opened, clicked, etc.)
     timestamp: payload.timestamp, // Optional: Event timestamp
     error: payload.error, // Optional: Failure/bounce error message
   }
@@ -109,6 +109,69 @@ Each provider sends webhook data in a different format, which is why the transfo
 ### Webhook Events
 
 <WebhookEventsReference />
+
+## Message Statuses & Events
+
+LetterSpace tracks the lifecycle of every email message through various statuses. These statuses are updated automatically when webhook events are received from your SMTP provider.
+
+### Status Overview
+
+| Status       | Description                                                     | Triggered By                                        |
+| ------------ | --------------------------------------------------------------- | --------------------------------------------------- |
+| `PENDING`    | Email is queued or delayed for sending                          | Initial state, webhook events: `pending`, `delayed` |
+| `SENT`       | Email was successfully delivered to the recipient's mail server | Webhook events: `delivered`, `sent`                 |
+| `OPENED`     | Recipient opened the email                                      | Webhook events: `opened`, `open`                    |
+| `CLICKED`    | Recipient clicked a link in the email                           | Webhook events: `clicked`, `click`                  |
+| `FAILED`     | Email delivery failed (bounced, rejected, etc.)                 | Webhook events: `bounced`, `bounce`, `failed`       |
+| `COMPLAINED` | Recipient marked the email as spam                              | Webhook events: `complained`, `complaint`, `spam`   |
+
+### Transform Function Examples
+
+Here are examples of how to map common SMTP provider events to LetterSpace statuses:
+
+#### Example 1
+
+```javascript
+function transform(payload, headers, query) {
+  const eventMap = {
+    processed: "pending",
+    deferred: "delayed",
+    delivered: "delivered",
+    open: "opened",
+    click: "clicked",
+    bounce: "bounced",
+    spamreport: "complained",
+  }
+
+  return {
+    messageId: payload.smtp_message_id,
+    event: eventMap[payload.event] || payload.event,
+    error: payload.reason,
+  }
+}
+```
+
+#### Example 2
+
+```javascript
+function transform(payload, headers, query) {
+  const eventData = payload["event-data"]
+  const eventMap = {
+    accepted: "pending",
+    delivered: "delivered",
+    opened: "opened",
+    clicked: "clicked",
+    failed: "failed",
+    complained: "complained",
+  }
+
+  return {
+    messageId: eventData.message.headers["message-id"],
+    event: eventMap[eventData.event] || eventData.event,
+    error: eventData.reason,
+  }
+}
+```
 
 ## Webhook Status
 

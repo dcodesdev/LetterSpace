@@ -7,6 +7,12 @@ export interface WebhookEvent {
 
 export const WEBHOOK_EVENTS: WebhookEvent[] = [
   {
+    name: "pending",
+    aliases: ["delayed"],
+    status: "PENDING",
+    description: "Email is pending or delayed in the queue",
+  },
+  {
     name: "delivered",
     aliases: ["sent"],
     status: "SENT",

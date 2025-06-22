@@ -18,6 +18,8 @@ export const EVENT_STATUS_MAP: Record<
   string,
   { status: MessageStatus; errorDefault?: string }
 > = {
+  pending: { status: "PENDING" },
+  delayed: { status: "PENDING" },
   delivered: { status: "SENT" },
   sent: { status: "SENT" },
   opened: { status: "OPENED" },

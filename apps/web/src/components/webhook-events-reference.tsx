@@ -1,18 +1,14 @@
-"use client"
-
 import { Card, CardContent, CardHeader, CardTitle, Badge } from "@repo/ui"
 import { WEBHOOK_EVENTS, type WebhookEvent } from "@repo/shared"
 
 interface WebhookEventsReferenceProps {
   title?: string
-  description?: string
   events?: WebhookEvent[]
   className?: string
 }
 
 export function WebhookEventsReference({
   title = "Accepted Event Types",
-  description = "Your webhook transform code must return one of these event types:",
   events = WEBHOOK_EVENTS,
   className,
 }: WebhookEventsReferenceProps) {
@@ -22,7 +18,21 @@ export function WebhookEventsReference({
         <CardTitle className="text-sm">{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <div className="text-sm text-muted-foreground">
+          <span>
+            Your webhook transform code must return one of these event types.
+            For detailed information about message statuses, see the{" "}
+            <a
+              href="https://docs.letterspace.app/webhooks"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:no-underline"
+            >
+              Message Statuses documentation
+            </a>
+            .
+          </span>
+        </div>
         <div className="space-y-2">
           {events.map((event) => (
             <div key={event.name} className="flex items-start gap-3">
