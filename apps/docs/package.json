@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@repo/shared": "workspace:*",
-    "next": "15.1.7",
+    "next": "15.1.11",
     "nextra": "^4.2.11",
     "nextra-theme-docs": "^4.2.11",
     "react": "^19.0.0",
