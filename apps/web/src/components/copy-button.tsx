@@ -3,15 +3,20 @@ import { Button } from "@repo/ui"
 import { useState } from "react"
 
 interface CopyButtonProps {
-  onCopy: () => void | Promise<void>
+  text?: string
+  onCopy?: () => void | Promise<void>
   className?: string
 }
 
-export function CopyButton({ onCopy, className }: CopyButtonProps) {
+export function CopyButton({ text, onCopy, className }: CopyButtonProps) {
   const [isCopied, setIsCopied] = useState(false)
 
   const handleCopy = async () => {
-    await onCopy()
+    if (text) {
+      await navigator.clipboard.writeText(text)
+    } else if (onCopy) {
+      await onCopy()
+    }
     setIsCopied(true)
     setTimeout(() => setIsCopied(false), 2000)
   }

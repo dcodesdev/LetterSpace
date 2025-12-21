@@ -20,6 +20,11 @@ const statusConfig: Record<
     className:
       "bg-success text-success-foreground dark:bg-success dark:text-success-foreground",
   },
+  AWAITING_WEBHOOK: {
+    label: "Awaiting Webhook",
+    className:
+      "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  },
   FAILED: {
     label: "Failed",
     className:
@@ -42,6 +47,11 @@ const statusConfig: Record<
   CANCELLED: {
     label: "Cancelled",
     className: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+  },
+  COMPLAINED: {
+    label: "Complained",
+    className:
+      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
   },
 }
 

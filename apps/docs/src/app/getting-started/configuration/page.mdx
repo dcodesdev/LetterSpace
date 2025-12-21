@@ -48,3 +48,20 @@ API keys allow you to interact with the newsletter system programmatically. You 
 - Last used timestamp
 
 Keep your API keys secure and rotate them regularly. You can create multiple API keys for different integrations and revoke them individually if needed.
+
+## Environment Variables
+
+LetterSpace supports various environment variables for configuration:
+
+### Required Variables
+
+- **DATABASE_URL**: PostgreSQL database connection string
+- **JWT_SECRET**: Secret key for JWT token signing
+
+### Optional Variables
+
+- **NODE_ENV**: Environment mode (default: development, use "production" for production deployments)
+- **WEBHOOK_MEMORY_LIMIT**: Memory limit for webhook transformer runtime in bytes (default: 16777216 = 16MB)
+- **WEBHOOK_MAX_STACK_SIZE**: Maximum stack size for webhook transformer in bytes (default: 262144 = 256KB)
+
+The webhook transformer variables control resource limits for custom webhook transformation code execution. Lower values provide better security and resource protection, while higher values allow for more complex transformations.

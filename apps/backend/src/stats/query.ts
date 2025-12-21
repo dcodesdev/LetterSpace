@@ -8,7 +8,7 @@ import {
   countDistinctRecipients,
   countDistinctRecipientsInTimeRange,
 } from "../../prisma/client/sql"
-import { MessageStatus } from "../../prisma/client"
+import { messageStatus } from "../utils/message-status"
 
 export const getStats = authProcedure
   .input(
@@ -20,13 +20,6 @@ export const getStats = authProcedure
     const now = new Date()
     const thirtyDaysAgo = subDays(now, 30)
     const sixtyDaysAgo = subDays(now, 60)
-
-    const processedMessageStatuses: MessageStatus[] = [
-      "SENT",
-      "CLICKED",
-      "OPENED",
-      "FAILED",
-    ]
 
     // Check auth
     const hasAccess = await prisma.userOrganization.findFirst({
@@ -51,7 +44,7 @@ export const getStats = authProcedure
             Campaign: {
               organizationId: input.organizationId,
             },
-            status: { in: processedMessageStatuses },
+            status: { in: messageStatus.processedMessages },
           },
         }),
         prisma.message.count({
@@ -63,7 +56,7 @@ export const getStats = authProcedure
               gte: thirtyDaysAgo,
               lt: now,
             },
-            status: { in: processedMessageStatuses },
+            status: { in: messageStatus.processedMessages },
           },
         }),
         prisma.message.count({
@@ -75,7 +68,7 @@ export const getStats = authProcedure
               gte: sixtyDaysAgo,
               lt: thirtyDaysAgo,
             },
-            status: { in: processedMessageStatuses },
+            status: { in: messageStatus.processedMessages },
           },
         }),
       ])
@@ -99,7 +92,7 @@ export const getStats = authProcedure
         const openedMessages = await prisma.message.count({
           where: {
             status: {
-              in: ["CLICKED", "OPENED"],
+              in: messageStatus.openedMessages,
             },
             Campaign: {
               organizationId: input.organizationId,
@@ -117,7 +110,7 @@ export const getStats = authProcedure
         const openedMessages = await prisma.message.count({
           where: {
             status: {
-              in: ["CLICKED", "OPENED"],
+              in: messageStatus.openedMessages,
             },
             Campaign: {
               organizationId: input.organizationId,
@@ -208,7 +201,7 @@ export const getStats = authProcedure
         const deliveredMessages = await prisma.message.count({
           where: {
             status: {
-              in: ["SENT", "CLICKED", "OPENED"],
+              in: messageStatus.deliveredMessages,
             },
             Campaign: {
               organizationId: input.organizationId,
@@ -229,7 +222,7 @@ export const getStats = authProcedure
         const deliveredMessages = await prisma.message.count({
           where: {
             status: {
-              in: ["SENT", "CLICKED", "OPENED"],
+              in: messageStatus.deliveredMessages,
             },
             Campaign: {
               organizationId: input.organizationId,

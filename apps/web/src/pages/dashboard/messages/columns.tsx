@@ -4,6 +4,7 @@ import { MessageStatusBadge } from "./message-status-badge"
 import { Message } from "backend"
 import { displayDateTime } from "@/utils"
 import { MessageActions } from "./message-actions"
+import { MessageIdCell } from "./message-id-cell"
 
 type MessageWithRelations = Message & {
   Subscriber: {
@@ -68,6 +69,11 @@ export const columns = ({
       header: "Sent At",
       cell: ({ row }) =>
         row.original.sentAt ? displayDateTime(row.original.sentAt) : "-",
+    },
+    {
+      id: "messageId",
+      header: "Message ID",
+      cell: ({ row }) => <MessageIdCell messageId={row.original.messageId} />,
     },
     {
       id: "actions",

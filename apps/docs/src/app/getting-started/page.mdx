@@ -43,6 +43,7 @@ We've made LetterSpace for simplicity and ease of use. The easiest way to get st
           # Make sure this matches the db service credentials
           DATABASE_URL: "postgresql://user:password@db:5432/letterspace?schema=public"
           JWT_SECRET: your_super_secret_jwt_key # Change to a secure secret
+          NODE_ENV: production
         networks:
           - app_network
 

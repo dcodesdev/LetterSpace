@@ -1,6 +1,6 @@
 import { hashPassword } from "../src/utils/auth"
 import { prisma } from "../src/utils/prisma"
-import { SmtpEncryption } from "./client"
+import { SmtpEncryption, type Prisma } from "./client"
 import dayjs from "dayjs"
 
 async function seed() {
@@ -87,6 +87,132 @@ async function seed() {
       skipDuplicates: true,
     })
   }
+
+  // Create webhook
+  const webhook = await prisma.webhook.upsert({
+    where: {
+      id: "test-webhook-1",
+    },
+    update: {},
+    create: {
+      id: "test-webhook-1",
+      name: "Test Webhook",
+      isActive: true,
+      organizationId: orgId,
+      authCode: `
+        function authorize(headers, body, query, params) {
+          // Example authorization logic
+          return headers['x-api-key'] === 'test-key';
+        }
+      `,
+      transformCode: `
+        function transform(payload, headers, query) {
+          // Example transform logic
+          return {
+            messageId: payload.messageId || payload['Message-ID'],
+            event: payload.event || payload.Type || 'delivered'
+          };
+        }
+      `,
+    },
+  })
+
+  // Create webhook logs with different statuses and data
+  const webhookLogs: Prisma.WebhookLogCreateManyInput[] = []
+  const events = [
+    "delivered",
+    "bounced",
+    "complained",
+    "opened",
+    "clicked",
+    "failed",
+  ]
+  const providers = ["ses", "sendgrid", "postmark", "mailgun", "resend"]
+  const statusCodes = [200, 201, 400, 401, 404, 500, 502, 503]
+
+  // Create 200 webhook logs with varied data
+  for (let i = 0; i < 200; i++) {
+    const event = events[Math.floor(Math.random() * events.length)]
+    const provider = providers[Math.floor(Math.random() * providers.length)]
+    const statusCode =
+      statusCodes[Math.floor(Math.random() * statusCodes.length)]
+    const isSuccess = statusCode >= 200 && statusCode < 300
+    const hasTransform = Math.random() > 0.3
+    const hasError = statusCode >= 400
+
+    const requestBody = {
+      provider,
+      messageId: `msg-${i}-${Date.now()}`,
+      event,
+      timestamp: dayjs().subtract(i, "minutes").toISOString(),
+      recipient: `subscriber${Math.floor(Math.random() * 100)}@example.com`,
+      metadata: {
+        campaignId: `campaign-${Math.floor(Math.random() * 10)}`,
+        source: provider,
+        ip: `192.168.1.${Math.floor(Math.random() * 255)}`,
+      },
+    }
+
+    const transformedPayload = hasTransform
+      ? {
+          messageId: requestBody.messageId,
+          event:
+            event === "delivered"
+              ? "delivered"
+              : event === "bounced"
+                ? "bounce"
+                : event === "complained"
+                  ? "complaint"
+                  : event === "opened"
+                    ? "open"
+                    : event === "clicked"
+                      ? "click"
+                      : "failed",
+        }
+      : null
+
+    webhookLogs.push({
+      webhookId: webhook.id,
+      requestBody,
+      transformedPayload: transformedPayload || undefined,
+      responseCode: statusCode,
+      responseBody: isSuccess
+        ? JSON.stringify({ status: "ok", processed: true })
+        : hasError
+          ? JSON.stringify({ error: `Error processing webhook: ${statusCode}` })
+          : null,
+      error: hasError
+        ? `HTTP ${statusCode}: ${
+            statusCode === 400
+              ? "Bad Request - Invalid payload format"
+              : statusCode === 401
+                ? "Unauthorized - Invalid API key"
+                : statusCode === 404
+                  ? "Not Found - Message not found"
+                  : statusCode === 500
+                    ? "Internal Server Error"
+                    : statusCode === 502
+                      ? "Bad Gateway"
+                      : statusCode === 503
+                        ? "Service Unavailable"
+                        : "Unknown error"
+          }`
+        : null,
+      duration: Math.floor(Math.random() * 2000) + 50, // 50ms to 2050ms
+      createdAt: dayjs().subtract(i, "minutes").toDate(),
+    })
+  }
+
+  // Create webhook logs in batches to avoid potential issues
+  const batchSize = 50
+  for (let i = 0; i < webhookLogs.length; i += batchSize) {
+    const batch = webhookLogs.slice(i, i + batchSize)
+    await prisma.webhookLog.createMany({
+      data: batch,
+    })
+  }
+
+  console.log(`Created ${webhookLogs.length} webhook logs for testing`)
 }
 
 seed()

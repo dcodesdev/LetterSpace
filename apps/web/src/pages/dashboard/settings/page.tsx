@@ -1,11 +1,11 @@
-"use client"
-
 import { TabsContent, TabsTrigger, TabsList, Tabs } from "@repo/ui"
+import { useNavigate, useSearchParams } from "react-router"
 import { SmtpSettings } from "./smtp-settings"
 import { GeneralSettings } from "./general-settings"
 import { ApiKeys } from "./api-keys"
 import { EmailSettings } from "./email-delivery-settings"
 import { OrganizationSettings } from "./organization-settings"
+import { WebhookSettings } from "./webhook-settings"
 import { trpc } from "@/trpc"
 import { useSession } from "@/hooks"
 import { Loader } from "@/components"
@@ -13,6 +13,10 @@ import { ProfileSettings } from "./profile-settings"
 
 export function SettingsPage() {
   const { organization } = useSession()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const defaultTab = searchParams.get("tab") || "profile"
+
   const { isLoading } = trpc.settings.getSmtp.useQuery(
     {
       organizationId: organization?.id ?? "",
@@ -40,7 +44,13 @@ export function SettingsPage() {
         <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-4">
+      <Tabs
+        defaultValue={defaultTab}
+        onValueChange={(value) => {
+          navigate(`/dashboard/settings?tab=${value}`)
+        }}
+        className="space-y-4"
+      >
         <TabsList>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
@@ -48,7 +58,14 @@ export function SettingsPage() {
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
           <TabsTrigger value="email">Email Delivery</TabsTrigger>
           <TabsTrigger value="api">API Keys</TabsTrigger>
-          {/* <TabsTrigger value="webhooks">Webhooks</TabsTrigger> */}
+          <TabsTrigger value="webhooks">
+            <span className="flex items-center gap-1">
+              Webhooks
+              <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-medium text-yellow-700 dark:text-yellow-400">
+                BETA
+              </span>
+            </span>
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="profile">
           <ProfileSettings />
@@ -74,9 +91,9 @@ export function SettingsPage() {
         <TabsContent value="api">
           <ApiKeys />
         </TabsContent>
-        {/* <TabsContent value="webhooks">
-            <WebhookSettings />
-          </TabsContent> */}
+        <TabsContent value="webhooks">
+          <WebhookSettings />
+        </TabsContent>
       </Tabs>
     </div>
   )

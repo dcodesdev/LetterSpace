@@ -17,6 +17,7 @@ import {
   NotFoundPage,
   VerifyEmailPage,
 } from "./pages"
+import { WebhookDetails } from "./pages/dashboard/settings/webhook-details"
 import { scan } from "react-scan"
 
 if (import.meta.env.DEV) {
@@ -46,7 +47,10 @@ export function App() {
             />
           </Route>
           <Route path="templates" element={<TemplatesPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings">
+            <Route index element={<SettingsPage />} />
+            <Route path="webhooks/:id" element={<WebhookDetails />} />
+          </Route>
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="lists" element={<ListsPage />} />
           <Route path="messages" element={<MessagesPage />} />
