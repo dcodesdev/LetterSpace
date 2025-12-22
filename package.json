@@ -9,11 +9,11 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "@types/node": "^24.0.3",
+    "@types/node": "^25.0.3",
     "bun-types": "^1.2.17",
     "prettier": "^3.4.2",
     "turbo": "^2.3.4",
-    "typescript": "5.8.3"
+    "typescript": "5.9.3"
   },
   "packageManager": "pnpm@10.10.0",
   "engines": {
