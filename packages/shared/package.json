@@ -4,6 +4,7 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -13,6 +14,6 @@
     "eslint": "^9.19.0"
   },
   "peerDependencies": {
-    "typescript": "^5"
+    "typescript": "5.9.3"
   }
 }

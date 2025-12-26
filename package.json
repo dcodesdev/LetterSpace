@@ -1,11 +1,12 @@
 {
-  "version": "0.10.2",
+  "version": "0.10.3",
   "name": "letterspace",
   "private": true,
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "check-types": "turbo check-types",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "knip": "knip"
   },
@@ -15,7 +16,7 @@
     "knip": "^5.77.1",
     "prettier": "^3.4.2",
     "turbo": "^2.3.4",
-    "typescript": "5.8.3"
+    "typescript": "5.7.3"
   },
   "packageManager": "pnpm@10.26.2",
   "engines": {
@@ -31,14 +32,18 @@
       "esbuild",
       "prisma",
       "sharp"
-    ],
-    "overrides": {
-      "@types/react": "19.2.7",
-      "@types/react-dom": "19.2.3"
-    }
+    ]
   },
   "resolutions": {
     "@types/react": "^19",
     "@types/react-dom": "^19"
-  }
+  },
+  "overrides": {
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

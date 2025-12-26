@@ -6,12 +6,13 @@
     "dev": "next dev --port 3002 --turbopack",
     "build": "next build",
     "start": "next start",
+    "check-types": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
     "@repo/shared": "workspace:*",
+    "@repo/ui": "workspace:*",
     "lucide-react": "^0.474.0",
     "next": "16.1.1",
     "react": "19.2.3",
@@ -27,6 +28,6 @@
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.8.3"
+    "typescript": "5.7.3"
   }
 }
