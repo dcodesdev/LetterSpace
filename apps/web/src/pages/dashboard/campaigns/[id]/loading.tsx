@@ -1,6 +1,6 @@
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@repo/ui"
 import { useNavigate } from "react-router"
+import { Button } from "@repo/ui"
+import { ArrowLeft } from "lucide-react"
 
 export const Loading = () => {
   const navigate = useNavigate()

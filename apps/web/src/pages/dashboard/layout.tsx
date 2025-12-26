@@ -1,3 +1,6 @@
+import { Link, Navigate, Outlet } from "react-router"
+import { useLocation } from "react-router"
+import { APP_VERSION } from "@repo/shared"
 import {
   ScrollArea,
   Sidebar,
@@ -13,29 +16,26 @@ import {
   SidebarProvider,
   cn,
 } from "@repo/ui"
-import { Link, Navigate, Outlet } from "react-router"
 import {
-  LayoutDashboard,
-  Mail,
-  Users,
-  Settings,
-  FileText,
-  User,
-  ListOrdered,
+  ArrowUpCircle,
   Building2,
+  FileText,
+  LayoutDashboard,
+  ListOrdered,
   LogOut,
   LucideIcon,
-  ArrowUpCircle,
+  Mail,
+  Settings,
+  User,
+  Users,
 } from "lucide-react"
-import { useSession } from "@/hooks"
-import { useLocation } from "react-router"
 import {
   CenteredLoader,
+  LetterSpaceText,
   ThemeToggle,
   WithTooltip,
-  LetterSpaceText,
 } from "@/components"
-import { APP_VERSION } from "@repo/shared"
+import { useSession } from "@/hooks"
 import { useUpdateCheck } from "@/hooks/use-update-check"
 
 const sidebarItems = [

@@ -1,5 +1,5 @@
-import globals from "globals"
 import pluginJs from "@eslint/js"
+import globals from "globals"
 import * as tseslint from "typescript-eslint"
 
 export default tseslint.config({

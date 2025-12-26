@@ -1,15 +1,15 @@
-import { TabsContent, TabsTrigger, TabsList, Tabs } from "@repo/ui"
 import { useNavigate, useSearchParams } from "react-router"
-import { SmtpSettings } from "./smtp-settings"
-import { GeneralSettings } from "./general-settings"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui"
+import { Loader } from "@/components"
+import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
 import { ApiKeys } from "./api-keys"
 import { EmailSettings } from "./email-delivery-settings"
+import { GeneralSettings } from "./general-settings"
 import { OrganizationSettings } from "./organization-settings"
-import { WebhookSettings } from "./webhook-settings"
-import { trpc } from "@/trpc"
-import { useSession } from "@/hooks"
-import { Loader } from "@/components"
 import { ProfileSettings } from "./profile-settings"
+import { SmtpSettings } from "./smtp-settings"
+import { WebhookSettings } from "./webhook-settings"
 
 export function SettingsPage() {
   const { organization } = useSession()

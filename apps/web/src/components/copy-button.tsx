@@ -1,6 +1,6 @@
-import { Check, Copy } from "lucide-react"
-import { Button } from "@repo/ui"
 import { useState } from "react"
+import { Button } from "@repo/ui"
+import { Check, Copy } from "lucide-react"
 
 interface CopyButtonProps {
   text?: string

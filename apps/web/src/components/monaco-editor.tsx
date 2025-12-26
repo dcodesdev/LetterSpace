@@ -1,7 +1,7 @@
 import Editor from "@monaco-editor/react"
+import { cn } from "@repo/ui"
 import type { editor } from "monaco-editor"
 import { useTheme } from "@/hooks/useTheme"
-import { cn } from "@repo/ui"
 
 interface MonacoEditorProps {
   value: string

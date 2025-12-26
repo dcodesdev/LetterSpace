@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest"
-import { createUser } from "@helpers/user/user"
 import { request } from "@helpers/request"
-import { createList } from "@tests/integration/helpers/list/list"
+import { createUser } from "@helpers/user/user"
 import { prisma } from "@src/utils/prisma"
+import { createList } from "@tests/integration/helpers/list/list"
+import { describe, expect, it } from "vitest"
 
 describe("[GET] /api/subscribers", () => {
   it("should get subscribers with pagination", async () => {

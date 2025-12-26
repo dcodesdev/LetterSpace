@@ -1,8 +1,8 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { constants } from "@/constants"
-import Image from "next/image"
 
 export const Footer = () => (
   <footer className="border-t border-gray-800 py-8 mt-12">

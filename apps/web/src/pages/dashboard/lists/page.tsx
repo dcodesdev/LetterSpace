@@ -2,32 +2,32 @@
 
 import { useEffect, useState } from "react"
 import {
+  Button,
+  DataTable,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Button,
-  DataTable,
 } from "@repo/ui"
-import { Plus } from "lucide-react"
-import { CreateListForm } from "./list-form"
-import { useSession, usePaginationWithQueryState } from "@/hooks"
-import { trpc } from "@/trpc"
-import { columns } from "./columns"
-import { Pagination } from "@/components"
-import { UpdateListForm } from "./update-list-form"
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogCancel,
 } from "@repo/ui"
+import { Plus } from "lucide-react"
+import { Pagination } from "@/components"
+import { usePaginationWithQueryState, useSession } from "@/hooks"
+import { trpc } from "@/trpc"
+import { columns } from "./columns"
+import { CreateListForm } from "./list-form"
 import { ListSearch } from "./list-search"
+import { UpdateListForm } from "./update-list-form"
 
 export function ListsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)

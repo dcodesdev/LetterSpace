@@ -1,6 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Button,
   Card,
@@ -17,11 +17,12 @@ import {
   Input,
   Separator,
 } from "@repo/ui"
-import { toast } from "sonner"
-import { trpc } from "@/trpc"
-import { useSession } from "@/hooks"
-import { useEffect, useState } from "react"
 import { Save } from "lucide-react"
+import { toast } from "sonner"
+import { z } from "zod"
+import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
+
 const emailSchema = z.object({
   rateLimit: z.coerce.number().min(1, "Rate limit is required"),
   rateWindow: z.coerce.number().min(1, "Rate window is required"),

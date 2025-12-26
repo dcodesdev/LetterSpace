@@ -1,7 +1,8 @@
-import { config } from "dotenv"
-config({ path: ".env.test" })
-import { beforeEach } from "vitest"
 import { execSync } from "child_process"
+import { config } from "dotenv"
+import { beforeEach } from "vitest"
+
+config({ path: ".env.test" })
 
 execSync("prisma migrate deploy", { stdio: "ignore" })
 

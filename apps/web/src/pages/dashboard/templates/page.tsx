@@ -1,6 +1,6 @@
-import { Plus } from "lucide-react"
+import { useEffect, useState } from "react"
 import {
-  Button,
+  AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
@@ -8,16 +8,16 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialog,
+  Button,
   DataTable,
 } from "@repo/ui"
-import { useState, useEffect } from "react"
+import { Plus } from "lucide-react"
 import { toast } from "sonner"
-import { useSession, usePaginationWithQueryState } from "@/hooks"
+import { Pagination } from "@/components"
+import { usePaginationWithQueryState, useSession } from "@/hooks"
 import { trpc } from "@/trpc"
 import { columns } from "./columns"
 import { CreateTemplateForm } from "./create-template-form"
-import { Pagination } from "@/components"
 import { TemplateSearch } from "./template-search"
 
 export function TemplatesPage() {

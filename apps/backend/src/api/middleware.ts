@@ -1,5 +1,5 @@
-import { prisma } from "../utils/prisma"
 import express, { NextFunction } from "express"
+import { prisma } from "../utils/prisma"
 
 export const authenticateApiKey = async (
   req: express.Request,

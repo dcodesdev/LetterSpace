@@ -1,11 +1,11 @@
 import { useState } from "react"
-import { Mail, MailX, CheckCircle, AlertCircle } from "lucide-react"
 import { Link, useSearchParams } from "react-router"
 import { Button } from "@repo/ui"
-import { trpc } from "@/trpc"
 import { IconBrandGithub } from "@tabler/icons-react"
-import { constants } from "@/constants"
+import { AlertCircle, CheckCircle, Mail, MailX } from "lucide-react"
 import { LetterSpaceText } from "@/components"
+import { constants } from "@/constants"
+import { trpc } from "@/trpc"
 
 export function UnsubscribePage() {
   const [error, setError] = useState<string | null>(null)

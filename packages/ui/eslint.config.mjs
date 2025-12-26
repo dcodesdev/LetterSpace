@@ -1,4 +1,4 @@
-import { config } from "@repo/eslint-config/react-internal";
+import { config } from "@repo/eslint-config/react-internal"
 
 /** @type {import("eslint").Linter.Config} */
 export default [
@@ -24,4 +24,4 @@ export default [
       "@typescript-eslint/no-require-imports": "off",
     },
   },
-];
+]

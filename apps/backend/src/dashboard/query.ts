@@ -1,12 +1,12 @@
-import { z } from "zod"
-import { authProcedure } from "../trpc"
-import { prisma } from "../utils/prisma"
 import { TRPCError } from "@trpc/server"
+import { subMonths } from "date-fns"
+import pMap from "p-map"
+import { z } from "zod"
 import { MessageStatus } from "../../prisma/client"
 import { countDbSize, subscriberGrowthQuery } from "../../prisma/client/sql"
-import pMap from "p-map"
-import { subMonths } from "date-fns"
+import { authProcedure } from "../trpc"
 import { messageStatus } from "../utils/message-status"
+import { prisma } from "../utils/prisma"
 
 export const getDashboardStats = authProcedure
   .input(
@@ -144,7 +144,8 @@ export const getDashboardStats = authProcedure
         continue
       }
 
-      const prev = subscriberGrowthCumulative[i - 1]?.count ?? baselineSubscriberCount
+      const prev =
+        subscriberGrowthCumulative[i - 1]?.count ?? baselineSubscriberCount
 
       subscriberGrowthCumulative.push({
         date: point.date,

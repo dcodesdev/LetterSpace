@@ -1,20 +1,18 @@
 "use client"
 
+import { Separator } from "."
 import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { type VariantProps, cva } from "class-variance-authority"
 import {
   CheckIcon,
-  XCircle,
   ChevronDown,
-  XIcon,
   WandSparkles,
+  XCircle,
+  XIcon,
 } from "lucide-react"
-
 import { cn } from "../lib"
-import { Separator } from "."
-import { Button } from "./button"
 import { Badge } from "./badge"
-import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+import { Button } from "./button"
 import {
   Command,
   CommandEmpty,
@@ -24,6 +22,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "./command"
+import { Popover, PopoverContent, PopoverTrigger } from "./popover"
 
 /**
  * Variants for the multi-select component to handle different styles.
