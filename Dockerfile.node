@@ -12,7 +12,7 @@ COPY packages/eslint-config/package.json ./packages/eslint-config/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
 COPY packages/ui/package.json ./packages/ui/
 
-RUN timeout 60 pnpm install --frozen-lockfile
+RUN timeout 120 pnpm install --frozen-lockfile
 
 COPY . .
 
