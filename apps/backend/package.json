@@ -11,7 +11,9 @@
     "lint:fix": "eslint . --fix",
     "generate": "prisma generate",
     "generate:sql": "prisma generate --sql",
-    "test": "dotenv -e .env.test -- vitest"
+    "test": "dotenv -e .env.test -- vitest",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy"
   },
   "exports": {
     ".": "./src/index.ts",
