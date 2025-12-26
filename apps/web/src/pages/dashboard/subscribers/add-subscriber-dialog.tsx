@@ -1,4 +1,5 @@
-import { Plus, Trash2 } from "lucide-react"
+import { useFieldArray, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Button,
   Dialog,
@@ -17,13 +18,12 @@ import {
   Input,
   Switch,
 } from "@repo/ui"
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { addSubscriberSchema } from "./schemas"
-import { trpc } from "@/trpc"
+import { Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner"
+import * as z from "zod"
 import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
+import { addSubscriberSchema } from "./schemas"
 
 interface AddSubscriberDialogProps {
   open: boolean

@@ -1,9 +1,9 @@
 import express from "express"
-import { prisma } from "../utils/prisma"
 import { logger } from "../utils/logger"
+import { prisma } from "../utils/prisma"
 import { runAuthorization } from "./authorization"
-import { transformPayload } from "./transformer"
 import { processWebhookEvent } from "./processor"
+import { transformPayload } from "./transformer"
 import { WebhookResult } from "./types"
 
 // TODO: Consider these improvements:

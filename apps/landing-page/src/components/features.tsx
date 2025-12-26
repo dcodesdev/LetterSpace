@@ -3,14 +3,14 @@
 import Link from "next/link"
 import type { LucideIcon } from "lucide-react"
 import {
-  Zap,
-  Wifi,
-  Database,
-  MessageSquare,
-  FileCode,
-  Settings,
   BugPlay,
   ChevronDown,
+  Database,
+  FileCode,
+  MessageSquare,
+  Settings,
+  Wifi,
+  Zap,
 } from "lucide-react"
 import { constants } from "@/constants"
 

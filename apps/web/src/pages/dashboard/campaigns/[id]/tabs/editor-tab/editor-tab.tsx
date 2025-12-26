@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   Button,
   Card,
@@ -11,13 +12,12 @@ import {
   FormMessage,
   Textarea,
 } from "@repo/ui"
-import { useCampaignContext } from "../../useCampaignContext"
-import { useState } from "react"
-import { Eye, Wand2, Link2 } from "lucide-react"
-import { EmailPreview } from "@/components"
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@repo/ui"
-import { trpc } from "@/trpc"
+import { Eye, Link2, Wand2 } from "lucide-react"
+import { EmailPreview } from "@/components"
 import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
+import { useCampaignContext } from "../../useCampaignContext"
 
 export const EditorTab = () => {
   const [previewOpen, setPreviewOpen] = useState(false)

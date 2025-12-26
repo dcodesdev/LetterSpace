@@ -1,4 +1,4 @@
-import { Pagination as UIPagination, PaginationContent, Button } from "@repo/ui"
+import { Button, PaginationContent, Pagination as UIPagination } from "@repo/ui"
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react"
 
 type PaginationProps = {

@@ -1,6 +1,6 @@
+import { useNavigate } from "react-router"
 import { Button } from "@repo/ui"
 import { ArrowLeft } from "lucide-react"
-import { useNavigate } from "react-router"
 
 export const NotFound = () => {
   const navigate = useNavigate()

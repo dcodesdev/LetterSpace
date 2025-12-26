@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query"
 import { APP_VERSION } from "@repo/shared"
+import { useQuery } from "@tanstack/react-query"
 import semver from "semver"
 
 type UpdateInfo = {

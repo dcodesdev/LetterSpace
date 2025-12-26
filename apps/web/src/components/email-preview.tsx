@@ -1,5 +1,5 @@
-import { cn } from "@repo/ui"
 import { useEffect, useRef } from "react"
+import { cn } from "@repo/ui"
 
 interface EmailPreviewProps {
   content: string

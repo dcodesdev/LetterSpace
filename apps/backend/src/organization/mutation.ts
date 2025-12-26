@@ -1,8 +1,8 @@
+import { TRPCError } from "@trpc/server"
+import fs from "fs/promises"
 import { z } from "zod"
 import { authProcedure } from "../trpc"
 import { prisma } from "../utils/prisma"
-import fs from "fs/promises"
-import { TRPCError } from "@trpc/server"
 
 const createOrganizationSchema = z.object({
   name: z.string().min(1, "Organization name is required"),

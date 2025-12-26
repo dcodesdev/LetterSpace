@@ -1,11 +1,10 @@
+import { subSeconds } from "date-fns"
 import pMap from "p-map"
 import { Mailer } from "../lib/Mailer"
 import { logger } from "../utils/logger"
-import { prisma } from "../utils/prisma"
 import { messageStatus } from "../utils/message-status"
-
+import { prisma } from "../utils/prisma"
 import { cronJob } from "./cron.utils"
-import { subSeconds } from "date-fns"
 
 export const sendMessagesCron = cronJob("sendMessages", async () => {
   const organizations = await prisma.organization.findMany()

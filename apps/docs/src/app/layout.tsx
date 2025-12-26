@@ -1,12 +1,12 @@
-import "./globals.css"
+import type { Metadata } from "next"
+import Image from "next/image"
+import Link from "next/link"
 import { Footer, Layout, Navbar } from "nextra-theme-docs"
+import "nextra-theme-docs/style.css"
 import { Head } from "nextra/components"
 import { getPageMap } from "nextra/page-map"
-import "nextra-theme-docs/style.css"
-import Link from "next/link"
-import Image from "next/image"
-import type { Metadata } from "next"
 import { Analytics } from "@/components"
+import "./globals.css"
 
 export const metadata: Metadata = {
   title: "LetterSpace Documentation | Self-hosted Newsletter Platform",

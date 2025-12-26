@@ -3,10 +3,10 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogFooter,
-  AlertDialogDescription,
 } from "@repo/ui"
 
 interface DeleteSubscriberAlertDialogProps {

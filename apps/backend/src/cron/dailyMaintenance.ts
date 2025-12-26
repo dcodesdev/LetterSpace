@@ -1,6 +1,6 @@
-import { cronJob } from "./cron.utils"
-import { prisma } from "../utils/prisma"
 import dayjs from "dayjs"
+import { prisma } from "../utils/prisma"
+import { cronJob } from "./cron.utils"
 
 export const dailyMaintenanceCron = cronJob("daily-maintenance", async () => {
   const organizations = await prisma.organization.findMany({

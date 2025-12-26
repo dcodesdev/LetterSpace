@@ -1,3 +1,6 @@
+import { useEffect } from "react"
+import { useFieldArray, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Button,
   Dialog,
@@ -15,17 +18,14 @@ import {
   Input,
   Switch,
 } from "@repo/ui"
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { editSubscriberSchema } from "./schemas"
-import { trpc } from "@/trpc"
-import { toast } from "sonner"
-import { useSession } from "@/hooks"
-import { useEffect } from "react"
-import { RouterOutput } from "@/types"
-import { EditSubscriberDialogState } from "./types"
 import { Plus, Trash2 } from "lucide-react"
+import { toast } from "sonner"
+import * as z from "zod"
+import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
+import { RouterOutput } from "@/types"
+import { editSubscriberSchema } from "./schemas"
+import { EditSubscriberDialogState } from "./types"
 
 interface EditSubscriberDialogProps extends EditSubscriberDialogState {
   onOpenChange: (open: boolean) => void

@@ -1,5 +1,5 @@
+import { describe, expect, it } from "vitest"
 import { replacePlaceholders } from "./placeholder-parser"
-import { describe, it, expect } from "vitest"
 
 describe("replacePlaceholders", () => {
   it("should replace a single placeholder", () => {

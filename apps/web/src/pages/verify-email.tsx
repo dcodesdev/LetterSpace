@@ -1,8 +1,8 @@
-import { trpc } from "@/trpc"
 import { useEffect, useState } from "react"
-import { useNavigate, useLocation } from "react-router"
+import { useLocation, useNavigate } from "react-router"
 import { Button } from "@repo/ui"
-import { Check, X, Mail } from "lucide-react"
+import { Check, Mail, X } from "lucide-react"
+import { trpc } from "@/trpc"
 
 export function VerifyEmailPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">(

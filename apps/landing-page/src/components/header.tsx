@@ -1,10 +1,10 @@
 "use client"
 
-import Link from "next/link"
-import { Menu } from "lucide-react"
-import { Button } from "@repo/ui"
-import { constants } from "@/constants"
 import Image from "next/image"
+import Link from "next/link"
+import { Button } from "@repo/ui"
+import { Menu } from "lucide-react"
+import { constants } from "@/constants"
 
 export const Header = () => (
   <header className="border-b border-gray-800">

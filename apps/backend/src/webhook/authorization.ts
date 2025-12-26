@@ -1,6 +1,6 @@
 import express from "express"
-import { logger } from "../utils/logger"
 import { getQuickJS } from "quickjs-emscripten"
+import { logger } from "../utils/logger"
 
 // Run authorization code in sandbox
 export async function runAuthorization(

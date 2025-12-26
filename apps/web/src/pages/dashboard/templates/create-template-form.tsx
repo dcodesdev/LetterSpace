@@ -1,6 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Button,
   Dialog,
@@ -20,10 +20,10 @@ import {
   Textarea,
 } from "@repo/ui"
 import { TextCursor } from "lucide-react"
-import { trpc } from "@/trpc"
 import { toast } from "sonner"
+import * as z from "zod"
 import { useSession } from "@/hooks"
-import { useState } from "react"
+import { trpc } from "@/trpc"
 
 const templateSchema = z.object({
   name: z.string().min(1, "Name is required"),

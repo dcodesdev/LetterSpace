@@ -1,10 +1,10 @@
-export type * from "./app"
-export type * from "../prisma/client"
-export type * from "./types"
-
 import { app } from "./app"
 import { initializeCronJobs } from "./cron/cron"
 import { prisma } from "./utils/prisma"
+
+export type * from "./app"
+export type * from "../prisma/client"
+export type * from "./types"
 
 const cronController = initializeCronJobs()
 

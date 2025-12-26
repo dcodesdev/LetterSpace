@@ -1,8 +1,8 @@
 import express from "express"
-import { logger } from "../utils/logger"
-import { WebhookEventSchema, WebhookResult } from "./types"
 import { getQuickJS } from "quickjs-emscripten"
 import { env } from "../constants"
+import { logger } from "../utils/logger"
+import { WebhookEventSchema, WebhookResult } from "./types"
 
 // Transform webhook payload using custom code or default schema
 export async function transformPayload(

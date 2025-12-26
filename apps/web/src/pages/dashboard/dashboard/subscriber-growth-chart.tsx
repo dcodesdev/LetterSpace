@@ -1,22 +1,22 @@
-import { useSession } from "@/hooks"
-import { trpc } from "@/trpc"
+import { useMemo } from "react"
 import {
+  Card,
   CardContent,
   CardDescription,
-  CardTitle,
+  CardFooter,
   CardHeader,
+  CardTitle,
+  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartConfig,
-  CardFooter,
-  Card,
   Skeleton,
 } from "@repo/ui"
 import dayjs from "dayjs"
 import { ArrowDown, TrendingUp } from "lucide-react"
-import { useMemo } from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
 
 const chartConfig = {
   count: {

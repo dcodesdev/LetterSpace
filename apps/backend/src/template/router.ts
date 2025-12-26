@@ -1,5 +1,5 @@
 import { router } from "../trpc"
-import { createTemplate, updateTemplate, deleteTemplate } from "./mutation"
+import { createTemplate, deleteTemplate, updateTemplate } from "./mutation"
 import { getTemplate, listTemplates } from "./query"
 
 export const templateRouter = router({

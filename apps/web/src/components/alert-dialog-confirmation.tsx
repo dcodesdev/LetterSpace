@@ -1,3 +1,4 @@
+import { ReactNode } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,7 +10,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@repo/ui"
-import { ReactNode } from "react"
 
 interface AlertDialogConfirmationProps {
   trigger?: ReactNode

@@ -1,7 +1,7 @@
-import { WithTooltip } from "@/components"
+import { useState } from "react"
 import { Badge } from "@repo/ui"
 import { CheckIcon, CopyIcon } from "lucide-react"
-import { useState } from "react"
+import { WithTooltip } from "@/components"
 
 export const IDField = ({ id }: { id: string }) => {
   const [copied, setCopied] = useState(false)

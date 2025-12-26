@@ -1,8 +1,8 @@
-import { trpc } from "@/trpc"
-import Cookies from "js-cookie"
 import { useCallback, useEffect, useMemo } from "react"
 import { useNavigate } from "react-router"
+import Cookies from "js-cookie"
 import { useLocalStorage } from "usehooks-ts"
+import { trpc } from "@/trpc"
 
 export function useSession() {
   const [orgId, setOrgId, removeOrgId] = useLocalStorage("orgId", "")

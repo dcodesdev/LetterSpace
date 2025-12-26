@@ -1,8 +1,8 @@
-import { z } from "zod"
-import { publicProcedure, authProcedure } from "../trpc"
-import { prisma } from "../utils/prisma"
-import { comparePasswords, generateToken, hashPassword } from "../utils/auth"
 import { TRPCError } from "@trpc/server"
+import { z } from "zod"
+import { authProcedure, publicProcedure } from "../trpc"
+import { comparePasswords, generateToken, hashPassword } from "../utils/auth"
+import { prisma } from "../utils/prisma"
 
 const signUpSchema = z.object({
   email: z.string().email().min(1, "Email is required"),
