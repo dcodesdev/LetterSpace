@@ -26,6 +26,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "6.7.0",
     "@trpc/server": "11.0.0-rc.730",
     "bcryptjs": "^3.0.0",
     "cors": "^2.8.5",

@@ -12,6 +12,7 @@ export default {
     },
     "apps/backend": {
       ignore: ["prisma/client/**/*"],
+      ignoreDependencies: ["@prisma/client"],
     },
   },
 } satisfies KnipConfig
