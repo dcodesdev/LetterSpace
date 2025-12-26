@@ -57,23 +57,38 @@ async function seed() {
     })
   }
 
-  // Create 5000 subscribers
-  const subscribers = Array.from({ length: 5000 }, (_, i) => ({
-    name: `Subscriber ${i + 1}`,
-    email: `subscriber${i + 1}@example.com`,
-    organizationId: orgId,
-    createdAt: dayjs().subtract(12, "days").toDate(),
-  }))
+  // Create 5000 subscribers distributed over 2 years (from 2 years ago to today)
+  const twoYearsAgo = dayjs().subtract(2, "years")
+  const now = dayjs()
+  const daysInTwoYears = now.diff(twoYearsAgo, "days")
+  const subscribers = Array.from({ length: 5000 }, (_, i) => {
+    const progress = i / (5000 - 1)
+    const createdAt =
+      i === 4999
+        ? now.toDate()
+        : twoYearsAgo
+            .add(Math.floor(progress * daysInTwoYears), "days")
+            .toDate()
+    return {
+      name: `Subscriber ${i + 1}`,
+      email: `subscriber${i + 1}@example.com`,
+      organizationId: orgId,
+      createdAt,
+    }
+  })
   await prisma.subscriber.createMany({
     data: subscribers,
     skipDuplicates: true,
   })
-  // Then 10 more for each day for 10 days
-  const now = new Date()
+  // Then 10 more for each day for 10 days, distributed over 2 years
   for (let d = 0; d < 10; d++) {
-    const day = dayjs(now)
-      .subtract(d + 1, "day")
-      .toDate()
+    const progress = d / 9
+    const day =
+      d === 9
+        ? now.toDate()
+        : twoYearsAgo
+            .add(Math.floor(progress * daysInTwoYears), "days")
+            .toDate()
 
     const dailySubs = Array.from({ length: 10 }, (_, i) => ({
       name: `DailySub ${d + 1}-${i + 1}`,

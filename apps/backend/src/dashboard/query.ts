@@ -43,45 +43,60 @@ export const getDashboardStats = authProcedure
         : {}),
     }
 
-    const [messageStats, recentCampaigns, subscriberGrowth, [dbSize]] =
-      await Promise.all([
-        // Message delivery stats
-        prisma.message.groupBy({
-          by: ["status"],
-          where: {
-            Campaign: {
-              organizationId: input.organizationId,
-            },
-            ...dateFilter,
-          },
-          _count: true,
-        }),
-
-        // Recent campaigns with stats
-        prisma.campaign.findMany({
-          where: {
+    const [
+      messageStats,
+      recentCampaigns,
+      subscriberGrowth,
+      [dbSize],
+      baselineSubscriberCount,
+    ] = await Promise.all([
+      // Message delivery stats
+      prisma.message.groupBy({
+        by: ["status"],
+        where: {
+          Campaign: {
             organizationId: input.organizationId,
-            status: "COMPLETED",
-            ...dateFilter,
           },
-          include: {
-            _count: {
-              select: {
-                Messages: true,
-              },
+          ...dateFilter,
+        },
+        _count: true,
+      }),
+
+      // Recent campaigns with stats
+      prisma.campaign.findMany({
+        where: {
+          organizationId: input.organizationId,
+          status: "COMPLETED",
+          ...dateFilter,
+        },
+        include: {
+          _count: {
+            select: {
+              Messages: true,
             },
           },
-          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-          take: 5,
-        }),
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        take: 5,
+      }),
 
-        // Subscriber growth over time
-        prisma.$queryRawTyped(
-          subscriberGrowthQuery(input.organizationId, from, to)
-        ),
+      // Subscriber growth over time
+      prisma.$queryRawTyped(
+        subscriberGrowthQuery(input.organizationId, from, to)
+      ),
 
-        prisma.$queryRawTyped(countDbSize(input.organizationId)),
-      ])
+      prisma.$queryRawTyped(countDbSize(input.organizationId)),
+
+      // Count of subscribers before the 6-month window (baseline)
+      prisma.subscriber.count({
+        where: {
+          organizationId: input.organizationId,
+          createdAt: {
+            lt: from,
+          },
+        },
+      }),
+    ])
 
     // Process message stats
     const messageStatsByStatus = messageStats.reduce(
@@ -129,7 +144,7 @@ export const getDashboardStats = authProcedure
         continue
       }
 
-      const prev = subscriberGrowthCumulative[i - 1]?.count || 0
+      const prev = subscriberGrowthCumulative[i - 1]?.count ?? baselineSubscriberCount
 
       subscriberGrowthCumulative.push({
         date: point.date,
