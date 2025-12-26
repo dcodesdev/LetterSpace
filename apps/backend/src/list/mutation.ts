@@ -1,7 +1,7 @@
+import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 import { authProcedure } from "../trpc"
 import { prisma } from "../utils/prisma"
-import { TRPCError } from "@trpc/server"
 
 const createListSchema = z.object({
   name: z.string().min(1, "List name is required"),

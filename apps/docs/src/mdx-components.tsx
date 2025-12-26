@@ -1,5 +1,5 @@
-import "./app/globals.css"
 import { useMDXComponents as getThemeComponents } from "nextra-theme-docs"
+import "./app/globals.css"
 import { WebhookEventsReference } from "./components"
 
 const themeComponents = getThemeComponents()

@@ -1,6 +1,6 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui"
 import { TrendingUp } from "lucide-react"
 import { TrendingDown } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui"
 import { LucideIcon } from "lucide-react"
 import { CardSkeleton } from "./card-skeleton"
 

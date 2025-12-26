@@ -1,9 +1,9 @@
-import { z } from "zod"
-import { authProcedure } from "../trpc"
-import { prisma } from "../utils/prisma"
 import { TRPCError } from "@trpc/server"
 import { randomBytes } from "crypto"
+import { z } from "zod"
 import { Mailer } from "../lib/Mailer"
+import { authProcedure } from "../trpc"
+import { prisma } from "../utils/prisma"
 
 const smtpSchema = z.object({
   organizationId: z.string(),

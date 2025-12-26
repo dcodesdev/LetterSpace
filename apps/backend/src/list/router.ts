@@ -1,5 +1,5 @@
 import { router } from "../trpc"
-import { createList, updateList, deleteList } from "./mutation"
+import { createList, deleteList, updateList } from "./mutation"
 import { getList, getLists } from "./query"
 
 export const listRouter = router({

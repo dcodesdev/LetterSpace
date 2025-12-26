@@ -1,22 +1,22 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
 import {
+  Alert,
+  AlertDescription,
+  Button,
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  Input,
   FormMessage,
-  FormDescription,
+  Input,
   Switch,
-  Button,
-  Alert,
-  AlertDescription,
 } from "@repo/ui"
-import { MonacoEditor, WebhookEventsReference } from "@/components"
 import { AlertTriangle } from "lucide-react"
+import { z } from "zod"
+import { MonacoEditor, WebhookEventsReference } from "@/components"
 
 const webhookSchema = z.object({
   name: z.string().min(1, "Name is required"),

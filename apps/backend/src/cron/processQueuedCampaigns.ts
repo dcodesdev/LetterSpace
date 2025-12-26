@@ -1,12 +1,12 @@
-import { prisma } from "../utils/prisma"
-import { LinkTracker } from "../lib/LinkTracker"
-import { v4 as uuidV4 } from "uuid"
-import {
-  replacePlaceholders,
-  PlaceholderDataKey,
-} from "../utils/placeholder-parser"
 import pMap from "p-map"
-import { Subscriber, Prisma, SubscriberMetadata } from "../../prisma/client"
+import { v4 as uuidV4 } from "uuid"
+import { Prisma, Subscriber, SubscriberMetadata } from "../../prisma/client"
+import { LinkTracker } from "../lib/LinkTracker"
+import {
+  PlaceholderDataKey,
+  replacePlaceholders,
+} from "../utils/placeholder-parser"
+import { prisma } from "../utils/prisma"
 import { cronJob } from "./cron.utils"
 
 // TODO: Make this a config

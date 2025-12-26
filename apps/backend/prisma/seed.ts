@@ -1,7 +1,7 @@
+import dayjs from "dayjs"
 import { hashPassword } from "../src/utils/auth"
 import { prisma } from "../src/utils/prisma"
-import { SmtpEncryption, type Prisma } from "./client"
-import dayjs from "dayjs"
+import { type Prisma, SmtpEncryption } from "./client"
 
 async function seed() {
   if (!(await prisma.organization.findFirst())) {

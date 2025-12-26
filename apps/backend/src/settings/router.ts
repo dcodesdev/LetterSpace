@@ -1,21 +1,21 @@
 import { router } from "../trpc"
 import {
-  getSmtp,
+  createApiKey,
+  createWebhook,
+  deleteApiKey,
+  deleteWebhook,
+  testSmtp,
+  updateEmailDelivery,
+  updateGeneral,
+  updateSmtp,
+} from "./mutation"
+import {
+  getEmailDelivery,
   getGeneral,
+  getSmtp,
   listApiKeys,
   listWebhooks,
-  getEmailDelivery,
 } from "./query"
-import {
-  updateSmtp,
-  testSmtp,
-  updateGeneral,
-  createApiKey,
-  deleteApiKey,
-  createWebhook,
-  deleteWebhook,
-  updateEmailDelivery,
-} from "./mutation"
 
 export const settingsRouter = router({
   getSmtp: getSmtp,

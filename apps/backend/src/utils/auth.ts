@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken"
 import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
 import { env } from "../constants"
 
 export async function hashPassword(password: string) {

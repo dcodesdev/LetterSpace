@@ -1,6 +1,5 @@
-import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import * as z from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Button,
   DialogFooter,
@@ -13,8 +12,9 @@ import {
   Input,
   Textarea,
 } from "@repo/ui"
-import { TextCursor } from "lucide-react"
 import { Template } from "backend"
+import { TextCursor } from "lucide-react"
+import * as z from "zod"
 
 const templateSchema = z.object({
   name: z.string().min(1, "Name is required"),

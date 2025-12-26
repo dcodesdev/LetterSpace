@@ -1,9 +1,9 @@
-import { z } from "zod"
-import { authProcedure } from "../trpc"
-import { prisma } from "../utils/prisma"
 import { TRPCError } from "@trpc/server"
 import pMap from "p-map"
+import { z } from "zod"
 import { Mailer } from "../lib/Mailer"
+import { authProcedure } from "../trpc"
+import { prisma } from "../utils/prisma"
 
 const createCampaignSchema = z.object({
   title: z.string().min(1, "Campaign title is required"),

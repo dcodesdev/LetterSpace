@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Button } from "@repo/ui"
-import { Eye, Check } from "lucide-react"
+import { Check, Eye } from "lucide-react"
 import { useDebounceValue } from "usehooks-ts"
 
 interface WebhookUrlDisplayProps {

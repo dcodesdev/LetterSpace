@@ -58,15 +58,18 @@ The script bumps version in `package.json`, creates a git tag, and pushes it. Gi
 ### Backend Architecture
 
 TRPC routers in `apps/backend/src/router/`:
+
 - Each domain (user, campaign, subscriber, etc.) has its own directory
 - Pattern: `router.ts` (definition), `mutation.ts` (writes), `query.ts` (reads)
 
 Key entry points:
+
 - `apps/backend/src/app.ts` - Express app setup, middleware, routes
 - `apps/backend/src/trpc.ts` - TRPC context and auth
 - `apps/backend/src/cron/` - Scheduled jobs (email sending, maintenance)
 
 Endpoints:
+
 - `/trpc/*` - TRPC RPC endpoints
 - `/api/*` - REST API (Swagger documented)
 - `/t/:id` - Link tracking redirect
@@ -75,6 +78,7 @@ Endpoints:
 ### Frontend Architecture
 
 React Router app in `apps/web/src/`:
+
 - `app.tsx` - Route definitions
 - `pages/` - Page components matching routes
 - TRPC client with React Query for data fetching

@@ -1,27 +1,27 @@
 import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
+  Button,
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardContent,
-  Button,
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  Input,
   FormMessage,
-  FormDescription,
+  Input,
 } from "@repo/ui"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { trpc } from "@/trpc"
-import { useSession } from "@/hooks"
-import { toast } from "sonner"
 import { LinkIcon, Save } from "lucide-react"
-import { WithTooltip, FormControlledInput } from "@/components"
+import { toast } from "sonner"
+import { z } from "zod"
+import { FormControlledInput, WithTooltip } from "@/components"
+import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
 
 const generalSettingsSchema = z.object({
   defaultFromEmail: z.string().email().optional().or(z.literal("")),

@@ -1,9 +1,9 @@
+import { TRPCError } from "@trpc/server"
 import { z } from "zod"
+import { Prisma } from "../../prisma/client"
 import { authProcedure } from "../trpc"
 import { prisma } from "../utils/prisma"
-import { TRPCError } from "@trpc/server"
 import { paginationSchema } from "../utils/schemas"
-import { Prisma } from "../../prisma/client"
 
 export const listTemplates = authProcedure
   .input(z.object({ organizationId: z.string() }).merge(paginationSchema))

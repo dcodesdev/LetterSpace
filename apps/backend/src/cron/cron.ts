@@ -1,8 +1,8 @@
 import cron from "node-cron"
-import { sendMessagesCron } from "./sendMessages"
+import { cleanupWebhookLogsCron } from "./cleanupWebhookLogs"
 import { dailyMaintenanceCron } from "./dailyMaintenance"
 import { processQueuedCampaigns } from "./processQueuedCampaigns"
-import { cleanupWebhookLogsCron } from "./cleanupWebhookLogs"
+import { sendMessagesCron } from "./sendMessages"
 
 type CronJob = {
   name: string

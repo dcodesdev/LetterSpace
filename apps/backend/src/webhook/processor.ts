@@ -1,6 +1,6 @@
 import { logger } from "../utils/logger"
 import { prisma } from "../utils/prisma"
-import { WebhookEvent, EVENT_STATUS_MAP } from "./types"
+import { EVENT_STATUS_MAP, WebhookEvent } from "./types"
 
 // Process webhook event and update message status
 export async function processWebhookEvent(

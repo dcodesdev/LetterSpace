@@ -1,7 +1,7 @@
+import { TRPCError } from "@trpc/server"
 import { z } from "zod"
 import { authProcedure } from "../trpc"
 import { prisma } from "../utils/prisma"
-import { TRPCError } from "@trpc/server"
 
 const contentSchema = z
   .string()

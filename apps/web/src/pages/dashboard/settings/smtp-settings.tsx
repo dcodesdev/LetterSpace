@@ -1,6 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Button,
   Card,
@@ -20,15 +20,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Switch,
   Separator,
+  Switch,
 } from "@repo/ui"
-import { toast } from "sonner"
-import { trpc } from "@/trpc"
-import { useSession } from "@/hooks"
-import { TestSmtpDialog } from "./test-smtp-dialog"
-import { useEffect, useState } from "react"
 import { Save } from "lucide-react"
+import { toast } from "sonner"
+import { z } from "zod"
+import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
+import { TestSmtpDialog } from "./test-smtp-dialog"
 
 const smtpSchema = z.object({
   host: z.string().min(1, "SMTP host is required"),

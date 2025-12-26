@@ -1,6 +1,5 @@
 "use client"
 
-import { MoreHorizontal, Trash, Eye, Edit } from "lucide-react"
 import {
   Button,
   DropdownMenu,
@@ -12,9 +11,10 @@ import {
 } from "@repo/ui"
 import { ColumnDef } from "@tanstack/react-table"
 import { Template } from "backend"
+import { Edit, Eye, MoreHorizontal, Trash } from "lucide-react"
+import { displayDateTime } from "@/utils"
 import { UpdateTemplateDialog } from "./update-template-dialog"
 import { ViewTemplateDialog } from "./view-template-dialog"
-import { displayDateTime } from "@/utils"
 
 interface ColumnActions {
   onDelete: (id: string) => void
