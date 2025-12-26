@@ -6,7 +6,8 @@
     "dev": "next dev --port 3002 --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
