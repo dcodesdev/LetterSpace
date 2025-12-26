@@ -30,11 +30,5 @@
     "postcss-load-config": "^6.0.1",
     "tailwindcss": "^4.0.6",
     "typescript": "^5.8.3"
-  },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.2.7",
-      "@types/react-dom": "19.2.3"
-    }
   }
 }
