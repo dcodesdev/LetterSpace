@@ -14,5 +14,3 @@ Object.entries(constants.env).forEach(([key, value]) => {
     throw new Error(`${key} is not defined`)
   }
 })
-
-export default constants

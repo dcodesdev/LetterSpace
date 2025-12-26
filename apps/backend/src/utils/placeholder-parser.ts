@@ -12,7 +12,15 @@ interface OrganizationPlaceholderData {
   name: string
 }
 
-type PlaceholderDataKey =
+export interface PlaceholderData {
+  subscriber: SubscriberPlaceholderData
+  campaign: CampaignPlaceholderData
+  organization: OrganizationPlaceholderData
+  unsubscribe_link: string
+  current_date?: string
+}
+
+export type PlaceholderDataKey =
   | `subscriber.${keyof SubscriberPlaceholderData}`
   | `campaign.${keyof CampaignPlaceholderData}`
   | `organization.${keyof OrganizationPlaceholderData}`

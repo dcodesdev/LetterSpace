@@ -3,7 +3,7 @@ import { ThemeProviderContext } from "./theme-context"
 
 type Theme = "dark" | "light" | "system"
 
-export type ThemeProviderProps = {
+type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
