@@ -9,3 +9,4 @@
 - Added ESLint configurations for all packages and apps
 - Updated TypeScript configurations across the monorepo
 - Consolidated `@types/react` version overrides for consistency
+- Added Prettier configuration with automatic import sorting

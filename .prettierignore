@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+.next
+coverage
+*.min.js
+pnpm-lock.yaml
+**/prisma/migrations
+**/prisma/client
