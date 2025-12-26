@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.0.1",
+    "@hookform/resolvers": "^3.10.0",
     "@monaco-editor/react": "^4.7.0",
     "@repo/shared": "workspace:*",
     "@repo/ui": "workspace:*",
