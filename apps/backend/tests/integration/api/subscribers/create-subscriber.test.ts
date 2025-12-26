@@ -235,7 +235,6 @@ describe("[POST] /api/subscribers", () => {
     const {
       apiKey: { key: apiKey },
       orgId,
-      user,
     } = await createUser()
 
     if (!process.env.RESEND_API_KEY) {

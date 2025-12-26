@@ -7,6 +7,7 @@
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
     "build": "rm -rf dist && tsc -b tsconfig.build.json",
+    "check-types": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "generate": "prisma generate",
@@ -65,7 +66,7 @@
     "supertest": "^7.0.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "typescript": "^5.8.3",
+    "typescript": "5.9.3",
     "typescript-eslint": "^8.22.0",
     "vitest": "^3.0.5"
   }

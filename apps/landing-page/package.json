@@ -6,6 +6,7 @@
     "dev": "next dev --port 3002 --turbopack",
     "build": "next build",
     "start": "next start",
+    "check-types": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -27,6 +28,6 @@
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.8.3"
+    "typescript": "5.9.3"
   }
 }
