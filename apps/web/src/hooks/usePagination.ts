@@ -2,22 +2,6 @@ import { useEffect, useState } from "react"
 import { useSearchParams } from "react-router"
 import { useDebounce } from "./useDebounce"
 
-type Pagination = {
-  page: number
-  perPage: number
-  totalPages: number
-}
-
-export function usePagination(
-  initialState: Pagination = {
-    page: 1,
-    perPage: 10,
-    totalPages: 1,
-  }
-) {
-  return useState<Pagination>(initialState)
-}
-
 type Key = "page" | "perPage" | "search" | "totalPages"
 
 type Value<T extends Key> = T extends "page" | "perPage"
