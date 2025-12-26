@@ -1,10 +1,10 @@
+import { ReactNode } from "react"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@repo/ui"
-import { ReactNode } from "react"
 
 interface WithTooltipProps {
   content: string

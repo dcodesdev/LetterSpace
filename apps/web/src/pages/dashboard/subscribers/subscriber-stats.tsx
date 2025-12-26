@@ -1,5 +1,5 @@
-import { ArrowDown, ArrowUp, Users } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui"
+import { ArrowDown, ArrowUp, Users } from "lucide-react"
 import { CardSkeleton } from "@/components"
 import { RouterOutput } from "@/types"
 

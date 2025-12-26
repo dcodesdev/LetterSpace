@@ -1,10 +1,10 @@
 "use client"
 
-import { Card, CardHeader, CardTitle, CardDescription } from "@repo/ui"
-import { trpc } from "@/trpc"
-import { Signup } from "./signup"
-import { Login } from "./login"
+import { Card, CardDescription, CardHeader, CardTitle } from "@repo/ui"
 import { Loader2 } from "lucide-react"
+import { trpc } from "@/trpc"
+import { Login } from "./login"
+import { Signup } from "./signup"
 
 export function AuthPage() {
   const { data: isFirstUser, isLoading } = trpc.user.isFirstUser.useQuery()

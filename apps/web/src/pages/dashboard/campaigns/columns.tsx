@@ -1,8 +1,8 @@
-import { ColumnDef } from "@tanstack/react-table"
-import { Button, cn } from "@repo/ui"
-import { Trash, Copy } from "lucide-react"
-import { CampaignStatus } from "backend"
 import { Link } from "react-router"
+import { Button, cn } from "@repo/ui"
+import { ColumnDef } from "@tanstack/react-table"
+import { CampaignStatus } from "backend"
+import { Copy, Trash } from "lucide-react"
 import { displayDateTime } from "@/utils"
 
 const statusConfig: Record<

@@ -1,26 +1,26 @@
 import { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
+  Button,
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardContent,
-  Button,
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
-  Input,
   FormMessage,
+  Input,
   Textarea,
 } from "@repo/ui"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { trpc } from "@/trpc"
-import { useSession } from "@/hooks"
-import { toast } from "sonner"
 import { Save } from "lucide-react"
+import { toast } from "sonner"
+import { z } from "zod"
+import { useSession } from "@/hooks"
+import { trpc } from "@/trpc"
 
 const organizationSettingsSchema = z.object({
   name: z.string().min(1, "Organization name is required."),

@@ -1,24 +1,24 @@
-import { Route, Routes, BrowserRouter } from "react-router"
+import { BrowserRouter, Route, Routes } from "react-router"
+import { scan } from "react-scan"
 import {
-  DashboardPage,
-  DashboardLayout,
-  SubscribersPage,
-  CampaignsPage,
-  EditCampaignPage,
-  TemplatesPage,
-  SettingsPage,
   AnalyticsPage,
-  ListsPage,
-  OnboardingPage,
-  MessagesPage,
-  EditCampaignLayout,
-  UnsubscribePage,
   AuthPage,
+  CampaignsPage,
+  DashboardLayout,
+  DashboardPage,
+  EditCampaignLayout,
+  EditCampaignPage,
+  ListsPage,
+  MessagesPage,
   NotFoundPage,
+  OnboardingPage,
+  SettingsPage,
+  SubscribersPage,
+  TemplatesPage,
+  UnsubscribePage,
   VerifyEmailPage,
 } from "./pages"
 import { WebhookDetails } from "./pages/dashboard/settings/webhook-details"
-import { scan } from "react-scan"
 
 if (import.meta.env.DEV) {
   scan({

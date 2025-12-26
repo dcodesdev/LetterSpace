@@ -1,9 +1,9 @@
-import { initTRPC, TRPCError } from "@trpc/server"
+import { TRPCError, initTRPC } from "@trpc/server"
 import * as trpcExpress from "@trpc/server/adapters/express"
+import SuperJSON from "superjson"
 import { verifyToken } from "./utils/auth"
 import { prisma } from "./utils/prisma"
 import { tokenPayloadSchema } from "./utils/token"
-import SuperJSON from "superjson"
 
 interface User {
   id: string

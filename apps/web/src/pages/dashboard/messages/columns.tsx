@@ -1,10 +1,10 @@
-import { ColumnDef } from "@tanstack/react-table"
 import { Link } from "react-router"
-import { MessageStatusBadge } from "./message-status-badge"
+import { ColumnDef } from "@tanstack/react-table"
 import { Message } from "backend"
 import { displayDateTime } from "@/utils"
 import { MessageActions } from "./message-actions"
 import { MessageIdCell } from "./message-id-cell"
+import { MessageStatusBadge } from "./message-status-badge"
 
 type MessageWithRelations = Message & {
   Subscriber: {

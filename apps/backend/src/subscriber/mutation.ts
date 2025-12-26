@@ -1,9 +1,9 @@
-import { z } from "zod"
-import { authProcedure, publicProcedure } from "../trpc"
-import { prisma } from "../utils/prisma"
 import { TRPCError } from "@trpc/server"
 import { parse } from "csv-parse"
 import { Readable } from "stream"
+import { z } from "zod"
+import { authProcedure, publicProcedure } from "../trpc"
+import { prisma } from "../utils/prisma"
 
 const createSubscriberSchema = z.object({
   email: z.string().email("Invalid email address"),

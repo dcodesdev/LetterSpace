@@ -1,8 +1,8 @@
+import { TRPCError } from "@trpc/server"
 import { z } from "zod"
+import { MessageStatus } from "../../prisma/client"
 import { authProcedure } from "../trpc"
 import { prisma } from "../utils/prisma"
-import { TRPCError } from "@trpc/server"
-import { MessageStatus } from "../../prisma/client"
 
 export const resendMessage = authProcedure
   .input(

@@ -1,13 +1,13 @@
+import { useState } from "react"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
 } from "@repo/ui"
 import { Template } from "backend"
-import { useState } from "react"
 import { EmailPreview } from "@/components/email-preview"
 
 interface ViewTemplateDialogProps {

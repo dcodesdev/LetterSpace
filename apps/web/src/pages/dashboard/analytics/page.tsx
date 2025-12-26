@@ -1,13 +1,3 @@
-import { Line, LineChart } from "recharts"
-import { ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import {
-  ArrowDown,
-  ArrowUp,
-  BarChart2,
-  Mail,
-  MousePointerClick,
-  Users,
-} from "lucide-react"
 import {
   Button,
   Card,
@@ -25,6 +15,16 @@ import {
   TabsList,
   TabsTrigger,
 } from "@repo/ui"
+import {
+  ArrowDown,
+  ArrowUp,
+  BarChart2,
+  Mail,
+  MousePointerClick,
+  Users,
+} from "lucide-react"
+import { Line, LineChart } from "recharts"
+import { ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 
 // Sample data for charts
 const subscriberData = [

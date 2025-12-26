@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle, Badge } from "@repo/ui"
 import { WEBHOOK_EVENTS, type WebhookEvent } from "@repo/shared"
+import { Badge, Card, CardContent, CardHeader, CardTitle } from "@repo/ui"
 
 interface WebhookEventsReferenceProps {
   title?: string

@@ -1,5 +1,5 @@
-import { Button } from "@repo/ui"
 import { Link, useNavigate } from "react-router"
+import { Button } from "@repo/ui"
 
 export function NotFoundPage() {
   const navigate = useNavigate()

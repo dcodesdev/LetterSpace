@@ -1,9 +1,9 @@
 "use client"
 
-import { constants } from "@/constants"
+import Link from "next/link"
 import { Button } from "@repo/ui"
 import { Mail, Star, Zap } from "lucide-react"
-import Link from "next/link"
+import { constants } from "@/constants"
 
 export const Hero = () => (
   <section className="container mx-auto px-4 py-16 md:py-24 flex flex-col md:flex-row items-center justify-between">

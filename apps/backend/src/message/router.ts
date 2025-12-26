@@ -1,6 +1,6 @@
 import { router } from "../trpc"
-import { listMessages, getMessage } from "./query"
 import { resendMessage } from "./mutation"
+import { getMessage, listMessages } from "./query"
 
 export const messageRouter = router({
   list: listMessages,

@@ -1,5 +1,5 @@
-import { hashPassword } from "@src/utils/auth"
 import { faker } from "@faker-js/faker"
+import { hashPassword } from "@src/utils/auth"
 import { prisma } from "@src/utils/prisma"
 
 export async function createUser() {

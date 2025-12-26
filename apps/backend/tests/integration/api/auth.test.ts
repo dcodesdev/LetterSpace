@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest"
 import { request } from "@helpers/request"
+import { describe, expect, it } from "vitest"
 
 describe("Auth", () => {
   it("Should return 401 without API Key", async () => {

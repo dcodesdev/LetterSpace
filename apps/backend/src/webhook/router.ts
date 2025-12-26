@@ -1,6 +1,6 @@
 import { router } from "../trpc"
-import { listWebhooks, getWebhook, getWebhookLogs } from "./query"
-import { createWebhook, updateWebhook, deleteWebhook } from "./mutation"
+import { createWebhook, deleteWebhook, updateWebhook } from "./mutation"
+import { getWebhook, getWebhookLogs, listWebhooks } from "./query"
 
 export const webhookRouter = router({
   list: listWebhooks,

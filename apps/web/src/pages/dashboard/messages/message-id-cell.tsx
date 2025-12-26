@@ -1,4 +1,3 @@
-import { toast } from "sonner"
 import {
   Button,
   Dialog,
@@ -8,6 +7,7 @@ import {
   DialogTrigger,
 } from "@repo/ui"
 import { Copy, Hash } from "lucide-react"
+import { toast } from "sonner"
 
 export function MessageIdCell({ messageId }: { messageId: string | null }) {
   const copyToClipboard = () => {
