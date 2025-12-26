@@ -1,7 +1,7 @@
 FROM oven/bun:1
 
 RUN apt-get update -y && apt-get install -y openssl
-RUN bun i -g pnpm@10.10.0
+RUN bun i -g pnpm@10.26.2
 
 WORKDIR /app
 
