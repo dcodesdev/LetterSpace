@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    "apps/web": {},
+    "apps/backend": {
+      "entry": ["src/index.ts"],
+      "ignore": ["prisma/client/**/*"]
+    }
+  }
+}
