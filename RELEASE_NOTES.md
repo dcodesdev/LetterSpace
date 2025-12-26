@@ -1,9 +1,11 @@
 ### ✨ Features
 
-- **Migration Scripts** - Added `migrate:dev` and `migrate:deploy` scripts for easier database migration management
-- **Release Script** - Added automated release script (`scripts/release.sh`) for version bumping and tag creation
+- **Next.js 16 Upgrade** - Landing page upgraded to Next.js 16.1.1 with React 19.2.3
+- **Knip Integration** - Added dead code detection tooling for improved codebase hygiene
 
-### 🐛 Bug Fixes
+### 🧹 Maintenance
 
-- Fixed dashboard subscriber growth calculation to properly handle baseline subscriber count
-- Improved seed data distribution - subscribers now distributed over 2 years instead of 12 days for better testing
+- Removed unused exports, hooks, and components across the codebase
+- Added ESLint configurations for all packages and apps
+- Updated TypeScript configurations across the monorepo
+- Consolidated `@types/react` version overrides for consistency
