@@ -39,6 +39,10 @@ LetterSpace is an open source newsletter application that gives you complete con
 
 ## Getting Started
 
+## Development
+
+See [CLAUDE.md](CLAUDE.md) for development guide including release process.
+
 ## Deployment
 
 Detailed deployment instructions are available in our [deployment guide](docs/deployment.md).
