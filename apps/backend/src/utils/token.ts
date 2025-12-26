@@ -6,5 +6,3 @@ export const tokenPayloadSchema = z.object({
   iat: z.number(),
   exp: z.number(),
 })
-
-export type TokenPayload = z.infer<typeof tokenPayloadSchema>

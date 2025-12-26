@@ -29,8 +29,6 @@ const VALID_HEADERS = [
   "tags",
 ] as const
 
-export type ValidHeader = (typeof VALID_HEADERS)[number]
-
 interface ImportSubscribersDialogProps {
   onSuccess?: () => void
   listId?: string

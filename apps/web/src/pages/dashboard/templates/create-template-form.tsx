@@ -37,7 +37,7 @@ const templateSchema = z.object({
     ),
 })
 
-export type CreateTemplateFormData = z.infer<typeof templateSchema>
+type CreateTemplateFormData = z.infer<typeof templateSchema>
 
 interface CreateTemplateFormProps {
   children: React.ReactNode
