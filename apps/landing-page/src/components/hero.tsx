@@ -1,6 +1,6 @@
 "use client"
 
-import constants from "@/constants"
+import { constants } from "@/constants"
 import { Button } from "@repo/ui"
 import { Mail, Star, Zap } from "lucide-react"
 import Link from "next/link"

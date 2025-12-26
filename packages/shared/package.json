@@ -3,8 +3,14 @@
   "module": "index.ts",
   "type": "module",
   "main": "index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@repo/eslint-config": "workspace:*",
+    "@types/bun": "latest",
+    "eslint": "^9.19.0"
   },
   "peerDependencies": {
     "typescript": "^5"

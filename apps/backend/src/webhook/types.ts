@@ -8,9 +8,6 @@ export const WebhookEventSchema = z.object({
   error: z.string().nullable().optional(),
 })
 
-// Schema for authorization result (must be boolean)
-export const AuthorizationResultSchema = z.boolean()
-
 export type WebhookEvent = z.infer<typeof WebhookEventSchema>
 
 // Event mapping configuration
@@ -33,10 +30,6 @@ export const EVENT_STATUS_MAP: Record<
   complaint: { status: "COMPLAINED", errorDefault: "Spam complaint" },
   spam: { status: "COMPLAINED", errorDefault: "Spam complaint" },
 }
-
-// Constants
-export const MEMORY_LIMIT = 128 * 1024 * 1024 // 128MB
-export const MAX_STACK_SIZE = 1024 * 1024 // 1MB
 
 export type WebhookResult =
   | {

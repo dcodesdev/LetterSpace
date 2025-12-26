@@ -12,7 +12,7 @@ import {
   BugPlay,
   ChevronDown,
 } from "lucide-react"
-import constants from "@/constants"
+import { constants } from "@/constants"
 
 interface Feature {
   icon: React.ReactElement<LucideIcon>

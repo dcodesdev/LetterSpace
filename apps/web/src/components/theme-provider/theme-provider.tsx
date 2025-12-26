@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 import { ThemeProviderContext } from "./theme-context"
 
-export type Theme = "dark" | "light" | "system"
+type Theme = "dark" | "light" | "system"
 
-export type ThemeProviderProps = {
+type ThemeProviderProps = {
   children: React.ReactNode
   defaultTheme?: Theme
   storageKey?: string
