@@ -11,7 +11,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@types/bun": "latest",
-    "eslint": "^9.19.0"
+    "eslint": "^9.39.2"
   },
   "peerDependencies": {
     "typescript": "5.9.3"
