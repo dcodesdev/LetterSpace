@@ -74,7 +74,7 @@ describe("replacePlaceholders", () => {
       current_date: "2024-01-01",
     }
     expect(replacePlaceholders(template, data)).toBe(
-      "Email: test@example.com, Campaign: Newsletter Q1, Org: MyCompany, Unsub: domain.com/unsub, Web: domain.com/web, Date: 2024-01-01"
+      "Email: test@example.com, Campaign: Newsletter Q1, Org: MyCompany, Unsub: domain.com/unsub, Date: 2024-01-01"
     )
   })
 

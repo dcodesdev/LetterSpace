@@ -9,7 +9,7 @@ export const dailyMaintenanceCron = cronJob("daily-maintenance", async () => {
     },
   })
 
-  let totalDeletedMessages = 0
+  let totalClearedMessages = 0
 
   for (const org of organizations) {
     const cleanupIntervalDays = org.GeneralSettings?.cleanupInterval ?? 30
@@ -48,21 +48,23 @@ export const dailyMaintenanceCron = cronJob("daily-maintenance", async () => {
 
       if (messagesToClean.length > 0) {
         console.log(
-          `Daily maintenance for org ${org.id}: Deleted ${messagesToClean.length} messages older than ${cleanupIntervalDays} days.`
+          `Daily maintenance for org ${org.id}: Cleared content of ${messagesToClean.length} messages older than ${cleanupIntervalDays} days.`
         )
-        totalDeletedMessages += messagesToClean.length
+        totalClearedMessages += messagesToClean.length
       }
     } catch (error) {
-      console.error(`Error deleting messages for org ${org.id}: ${error}`)
+      console.error(
+        `Error clearing message content for org ${org.id}: ${error}`
+      )
       continue
     }
   }
 
-  if (totalDeletedMessages > 0) {
+  if (totalClearedMessages > 0) {
     console.log(
-      `Daily maintenance job finished. Total deleted messages: ${totalDeletedMessages}.`
+      `Daily maintenance job finished. Total messages cleared: ${totalClearedMessages}.`
     )
   } else {
-    console.log("Daily maintenance job finished. No messages to delete.")
+    console.log("Daily maintenance job finished. No messages to clear.")
   }
 })

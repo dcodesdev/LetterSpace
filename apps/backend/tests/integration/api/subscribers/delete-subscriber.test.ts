@@ -1,7 +1,6 @@
+import { createList, createUser } from "@helpers/factories"
 import { request } from "@helpers/request"
-import { createUser } from "@helpers/user/user"
 import { prisma } from "@src/utils/prisma"
-import { createList } from "@tests/integration/helpers/list/list"
 import { describe, expect, it } from "vitest"
 
 describe("[DELETE] /api/subscribers/:id", () => {

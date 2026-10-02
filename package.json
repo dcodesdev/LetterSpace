@@ -8,7 +8,9 @@
     "lint": "turbo lint",
     "check-types": "turbo check-types",
     "format": "prettier --write .",
-    "knip": "knip"
+    "test": "turbo test",
+    "knip": "knip",
+    "release": "./scripts/release.sh"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",

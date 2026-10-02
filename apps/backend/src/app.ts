@@ -21,7 +21,7 @@ import { prisma } from "./utils/prisma"
 import { handleWebhook } from "./webhook/handler"
 import { webhookRouter } from "./webhook/router"
 
-const appRouter = router({
+export const appRouter = router({
   user: userRouter,
   list: listRouter,
   organization: organizationRouter,

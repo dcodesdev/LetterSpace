@@ -1,0 +1,67 @@
+- [ ] test `pnpm --filter backend test:run` passes twice in a row from a clean database (no state leakage between files)
+- [ ] test `pnpm test` at the repo root runs the backend suite through Turbo
+- [ ] test factories in `tests/integration/helpers/factories/` each create a valid row (api key exposes `key`, user exposes `pwdVersion`)
+- [ ] test `createAuthedUser()` returns a token that authenticates against a TRPC route, and `createCaller()` with no user throws UNAUTHORIZED
+- [ ] test `src/utils/auth.test.ts` — bcrypt round-trip and JWT expiry/tamper rejection
+- [ ] test `src/utils/token.test.ts` — tokenPayloadSchema accepts a real payload, rejects missing/mistyped fields
+- [ ] test `src/utils/message-status.test.ts` — groups stay in sync with the Prisma MessageStatus enum
+- [ ] test `src/utils/pProps.test.ts` — resolveProps resolves keys concurrently and propagates rejections
+- [ ] test `src/cron/cron.utils.test.ts` — cronJob skips concurrent runs and releases its lock after success/throw
+- [ ] test Mailer transport config per encryption mode (STARTTLS/SSL_TLS/NONE) and default ports
+- [ ] test Mailer returns success + stripped messageId on accept, false on reject, throws on transport failure
+- [ ] test LinkTracker rewrites only `@TRACK` links, upserts idempotently, and scopes tracked links per campaign
+- [ ] test `GET /t/:id` redirects, records a click with `?sid=`, marks the message CLICKED, 404s on unknown id
+- [ ] test `GET /img/:id/img.png` returns the 1x1 PNG, marks SENT/AWAITING_WEBHOOK opened, respects `openTracking`, 200s on unknown id
+- [ ] verify manually whether tracked links in a real sent campaign resolve — `LinkTracker` emits `/r/:id` but only `/t/:id` is routed
+- [ ] test webhook transform code with an infinite loop returns 500 "timed out" within ~5s and does not hang the server
+- [ ] test webhook transform sandbox: syntax error, thrown error, memory limit, no host globals
+- [ ] test webhook authorization schemes (bearer, body secret, query key) accept valid and reject missing/wrong credentials
+- [ ] test POST /webhook/:id for unknown id, inactive webhook, unauthorized, bad payload, and a successful run writing a webhook log
+- [ ] test a webhook cannot update a message belonging to another organization
+- [ ] test signup only works for the very first user and login/me/updateProfile behave for that user
+- [ ] test changing the password invalidates existing sessions (old token rejected, new token works)
+- [ ] test creating an organization seeds the Newsletter template and default general/delivery settings
+- [ ] test a user cannot read or update an organization they do not belong to
+- [ ] test SMTP / general / email-delivery settings read, update, upsert-on-first-write, and validation errors
+- [ ] test API key create returns an `sk_` key once, list never exposes the key, and delete is org-scoped
+- [ ] verify manually whether webhook management in Settings works at all — createWebhook/listWebhooks are TODO stubs
+- [ ] test list CRUD in the UI: create, rename, delete, and that the subscriber count ignores unsubscribed members
+- [ ] test list search matches the description as well as the name
+- [ ] test importing a CSV of subscribers (this was completely broken before and now works) with `email`, `name`, and `first_name`/`last_name` columns
+- [ ] test that a CSV import into a list adds every imported subscriber to that list, and re-importing the same file changes nothing
+- [ ] test a CSV row with a blank email shows a readable error naming the row, not a server error
+- [ ] test subscriber create/update/delete, duplicate email rejection, and adding/removing list memberships
+- [ ] test unsubscribing a subscriber from a list cancels their queued messages for campaigns using that list
+- [ ] test the public unsubscribe link with and without a campaign id
+- [ ] test campaign create/edit/duplicate/delete and that editing a campaign that is already sending is refused
+- [ ] test starting a campaign scheduled in the future shows SCHEDULED, and one with no schedule starts immediately
+- [ ] test starting a campaign with no subject, no content, no list, or no base URL configured shows a readable error
+- [ ] test cancelling a sending campaign also cancels its queued messages but leaves already-sent ones
+- [ ] test the campaign "send test email" button, with and without a template applied
+- [ ] test template CRUD and that saving content without the {{content}} placeholder is rejected
+- [ ] test the messages list filters by status, campaign and subscriber, and that search matches subscriber name/email and campaign title
+- [ ] test resending a failed message puts it back in the queue
+- [ ] verify a message from another organization can no longer be opened by id (was previously readable by any logged-in user)
+- [ ] test the dashboard renders message-status counts, the five most recent completed campaigns with delivery rates, and the subscriber growth chart
+- [ ] test the dashboard on a brand new organization shows zeros and no NaN/Infinity anywhere
+- [ ] test the stats page open/click/delivery rates and their month-over-month comparisons against known data
+- [ ] test the campaigns "comparison" figure on the stats page — it currently compares all-time totals against last month
+- [ ] test webhook create/edit/delete from the settings UI, including toggling active and saving transform/auth code
+- [ ] test the webhook log viewer paginates and shows request body, response code and errors
+- [ ] test that a campaign scheduled for a future time actually sends when that time arrives — it currently stays SCHEDULED forever
+- [ ] test that queued messages send, respect the org rate limit, and retry after the configured delay
+- [ ] test that a rejected or erroring send retries up to maxRetries and then shows as failed
+- [ ] test that a campaign flips to Completed once all its messages finish
+- [ ] test that starting a campaign creates one message per subscribed list member, with tracking pixel and @TRACK links rewritten
+- [ ] test that starting the same campaign twice does not send duplicate emails
+- [ ] test that a campaign with more than 100 recipients finishes across multiple cron passes
+- [ ] test that old message bodies are cleared and old webhook logs deleted after the configured cleanup interval
+- [ ] test that an expired API key is rejected — it currently authenticates like a live key
+- [ ] test that the API key "last used" timestamp shown in settings updates after an API call
+- [ ] test that an API key from one organization cannot read, update or delete another organization's subscribers
+- [ ] test the /docs Swagger page loads and its subscriber endpoints can be tried out with a real API key
+- [ ] test that CI runs the backend suite on a pull request and fails the check when a test fails
+- [ ] test that `createdb letterspace_test && pnpm test` from a clean machine works exactly as README/docs describe
+- [ ] test that every command in docs/testing.md runs (single file, single dir, `-t` filter, watch mode)
+- [ ] test that the docs/testing.md TRPC and REST snippets compile and pass when pasted into a new test file
+- [ ] test that overriding DATABASE_URL in the shell really beats the committed .env.test, as documented

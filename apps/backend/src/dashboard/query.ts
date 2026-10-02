@@ -1,6 +1,5 @@
 import { TRPCError } from "@trpc/server"
 import { subMonths } from "date-fns"
-import pMap from "p-map"
 import { z } from "zod"
 import { MessageStatus } from "../../prisma/client"
 import { countDbSize, subscriberGrowthQuery } from "../../prisma/client/sql"
@@ -108,20 +107,24 @@ export const getDashboardStats = authProcedure
     )
 
     // Process recent campaigns
-    const processedCampaigns = await pMap(recentCampaigns, async (campaign) => {
-      const [deliveredCount, totalCount] = await Promise.all([
-        prisma.message.count({
-          where: {
-            campaignId: campaign.id,
-            status: {
-              in: messageStatus.deliveredMessages,
-            },
-          },
-        }),
-        prisma.message.count({
-          where: { campaignId: campaign.id },
-        }),
-      ])
+    const campaignMessageCounts = await prisma.message.groupBy({
+      by: ["campaignId", "status"],
+      where: {
+        campaignId: { in: recentCampaigns.map((campaign) => campaign.id) },
+      },
+      _count: true,
+    })
+
+    const processedCampaigns = recentCampaigns.map((campaign) => {
+      const counts = campaignMessageCounts.filter(
+        (count) => count.campaignId === campaign.id
+      )
+      const totalCount = counts.reduce((sum, count) => sum + count._count, 0)
+      const deliveredCount = counts
+        .filter((count) =>
+          messageStatus.deliveredMessages.includes(count.status)
+        )
+        .reduce((sum, count) => sum + count._count, 0)
 
       return {
         id: campaign.id,
@@ -137,15 +140,14 @@ export const getDashboardStats = authProcedure
 
     const subscriberGrowthCumulative: { date: Date; count: number }[] = []
 
-    for (let i = 0; i < subscriberGrowth.length; i++) {
-      const point = subscriberGrowth[i]
-
-      if (!point?.date) {
+    for (const point of subscriberGrowth) {
+      if (!point.date) {
         continue
       }
 
       const prev =
-        subscriberGrowthCumulative[i - 1]?.count ?? baselineSubscriberCount
+        subscriberGrowthCumulative[subscriberGrowthCumulative.length - 1]
+          ?.count ?? baselineSubscriberCount
 
       subscriberGrowthCumulative.push({
         date: point.date,

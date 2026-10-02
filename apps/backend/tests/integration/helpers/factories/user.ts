@@ -1,13 +1,16 @@
 import { faker } from "@faker-js/faker"
 import { hashPassword } from "@src/utils/auth"
 import { prisma } from "@src/utils/prisma"
+import { createApiKey } from "./api-key"
+
+export const USER_PASSWORD = "password123"
 
 export async function createUser() {
   const user = await prisma.user.create({
     data: {
       name: faker.person.fullName(),
       email: faker.internet.email(),
-      password: await hashPassword("password123"),
+      password: await hashPassword(USER_PASSWORD),
       UserOrganizations: {
         create: {
           Organization: {
@@ -36,6 +39,8 @@ export async function createUser() {
         },
       },
     },
+    // `pwdVersion` is globally omitted on the client; tests need it to sign tokens.
+    omit: { pwdVersion: false },
     include: {
       UserOrganizations: {
         select: {
@@ -50,21 +55,7 @@ export async function createUser() {
     throw new Error("Organization not found")
   }
 
-  // New API Key
-  const apiKey = await prisma.apiKey.create({
-    data: {
-      key: faker.string.uuid(),
-      name: "Test API Key",
-      Organization: {
-        connect: {
-          id: orgId,
-        },
-      },
-    },
-    select: {
-      key: true,
-    },
-  })
+  const apiKey = await createApiKey({ organizationId: orgId })
 
   return { user, apiKey, orgId }
 }

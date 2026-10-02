@@ -1,0 +1,54 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend Test Suite
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: letterspace_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    # These override the committed apps/backend/.env.test: dotenv-cli and
+    # dotenv are loaded without `override`, so real environment wins.
+    env:
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/letterspace_ci?schema=public"
+      JWT_SECRET: ${{ secrets.TEST_JWT_SECRET || 'ci-jwt-secret' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma generate
+        run: pnpm --filter backend generate
+
+      - name: Run migrations
+        run: pnpm --filter backend migrate:deploy
+
+      - name: Run tests
+        run: pnpm --filter backend test:run

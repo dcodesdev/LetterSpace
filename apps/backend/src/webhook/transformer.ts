@@ -95,36 +95,35 @@ export async function transformPayload(
 
         // Set up timeout mechanism using QuickJS interrupt handler
         const TIMEOUT_MS = 5000 // 5 seconds timeout
-        // eslint-disable-next-line no-undef
-        let timeoutId: NodeJS.Timeout | null = null
+        const deadline = Date.now() + TIMEOUT_MS
         let isTimedOut = false
 
-        // Set interrupt handler
+        // evalCode blocks the event loop, so the deadline is checked from
+        // inside the interrupt handler rather than from a timer
         runtime.setInterruptHandler(() => {
-          if (isTimedOut) {
+          if (Date.now() >= deadline) {
+            isTimedOut = true
             return true // Interrupt execution
           }
           return false // Continue execution
         })
 
-        // Start timeout timer
-        timeoutId = setTimeout(() => {
-          isTimedOut = true
-        }, TIMEOUT_MS)
-
         let result
         try {
           result = context.evalCode(code)
         } finally {
-          // Clear timeout and interrupt handler
-          if (timeoutId) {
-            clearTimeout(timeoutId)
-          }
           runtime.setInterruptHandler(() => false)
         }
 
         // Check if execution was interrupted due to timeout
         if (isTimedOut) {
+          // The interrupted result still owns a handle; disposing the runtime
+          // with it alive aborts the QuickJS module
+          if (result.error) {
+            result.error.dispose()
+          } else {
+            result.value.dispose()
+          }
           throw new Error("Transform code execution timed out")
         }
 

@@ -22,6 +22,7 @@ export const handleWebhook = async (
   let responseBody: string | undefined
   let errorMessage: string | undefined
   let transformResult: WebhookResult | null = null
+  let webhookExists = false
 
   try {
     const webhookId = req.params.webhookId
@@ -33,14 +34,12 @@ export const handleWebhook = async (
       return
     }
 
-    const webhook = await prisma.webhook.findFirst({
-      where: {
-        id: webhookId,
-        isActive: true,
-      },
+    const webhook = await prisma.webhook.findUnique({
+      where: { id: webhookId },
     })
+    webhookExists = !!webhook
 
-    if (!webhook) {
+    if (!webhook || !webhook.isActive) {
       responseCode = 404
       responseBody = JSON.stringify({ error: "Webhook not found or inactive" })
       res.status(404).json({ error: "Webhook not found or inactive" })
@@ -88,24 +87,26 @@ export const handleWebhook = async (
     responseBody = JSON.stringify({ error: "Internal server error" })
     res.status(500).json({ error: "Internal server error" })
   } finally {
-    // Log the webhook request
-    try {
-      const duration = Date.now() - startTime
-      await prisma.webhookLog.create({
-        data: {
-          webhookId: req.params.webhookId!,
-          requestBody: req.body,
-          transformedPayload: transformResult?.success
-            ? transformResult?.data
-            : undefined,
-          responseCode,
-          responseBody,
-          error: errorMessage,
-          duration,
-        },
-      })
-    } catch (logError) {
-      logger.error("Failed to log webhook request:", logError)
+    // Log the webhook request; unknown ids have no row to attach the log to
+    if (webhookExists) {
+      try {
+        const duration = Date.now() - startTime
+        await prisma.webhookLog.create({
+          data: {
+            webhookId: req.params.webhookId!,
+            requestBody: req.body,
+            transformedPayload: transformResult?.success
+              ? transformResult?.data
+              : undefined,
+            responseCode,
+            responseBody,
+            error: errorMessage,
+            duration,
+          },
+        })
+      } catch (logError) {
+        logger.error("Failed to log webhook request:", logError)
+      }
     }
   }
 }

@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   authors: [{ name: "LetterSpace Team" }],
   creator: "LetterSpace",
   publisher: "LetterSpace",
-  metadataBase: new URL("https://letterspace.app"),
+  metadataBase: new URL("https://letterspace.dcodes.dev"),
   alternates: {
     canonical: "/",
   },

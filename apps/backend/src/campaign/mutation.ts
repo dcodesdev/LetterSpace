@@ -1,5 +1,4 @@
 import { TRPCError } from "@trpc/server"
-import pMap from "p-map"
 import { z } from "zod"
 import { Mailer } from "../lib/Mailer"
 import { authProcedure } from "../trpc"
@@ -142,12 +141,14 @@ export const updateCampaign = authProcedure
         templateId: input.templateId,
         scheduledAt: input.scheduledAt,
         openTracking: input.openTracking,
-        CampaignLists: {
-          deleteMany: {},
-          create: input.listIds?.map((listId) => ({
-            listId,
-          })),
-        },
+        ...(input.listIds !== undefined && {
+          CampaignLists: {
+            deleteMany: {},
+            create: input.listIds.map((listId) => ({
+              listId,
+            })),
+          },
+        }),
       },
       include: {
         Template: true,
@@ -272,26 +273,8 @@ export const startCampaign = authProcedure
       include: {
         Template: true,
         CampaignLists: {
-          include: {
-            List: {
-              include: {
-                ListSubscribers: {
-                  where: {
-                    unsubscribedAt: null,
-                  },
-                  include: {
-                    Subscriber: {
-                      select: {
-                        id: true,
-                        email: true,
-                        name: true,
-                        Metadata: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
+          select: {
+            listId: true,
           },
         },
       },
@@ -335,19 +318,15 @@ export const startCampaign = authProcedure
       })
     }
 
-    type Subscriber =
-      (typeof campaign)["CampaignLists"][0]["List"]["ListSubscribers"][0]["Subscriber"] & {
-        Metadata: { key: string; value: string }[]
-      }
-
-    const subscribers = new Map<string, Subscriber>()
-    await pMap(campaign.CampaignLists, (campaignList) => {
-      return pMap(campaignList.List.ListSubscribers, (listSubscriber) => {
-        subscribers.set(listSubscriber.Subscriber.id, listSubscriber.Subscriber)
-      })
+    const recipient = await prisma.listSubscriber.findFirst({
+      where: {
+        listId: { in: campaign.CampaignLists.map((cl) => cl.listId) },
+        unsubscribedAt: null,
+      },
+      select: { id: true },
     })
 
-    if (subscribers.size === 0) {
+    if (!recipient) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Campaign must have at least one recipient",
@@ -402,7 +381,21 @@ export const cancelCampaign = authProcedure
       organizationId: z.string(),
     })
   )
-  .mutation(async ({ input }) => {
+  .mutation(async ({ ctx, input }) => {
+    const userOrganization = await prisma.userOrganization.findFirst({
+      where: {
+        userId: ctx.user.id,
+        organizationId: input.organizationId,
+      },
+    })
+
+    if (!userOrganization) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Organization not found",
+      })
+    }
+
     const campaign = await prisma.campaign.findFirst({
       where: {
         id: input.id,

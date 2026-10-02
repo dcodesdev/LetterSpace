@@ -23,7 +23,7 @@ export function WebhookEventsReference({
             Your webhook transform code must return one of these event types.
             For detailed information about message statuses, see the{" "}
             <a
-              href="https://docs.letterspace.app/webhooks"
+              href="https://letterspacedocs.dcodes.dev/webhooks"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary underline hover:no-underline"

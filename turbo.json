@@ -25,6 +25,11 @@
     },
     "generate": {
       "cache": false
+    },
+    "test": {
+      "dependsOn": ["generate"],
+      "cache": false,
+      "inputs": ["$TURBO_DEFAULT$", ".env*"]
     }
   }
 }

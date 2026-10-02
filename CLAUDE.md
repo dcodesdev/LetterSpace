@@ -14,6 +14,7 @@ LetterSpace is an open source, self-hosted newsletter platform. It's a pnpm mono
 pnpm dev                    # Run all dev servers (Turbo)
 pnpm build                  # Build all projects
 pnpm lint                   # Lint all projects
+pnpm test                   # Run all tests (Turbo; needs a test database)
 pnpm format                 # Format with Prettier
 ```
 
@@ -21,7 +22,7 @@ pnpm format                 # Format with Prettier
 
 ```bash
 pnpm --filter backend dev           # Run backend only
-pnpm --filter backend test          # Run tests (Vitest)
+pnpm --filter backend test          # Run tests (Vitest against a real Postgres)
 pnpm --filter backend generate      # Prisma codegen
 pnpm --filter backend migrate:dev   # Dev migrations
 ```
@@ -33,6 +34,20 @@ pnpm --filter backend prisma db seed              # Seed database
 cd apps/backend && pnpm prisma migrate reset --force  # Reset and reseed
 ```
 
+### Test database
+
+Tests need their own PostgreSQL database, configured by `DATABASE_URL` in
+`apps/backend/.env.test` (default `letterspace_test` on localhost). Migrations
+apply automatically when the suite starts; all data is deleted before every
+test, so never point it at a database you care about.
+
+```bash
+createdb letterspace_test
+pnpm test
+```
+
+See [docs/testing.md](docs/testing.md).
+
 ### Release Process
 
 ```bash
@@ -41,7 +56,7 @@ cd apps/backend && pnpm prisma migrate reset --force  # Reset and reseed
 ./scripts/release.sh major    # Bumps major version
 ```
 
-The script bumps version in `package.json`, creates a git tag, and pushes it. GitHub Actions builds Docker images and creates a release from `RELEASE_NOTES.md`.
+Also available as `pnpm release [patch|minor|major]`; add `--dry-run` to only preview. Needs a clean working tree. The script shows the planned version and tag, asks (single keypress) before bumping `package.json`, committing and tagging, then asks again before pushing the commit and tag. GitHub Actions builds Docker images and creates a release from `RELEASE_NOTES.md`.
 
 ## Architecture
 
@@ -106,6 +121,7 @@ Key models: User, Organization (multi-tenancy), Subscriber, List, Campaign, Temp
 
 ## Development Notes
 
-- Email sending is disabled in development (`NODE_ENV=development`) - cron jobs skip and mailer returns mock responses
-- Backend tests use `.env.test` for configuration
+- Cron jobs and the mailer run in every environment - there is no `NODE_ENV` gate, so point a dev organization at a local SMTP catcher
+- Backend tests use `.env.test` for configuration; see [docs/testing.md](docs/testing.md)
 - Webhook transformers run in QuickJS sandbox with configurable memory limits
+- Feature docs live in `docs/` - one file per feature, see `docs/README.md`

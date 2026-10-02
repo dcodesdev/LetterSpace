@@ -128,10 +128,17 @@ export const getMessage = authProcedure
       id: z.string(),
     })
   )
-  .query(async ({ input }) => {
-    const message = await prisma.message.findUnique({
+  .query(async ({ ctx, input }) => {
+    const message = await prisma.message.findFirst({
       where: {
         id: input.id,
+        Campaign: {
+          Organization: {
+            UserOrganizations: {
+              some: { userId: ctx.user.id },
+            },
+          },
+        },
       },
       include: {
         Campaign: {

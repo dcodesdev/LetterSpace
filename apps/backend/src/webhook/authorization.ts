@@ -2,6 +2,12 @@ import express from "express"
 import { getQuickJS } from "quickjs-emscripten"
 import { logger } from "../utils/logger"
 
+class AuthorizationTimeoutError extends Error {
+  constructor() {
+    super("Authorization code execution timed out")
+  }
+}
+
 // Run authorization code in sandbox
 export async function runAuthorization(
   webhook: { authCode: string | null },
@@ -90,8 +96,38 @@ export async function runAuthorization(
         authorize(headers, body, query, params)
       `
 
+      const TIMEOUT_MS = 5000 // 5 seconds timeout
+      const deadline = Date.now() + TIMEOUT_MS
+      let isTimedOut = false
+
+      // evalCode blocks the event loop, so the deadline is checked from
+      // inside the interrupt handler rather than from a timer
+      runtime.setInterruptHandler(() => {
+        if (Date.now() >= deadline) {
+          isTimedOut = true
+          return true
+        }
+        return false
+      })
+
       logger.debug(`Executing authorization code for webhook ${webhookId}`)
-      const result = context.evalCode(code)
+      let result
+      try {
+        result = context.evalCode(code)
+      } finally {
+        runtime.setInterruptHandler(() => false)
+      }
+
+      if (isTimedOut) {
+        // The interrupted result still owns a handle; disposing the runtime
+        // with it alive aborts the QuickJS module
+        if (result.error) {
+          result.error.dispose()
+        } else {
+          result.value.dispose()
+        }
+        throw new AuthorizationTimeoutError()
+      }
 
       if (result.error) {
         const error = context.dump(result.error)
@@ -127,6 +163,13 @@ export async function runAuthorization(
     }
   } catch (error) {
     logger.error(`Webhook ${webhookId} authorization error:`, error)
+    if (error instanceof AuthorizationTimeoutError) {
+      return {
+        success: false,
+        status: 500,
+        error: error.message,
+      }
+    }
     return {
       success: false,
       status: 500,

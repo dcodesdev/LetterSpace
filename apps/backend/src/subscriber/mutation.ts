@@ -232,10 +232,27 @@ export const importSubscribers = authProcedure
       listId: z.string().optional(),
     })
   )
-  .mutation(async ({ input }) => {
+  .mutation(async ({ ctx, input }) => {
+    const userOrganization = await prisma.userOrganization.findFirst({
+      where: {
+        userId: ctx.user.id,
+        organizationId: input.organizationId,
+      },
+    })
+
+    if (!userOrganization) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Organization not found",
+      })
+    }
+
     const file = input.file.get("file") as File
     if (!file) {
-      throw new Error("No file provided")
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: "No file provided",
+      })
     }
 
     const buffer = Buffer.from(await file.arrayBuffer())
@@ -256,7 +273,12 @@ export const importSubscribers = authProcedure
       })
 
       parser.on("error", function (err) {
-        reject(err)
+        reject(
+          new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Invalid CSV: ${err.message}`,
+          })
+        )
       })
 
       parser.on("end", function () {
@@ -267,23 +289,34 @@ export const importSubscribers = authProcedure
     })
 
     // Validate and transform records
-    const subscribers = records.map((record) => ({
-      email: record.email,
-      firstName: record.first_name || null,
-      lastName: record.last_name || null,
-      phone: record.phone || null,
-      company: record.company || null,
-      jobTitle: record.job_title || null,
-      city: record.city || null,
-      country: record.country || null,
-      subscribedAt: record.subscribed_at
-        ? new Date(record.subscribed_at)
-        : new Date(),
-      tags: record.tags
-        ? record.tags.split(",").map((t: string) => t.trim())
-        : [],
-      organizationId: input.organizationId,
-    }))
+    const rows = records.map((record, index) => {
+      const email = String(record.email ?? "").trim()
+
+      if (!email) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: `Missing email on row ${index + 1}`,
+        })
+      }
+
+      const name =
+        record.name?.trim() ||
+        [record.first_name, record.last_name]
+          .filter(Boolean)
+          .join(" ")
+          .trim() ||
+        null
+
+      return {
+        email,
+        name,
+        organizationId: input.organizationId,
+      }
+    })
+
+    const subscribers = [
+      ...new Map(rows.map((row) => [row.email, row])).values(),
+    ]
 
     // Import subscribers
     const result = await prisma.$transaction(async (tx) => {

@@ -1,7 +1,6 @@
+import { createList, createUser } from "@helpers/factories"
 import { request } from "@helpers/request"
-import { createUser } from "@helpers/user/user"
 import { prisma } from "@src/utils/prisma"
-import { createList } from "@tests/integration/helpers/list/list"
 import { describe, expect, it } from "vitest"
 
 describe("[PUT] /api/subscribers/:id", () => {
@@ -194,5 +193,114 @@ describe("[PUT] /api/subscribers/:id", () => {
     expect(response.status).toBe(200)
     expect(response.body.email).toBe("test@test.com")
     expect(response.body.name).toBe("New Name")
+  })
+  it("should reject an invalid email format", async () => {
+    const {
+      apiKey: { key: apiKey },
+      orgId,
+    } = await createUser()
+
+    const subscriber = await prisma.subscriber.create({
+      data: { email: "test@test.com", organizationId: orgId },
+    })
+
+    const response = await request
+      .put(`/api/subscribers/${subscriber.id}`)
+      .set("x-api-key", apiKey)
+      .send({ email: "not-an-email" })
+
+    expect(response.status).toBe(400)
+    expect(response.body.error).toBeDefined()
+
+    const unchanged = await prisma.subscriber.findUniqueOrThrow({
+      where: { id: subscriber.id },
+    })
+    expect(unchanged.email).toBe("test@test.com")
+  })
+
+  it("should reject an empty lists array", async () => {
+    const {
+      apiKey: { key: apiKey },
+      orgId,
+    } = await createUser()
+
+    const subscriber = await prisma.subscriber.create({
+      data: { email: "test@test.com", organizationId: orgId },
+    })
+
+    const response = await request
+      .put(`/api/subscribers/${subscriber.id}`)
+      .set("x-api-key", apiKey)
+      .send({ lists: [] })
+
+    expect(response.status).toBe(400)
+    expect(response.body.error).toBe("At least one listId is required")
+  })
+
+  it("should reject an unknown list id", async () => {
+    const {
+      apiKey: { key: apiKey },
+      orgId,
+    } = await createUser()
+
+    const subscriber = await prisma.subscriber.create({
+      data: { email: "test@test.com", organizationId: orgId },
+    })
+
+    const response = await request
+      .put(`/api/subscribers/${subscriber.id}`)
+      .set("x-api-key", apiKey)
+      .send({ lists: ["missing-list-id"] })
+
+    expect(response.status).toBe(400)
+    expect(response.body.error).toBe("List with id missing-list-id not found")
+  })
+
+  it("should reject a list belonging to another organization", async () => {
+    const {
+      apiKey: { key: apiKey },
+      orgId,
+    } = await createUser()
+    const { orgId: otherOrgId } = await createUser()
+
+    const otherList = await createList({
+      name: "Other Org List",
+      organizationId: otherOrgId,
+    })
+
+    const subscriber = await prisma.subscriber.create({
+      data: { email: "test@test.com", organizationId: orgId },
+    })
+
+    const response = await request
+      .put(`/api/subscribers/${subscriber.id}`)
+      .set("x-api-key", apiKey)
+      .send({ lists: [otherList.id] })
+
+    expect(response.status).toBe(400)
+    expect(response.body.error).toBe(`List with id ${otherList.id} not found`)
+  })
+
+  it("should return 404 when updating a subscriber from another organization", async () => {
+    const {
+      apiKey: { key: apiKey },
+    } = await createUser()
+    const { orgId: otherOrgId } = await createUser()
+
+    const subscriber = await prisma.subscriber.create({
+      data: { email: "theirs@test.com", organizationId: otherOrgId },
+    })
+
+    const response = await request
+      .put(`/api/subscribers/${subscriber.id}`)
+      .set("x-api-key", apiKey)
+      .send({ name: "Hijacked" })
+
+    expect(response.status).toBe(404)
+
+    const unchanged = await prisma.subscriber.findUniqueOrThrow({
+      where: { id: subscriber.id },
+    })
+    expect(unchanged.name).toBeNull()
   })
 })

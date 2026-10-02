@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   authors: [{ name: "LetterSpace Team" }],
   creator: "LetterSpace",
   publisher: "LetterSpace",
-  metadataBase: new URL("https://docs.letterspace.app"),
+  metadataBase: new URL("https://letterspacedocs.dcodes.dev"),
   alternates: {
     canonical: "/",
   },
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
 const navbar = (
   <Navbar
     logo={
-      <Link className="flex items-center gap-2" href="https://letterspace.app">
+      <Link className="flex items-center gap-2" href="https://letterspace.dcodes.dev">
         <Image
           src="/android-chrome-192x192.png"
           alt="LetterSpace"

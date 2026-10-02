@@ -244,10 +244,23 @@ export const deleteApiKey = authProcedure
       })
     }
 
-    await prisma.apiKey.delete({
+    const apiKey = await prisma.apiKey.findFirst({
       where: {
         id: input.id,
         organizationId: input.organizationId,
+      },
+    })
+
+    if (!apiKey) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "API key not found",
+      })
+    }
+
+    await prisma.apiKey.delete({
+      where: {
+        id: apiKey.id,
       },
     })
 

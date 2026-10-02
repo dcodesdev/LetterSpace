@@ -6,7 +6,7 @@ export function Analytics() {
       id="plausible-script"
       strategy="afterInteractive"
       defer
-      data-domain="letterspace.app"
+      data-domain="letterspace.dcodes.dev"
       src="https://analytics.letterspace.app/js/script.js"
     />
   )

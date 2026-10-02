@@ -1,8 +1,27 @@
+import { createList, createUser } from "@helpers/factories"
 import { request } from "@helpers/request"
-import { createUser } from "@helpers/user/user"
 import { prisma } from "@src/utils/prisma"
-import { createList } from "@tests/integration/helpers/list/list"
-import { describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+
+const mocks = vi.hoisted(() => {
+  const sendMail = vi.fn()
+  return { sendMail, createTransport: vi.fn(() => ({ sendMail })) }
+})
+
+vi.mock("nodemailer", () => ({
+  default: { createTransport: mocks.createTransport },
+}))
+
+const { sendMail } = mocks
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  sendMail.mockResolvedValue({
+    accepted: ["optin@example.com"],
+    rejected: [],
+    messageId: "<verify-id@test>",
+  })
+})
 
 describe("[POST] /api/subscribers", () => {
   it("should create a subscriber", async () => {
@@ -237,44 +256,15 @@ describe("[POST] /api/subscribers", () => {
       orgId,
     } = await createUser()
 
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY is not set")
-    }
-    if (!process.env.RESEND_TEST_EMAIL) {
-      throw new Error("RESEND_TEST_EMAIL is not set")
-    }
-
-    // Delete existing SMTP settings for the org to ensure a clean slate for this test
-    await prisma.smtpSettings.deleteMany({
+    await prisma.smtpSettings.updateMany({
       where: { organizationId: orgId },
+      data: { fromEmail: "sender@example.com" },
     })
 
-    // Create specific SMTP settings for this test with SSL_TLS encryption
-    await prisma.smtpSettings.create({
-      data: {
-        organizationId: orgId,
-        host: "smtp.resend.com",
-        port: 465, // Standard SSL/TLS port
-        username: "resend",
-        password: process.env.RESEND_API_KEY,
-        fromEmail: process.env.RESEND_TEST_EMAIL,
-        encryption: "SSL_TLS", // Explicitly set to SSL_TLS
-        secure: true, // Ensure secure is true, though Mailer handles it for SSL_TLS
-      },
-    })
-
-    // Upsert General settings (organizationId is unique here, so upsert is fine)
     await prisma.generalSettings.upsert({
       where: { organizationId: orgId },
-      update: {
-        baseURL: "http://localhost:3000",
-        defaultFromEmail: process.env.RESEND_TEST_EMAIL,
-      },
-      create: {
-        organizationId: orgId,
-        baseURL: "http://localhost:3000",
-        defaultFromEmail: process.env.RESEND_TEST_EMAIL,
-      },
+      update: { baseURL: "http://localhost:3000" },
+      create: { organizationId: orgId, baseURL: "http://localhost:3000" },
     })
 
     const list = await createList({
@@ -282,39 +272,93 @@ describe("[POST] /api/subscribers", () => {
       organizationId: orgId,
     })
 
-    const receivingEmail = process.env.RESEND_TEST_EMAIL_RECEIVER
-    if (!receivingEmail) {
-      throw new Error("RESEND_TEST_EMAIL_RECEIVER is not set")
-    }
-
     const response = await request
       .post("/api/subscribers")
       .set("x-api-key", apiKey)
       .send({
-        email: receivingEmail,
+        email: "optin@example.com",
         lists: [list.id],
         doubleOptIn: true,
       })
 
     expect(response.status).toBe(201)
-    expect(response.body).toBeDefined()
 
     const subscriber = response.body
-    expect(subscriber.email).toBe(receivingEmail.toLowerCase())
-    expect(subscriber.lists).toBeDefined()
-    expect(subscriber.lists.length).toBe(1)
+    expect(subscriber.email).toBe("optin@example.com")
+    expect(subscriber.lists).toHaveLength(1)
     expect(subscriber.lists[0].id).toBe(list.id)
     expect(subscriber.emailVerified).toBe(false)
 
-    const dbSubscriber = await prisma.subscriber.findUnique({
+    const dbSubscriber = await prisma.subscriber.findUniqueOrThrow({
       where: { id: subscriber.id },
     })
-    expect(dbSubscriber).toBeDefined()
-    expect(dbSubscriber?.emailVerified).toBe(false)
+    expect(dbSubscriber.emailVerified).toBe(false)
+    expect(dbSubscriber.emailVerificationToken).toBeTruthy()
 
-    await prisma.generalSettings.deleteMany({
-      where: { organizationId: orgId },
+    expect(sendMail).toHaveBeenCalledTimes(1)
+    expect(sendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: ["optin@example.com"],
+        from: "sender@example.com",
+      })
+    )
+  })
+
+  it("should reject a list belonging to another organization", async () => {
+    const {
+      apiKey: { key: apiKey },
+    } = await createUser()
+    const { orgId: otherOrgId } = await createUser()
+
+    const otherList = await createList({
+      name: "Other Org List",
+      organizationId: otherOrgId,
     })
-    await prisma.smtpSettings.deleteMany({ where: { organizationId: orgId } })
+
+    const response = await request
+      .post("/api/subscribers")
+      .set("x-api-key", apiKey)
+      .send({ email: "test@test.com", lists: [otherList.id] })
+
+    expect(response.status).toBe(400)
+    expect(response.body.error).toBe(`List with id ${otherList.id} not found`)
+    expect(await prisma.subscriber.count()).toBe(0)
+  })
+
+  it("should allow the same email in two different organizations", async () => {
+    const {
+      apiKey: { key: apiKey },
+      orgId,
+    } = await createUser()
+    const {
+      apiKey: { key: otherApiKey },
+      orgId: otherOrgId,
+    } = await createUser()
+
+    const list = await createList({ name: "List", organizationId: orgId })
+    const otherList = await createList({
+      name: "Other List",
+      organizationId: otherOrgId,
+    })
+
+    const first = await request
+      .post("/api/subscribers")
+      .set("x-api-key", apiKey)
+      .send({ email: "shared@test.com", lists: [list.id] })
+
+    const second = await request
+      .post("/api/subscribers")
+      .set("x-api-key", otherApiKey)
+      .send({ email: "shared@test.com", lists: [otherList.id] })
+
+    expect(first.status).toBe(201)
+    expect(second.status).toBe(201)
+    expect(first.body.id).not.toBe(second.body.id)
+    expect(
+      await prisma.subscriber.count({ where: { organizationId: orgId } })
+    ).toBe(1)
+    expect(
+      await prisma.subscriber.count({ where: { organizationId: otherOrgId } })
+    ).toBe(1)
   })
 })

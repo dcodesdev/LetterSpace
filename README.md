@@ -37,11 +37,28 @@ LetterSpace is an open source newsletter application that gives you complete con
 - `WEBHOOK_MEMORY_LIMIT` - Memory limit for webhook transformer runtime in bytes (default: 16777216 = 16MB)
 - `WEBHOOK_MAX_STACK_SIZE` - Maximum stack size for webhook transformer in bytes (default: 262144 = 256KB)
 
+## Testing
+
+The backend suite runs against a real PostgreSQL database configured by
+`apps/backend/.env.test`:
+
+```bash
+createdb letterspace_test
+pnpm test
+```
+
+See [docs/testing.md](docs/testing.md) for the database setup, the test
+factories, and the CI workflow.
+
+## Documentation
+
+Feature docs live in [docs/](docs/README.md) - one file per feature.
+
 ## Getting Started
 
 ## Deployment
 
-Detailed deployment instructions are available in our [deployment guide](docs/deployment.md).
+Detailed deployment instructions are available in the [getting started guide](apps/docs/src/app/getting-started/page.mdx).
 
 ## Contributing
 
@@ -53,9 +70,9 @@ We welcome contributions! Please see our [contributing guidelines](CONTRIBUTING.
 
 ## Support
 
-- [Documentation](https://docs.letterspace.app)
+- [Documentation](https://letterspacedocs.dcodes.dev)
 - [GitHub Issues](https://github.com/dcodesdev/letterspace/issues)
 
 ---
 
-Visit [letterspace.app](https://letterspace.app) for more information.
+Visit [letterspace.dcodes.dev](https://letterspace.dcodes.dev) for more information.

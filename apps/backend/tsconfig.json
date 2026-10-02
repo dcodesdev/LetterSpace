@@ -15,7 +15,8 @@
     "paths": {
       "@src/*": ["./src/*"],
       "@tests/*": ["./tests/*"],
-      "@helpers/*": ["./tests/integration/helpers/*"]
+      "@helpers/*": ["./tests/integration/helpers/*"],
+      "@prisma-client": ["./prisma/client"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"],

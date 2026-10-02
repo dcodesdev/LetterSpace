@@ -6,6 +6,8 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.test.ts", "src/**/*.test.ts"],
     setupFiles: ["tests/integration/helpers/setup.ts"],
+    // One shared test database: never run files or tests in parallel.
+    fileParallelism: false,
     sequence: {
       concurrent: false,
     },
@@ -15,6 +17,7 @@ export default defineConfig({
       "@src": path.resolve(__dirname, "./src"),
       "@tests": path.resolve(__dirname, "./tests"),
       "@helpers": path.resolve(__dirname, "./tests/integration/helpers"),
+      "@prisma-client": path.resolve(__dirname, "./prisma/client"),
     },
   },
 })

@@ -1,0 +1,62 @@
+FROM ubuntu:24.04
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    build-essential \
+    git \
+    pkg-config \
+    libssl-dev \
+    unzip \
+    zip \
+    jq \
+    vim \
+    nano \
+    htop \
+    tree \
+    less \
+    ca-certificates \
+    gnupg \
+    openssh-client \
+    ripgrep \
+    fd-find \
+    bat \
+    postgresql-client \
+    redis-tools \
+    sox \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js (includes npm)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install bun globally (to /usr/local/bin)
+RUN curl -fsSL https://bun.sh/install | BUN_INSTALL=/usr/local bash
+
+# Install yarn and pnpm
+RUN npm install -g yarn pnpm
+
+# Verify installations
+RUN node --version && npm --version && bun --version && yarn --version && pnpm --version
+
+# Install Playwright with Chromium (shared browser path readable by all users)
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN npm install -g playwright \
+    && playwright install --with-deps chromium \
+    && chmod -R 755 /ms-playwright \
+    && rm -rf /var/lib/apt/lists/*
+
+# User ubuntu with UID 1000 already exists in the base image
+# Ensure home directory exists for the user
+RUN mkdir -p /home/ubuntu/.local/bin && chown -R 1000:1000 /home/ubuntu
+
+USER 1000:1000
+ENV HOME=/home/ubuntu
+ENV PATH="/home/ubuntu/.local/bin:${PATH}"
+
+WORKDIR /app
+
+# Default command
+CMD ["/bin/bash"]

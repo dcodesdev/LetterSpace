@@ -298,19 +298,29 @@ export const getStats = authProcedure
 
     const result = await resolveProps(promises)
 
+    const recipientsAllTime = Number(result.recipients[0]?.count ?? 0)
+    const recipientsThisMonth = Number(
+      result.recipientsThisMonth[0]?.count ?? 0
+    )
+    const recipientsLastMonth = Number(
+      result.recipientsLastMonth[0]?.count ?? 0
+    )
+
     const data = {
       campaigns: {
         total: result.totalCampaigns,
         thisMonth: result.totalCampaignsThisMonth,
         lastMonth: result.totalCampaignsLastMonth,
-        comparison: result.totalCampaigns - result.totalCampaignsLastMonth,
+        comparison:
+          result.totalCampaignsThisMonth - result.totalCampaignsLastMonth,
       },
       completedCampaigns: {
         total: result.completedCampaigns,
         thisMonth: result.completedCampaignsThisMonth,
         lastMonth: result.completedCampaignsLastMonth,
         comparison:
-          result.completedCampaigns - result.completedCampaignsLastMonth,
+          result.completedCampaignsThisMonth -
+          result.completedCampaignsLastMonth,
       },
       openRate: {
         thisMonth: result.openRateThisMonth * 100,
@@ -336,12 +346,10 @@ export const getStats = authProcedure
         lastPeriod: totalMessagesLastPeriod,
       },
       recipients: {
-        allTime: result.recipients[0]?.count || 0,
-        thisMonth: result.recipientsThisMonth[0]?.count || 0,
-        lastMonth: result.recipientsLastMonth[0]?.count || 0,
-        comparison:
-          Number(result.recipientsThisMonth[0]?.count) -
-          Number(result.recipientsLastMonth[0]?.count),
+        allTime: recipientsAllTime,
+        thisMonth: recipientsThisMonth,
+        lastMonth: recipientsLastMonth,
+        comparison: recipientsThisMonth - recipientsLastMonth,
       },
       deliveryRate: {
         thisMonth: {
