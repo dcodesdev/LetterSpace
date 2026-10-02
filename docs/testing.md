@@ -41,8 +41,9 @@ can override per shell:
 DATABASE_URL="postgresql://me@localhost:5432/my_test_db" pnpm --filter backend test
 ```
 
-Migrations apply automatically: `setup.ts` runs `prisma migrate deploy` when the
-suite loads. You never need to migrate the test database by hand.
+Migrations apply automatically: the vitest `globalSetup`
+(`tests/integration/helpers/global-setup.ts`) runs `prisma migrate deploy` once
+before any test file. You never need to migrate the test database by hand.
 
 The suite drops all data before every test, so never point `DATABASE_URL` at a
 database you care about.
@@ -173,7 +174,9 @@ need. Mock external services with `vi.mock` — `src/lib/Mailer.test.ts` mocks
 
 1. Start a `postgres:16` service container.
 2. `pnpm install --frozen-lockfile`, Node 22, pnpm cache.
-3. `pnpm --filter backend generate` then `migrate:deploy`.
+3. `pnpm --filter backend migrate:deploy`, then `generate`. TypedSQL
+   (`prisma generate --sql`) checks queries against the database, so it must be
+   migrated first.
 4. `pnpm --filter backend test:run`.
 
 `DATABASE_URL` and `JWT_SECRET` come from the workflow `env` block, which

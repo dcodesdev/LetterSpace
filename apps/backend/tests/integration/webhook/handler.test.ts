@@ -182,6 +182,28 @@ describe("POST /webhook/:webhookId", () => {
     expect(message.error).toBe("Email bounced")
   })
 
+  it("updates the message when the transformed error has quotes and newlines", async () => {
+    const reason = '550 "mailbox unavailable"\nat C:\\spool'
+    const webhook = await createWebhook({
+      organizationId: orgId,
+      transformCode: `function transform(payload) {
+        return { messageId: payload.id, event: 'bounced', error: payload.reason }
+      }`,
+    })
+
+    const response = await request
+      .post(`/webhook/${webhook.id}`)
+      .send({ id: EXTERNAL_ID, reason })
+
+    expect(response.status).toBe(200)
+
+    const message = await prisma.message.findUniqueOrThrow({
+      where: { id: messageDbId },
+    })
+    expect(message.status).toBe("FAILED")
+    expect(message.error).toBe(reason)
+  })
+
   it("returns 500 when the transform code throws", async () => {
     const webhook = await createWebhook({
       organizationId: orgId,

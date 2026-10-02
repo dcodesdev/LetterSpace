@@ -75,6 +75,9 @@ export const CampaignActions = () => {
               organizationId: organization.id,
             })
           },
+          onError: (error) => {
+            toastError("Error saving campaign", error)
+          },
         }
       )
     })()

@@ -220,18 +220,18 @@ describe("trpc settings router", () => {
       expect(sendMail).not.toHaveBeenCalled()
     })
 
-    // Pins current behaviour: testSmtp has no membership check.
-    it("sends through another organization's settings for a non-member", async () => {
+    it("rejects a non-member without sending", async () => {
       const { user } = await createUser()
       const other = await createUser()
 
-      const result = await createCaller({ id: user.id }).settings.testSmtp({
-        email: "to@example.com",
-        organizationId: other.orgId,
-      })
-
-      expect(result).toEqual({ success: true })
-      expect(sendMail).toHaveBeenCalledTimes(1)
+      await expectTrpcError(
+        createCaller({ id: user.id }).settings.testSmtp({
+          email: "to@example.com",
+          organizationId: other.orgId,
+        }),
+        "UNAUTHORIZED"
+      )
+      expect(sendMail).not.toHaveBeenCalled()
     })
 
     it("rejects without a user", async () => {

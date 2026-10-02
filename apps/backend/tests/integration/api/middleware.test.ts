@@ -28,6 +28,35 @@ describe("authenticateApiKey", () => {
     expect(response.body.error).toBe("Invalid API Key")
   })
 
+  it("rejects an expired API key", async () => {
+    const { orgId } = await createUser()
+    const apiKey = await createApiKey({
+      organizationId: orgId,
+      expiresAt: new Date(Date.now() - 60_000),
+    })
+
+    const response = await request
+      .get("/api/subscribers")
+      .set("x-api-key", apiKey.key)
+
+    expect(response.status).toBe(401)
+    expect(response.body.error).toBe("Invalid API Key")
+  })
+
+  it("accepts an API key that has not expired yet", async () => {
+    const { orgId } = await createUser()
+    const apiKey = await createApiKey({
+      organizationId: orgId,
+      expiresAt: new Date(Date.now() + 60 * 60_000),
+    })
+
+    const response = await request
+      .get("/api/subscribers")
+      .set("x-api-key", apiKey.key)
+
+    expect(response.status).toBe(200)
+  })
+
   it("scopes the request to the organization owning the key", async () => {
     const {
       apiKey: { key: apiKey },

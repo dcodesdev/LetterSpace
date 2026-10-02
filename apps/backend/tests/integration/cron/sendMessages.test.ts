@@ -464,6 +464,30 @@ describe("sendMessages cron", () => {
       expect(stored.status).toBe("FAILED")
     })
 
+    it("makes exactly maxRetries attempts before marking FAILED", async () => {
+      const { subscriber, campaign } = await seedSendableOrg({
+        maxRetries: 3,
+        retryDelay: 0,
+      })
+      sendMail.mockResolvedValue(rejected())
+      const message = await createMessage({
+        campaignId: campaign.id,
+        subscriberId: subscriber.id,
+        status: "QUEUED",
+      })
+
+      for (let i = 0; i < 5; i++) {
+        await sendMessagesCron()
+      }
+
+      expect(sendMail).toHaveBeenCalledTimes(3)
+      const stored = await prisma.message.findUniqueOrThrow({
+        where: { id: message.id },
+      })
+      expect(stored.status).toBe("FAILED")
+      expect(stored.tries).toBe(3)
+    })
+
     it("picks up a RETRYING message once the retry delay has elapsed", async () => {
       const { subscriber, campaign } = await seedSendableOrg({ retryDelay: 60 })
       const message = await createMessage({
@@ -502,6 +526,62 @@ describe("sendMessages cron", () => {
         where: { id: message.id },
       })
       expect(stored.status).toBe("RETRYING")
+    })
+  })
+
+  describe("cancellation", () => {
+    it("does not send a message cancelled between fetch and claim", async () => {
+      const { subscriber, campaign } = await seedSendableOrg()
+      const message = await createMessage({
+        campaignId: campaign.id,
+        subscriberId: subscriber.id,
+        status: "QUEUED",
+      })
+      const findMany = prisma.message.findMany
+      // vi.spyOn can't restore methods on the extended client
+      prisma.message.findMany = (async (
+        args: Parameters<typeof findMany>[0]
+      ) => {
+        const result = await findMany(args)
+        await prisma.message.update({
+          where: { id: message.id },
+          data: { status: "CANCELLED" },
+        })
+        return result
+      }) as typeof findMany
+
+      try {
+        await sendMessagesCron()
+      } finally {
+        prisma.message.findMany = findMany
+      }
+
+      expect(sendMail).not.toHaveBeenCalled()
+      const stored = await prisma.message.findUniqueOrThrow({
+        where: { id: message.id },
+      })
+      expect(stored.status).toBe("CANCELLED")
+    })
+
+    it("does not send queued messages of a cancelled campaign", async () => {
+      const { subscriber, campaign } = await seedSendableOrg()
+      await prisma.campaign.update({
+        where: { id: campaign.id },
+        data: { status: "CANCELLED" },
+      })
+      const message = await createMessage({
+        campaignId: campaign.id,
+        subscriberId: subscriber.id,
+        status: "QUEUED",
+      })
+
+      await sendMessagesCron()
+
+      expect(sendMail).not.toHaveBeenCalled()
+      const stored = await prisma.message.findUniqueOrThrow({
+        where: { id: message.id },
+      })
+      expect(stored.status).toBe("QUEUED")
     })
   })
 

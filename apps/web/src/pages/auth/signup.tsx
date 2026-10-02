@@ -18,6 +18,7 @@ import Cookies from "js-cookie"
 import { Eye, EyeOff, Mail, User } from "lucide-react"
 import { z } from "zod"
 import { trpc } from "@/trpc"
+import { toastError } from "@/utils"
 
 const signUpSchema = z.object({
   name: z.string().min(2),
@@ -42,6 +43,9 @@ export const Signup = () => {
       onSuccess(data) {
         Cookies.set("token", data.token)
         navigate("/onboarding")
+      },
+      onError(error) {
+        toastError("Error signing up", error)
       },
     })
   }

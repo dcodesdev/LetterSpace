@@ -20,3 +20,5 @@ export function cronJob(name: string, cronFn: () => Promise<void>) {
     }
   }
 }
+
+export const DEFAULT_CLEANUP_INTERVAL_DAYS = 90

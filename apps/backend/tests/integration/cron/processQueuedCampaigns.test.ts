@@ -6,7 +6,10 @@ import {
   createSubscriber,
   createTemplate,
 } from "@helpers/factories"
+import { request } from "@helpers/request"
+import { waitFor } from "@helpers/wait-for"
 import { processQueuedCampaigns } from "@src/cron/processQueuedCampaigns"
+import { sendMessagesCron } from "@src/cron/sendMessages"
 import { prisma } from "@src/utils/prisma"
 import { addDays, subDays } from "date-fns"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -117,7 +120,7 @@ describe("processQueuedCampaigns cron", () => {
       expect(await messagesFor(campaign.id)).toHaveLength(0)
     })
 
-    it("skips a campaign with no lists", async () => {
+    it("moves a campaign with no lists to SENDING", async () => {
       const { org } = await seedOrg()
       const campaign = await createCampaign({
         organizationId: org.id,
@@ -130,10 +133,10 @@ describe("processQueuedCampaigns cron", () => {
       const stored = await prisma.campaign.findUniqueOrThrow({
         where: { id: campaign.id },
       })
-      expect(stored.status).toBe("CREATING")
+      expect(stored.status).toBe("SENDING")
     })
 
-    it("skips a campaign whose lists have no subscribers", async () => {
+    it("moves a campaign whose lists have no subscribers to SENDING", async () => {
       const { org, list } = await seedOrg()
       const campaign = await createCampaign({
         organizationId: org.id,
@@ -144,6 +147,10 @@ describe("processQueuedCampaigns cron", () => {
       await processQueuedCampaigns()
 
       expect(await messagesFor(campaign.id)).toHaveLength(0)
+      const stored = await prisma.campaign.findUniqueOrThrow({
+        where: { id: campaign.id },
+      })
+      expect(stored.status).toBe("SENDING")
     })
   })
 
@@ -316,6 +323,28 @@ describe("processQueuedCampaigns cron", () => {
     })
   })
 
+  describe("organization scoping", () => {
+    it("skips subscribers from another organization on the campaign's list", async () => {
+      const { org, list } = await seedOrg()
+      const other = await createOrganization()
+      const mine = await createSubscriber({
+        organizationId: org.id,
+        listIds: [list.id],
+      })
+      await createSubscriber({ organizationId: other.id, listIds: [list.id] })
+      const campaign = await createCampaign({
+        organizationId: org.id,
+        status: "CREATING",
+        listIds: [list.id],
+      })
+
+      await processQueuedCampaigns()
+
+      const messages = await messagesFor(campaign.id)
+      expect(messages.map((m) => m.subscriberId)).toEqual([mine.id])
+    })
+  })
+
   describe("idempotency", () => {
     it("creates no extra messages on a second run", async () => {
       const { org, list } = await seedOrg()
@@ -467,6 +496,29 @@ describe("processQueuedCampaigns cron", () => {
       expect(message?.content).toContain("<html><body><p>Inner</p>")
     })
 
+    it("inserts content containing $ patterns into the template literally", async () => {
+      const { org, list } = await seedOrg()
+      await createSubscriber({ organizationId: org.id, listIds: [list.id] })
+      const template = await createTemplate({
+        organizationId: org.id,
+        content: "<html><body>{{content}}</body></html>",
+      })
+      const campaign = await createCampaign({
+        organizationId: org.id,
+        status: "CREATING",
+        listIds: [list.id],
+        templateId: template.id,
+        content: "<p>Save $$$ $' $&</p>",
+      })
+
+      await processQueuedCampaigns()
+
+      const [message] = await messagesFor(campaign.id)
+      expect(message?.content).toContain(
+        "<html><body><p>Save $$$ $' $&</p></body></html>"
+      )
+    })
+
     it("appends an open tracking pixel when open tracking is on", async () => {
       const { org, list } = await seedOrg()
       await createSubscriber({ organizationId: org.id, listIds: [list.id] })
@@ -503,9 +555,12 @@ describe("processQueuedCampaigns cron", () => {
       expect(message?.content).not.toContain("/img.png")
     })
 
-    it("rewrites @TRACK links through the link tracker", async () => {
+    it("rewrites @TRACK links to a /t/ url that records the subscriber's click", async () => {
       const { org, list } = await seedOrg()
-      await createSubscriber({ organizationId: org.id, listIds: [list.id] })
+      const subscriber = await createSubscriber({
+        organizationId: org.id,
+        listIds: [list.id],
+      })
       const campaign = await createCampaign({
         organizationId: org.id,
         status: "CREATING",
@@ -521,8 +576,53 @@ describe("processQueuedCampaigns cron", () => {
       expect(trackedLink.url).toBe("https://example.com/post")
 
       const [message] = await messagesFor(campaign.id)
-      expect(message?.content).toContain(`${BASE_URL}/r/${trackedLink.id}`)
+      const trackingPath = `/t/${trackedLink.id}?sid=${subscriber.id}`
+      expect(message?.content).toContain(`${BASE_URL}${trackingPath}`)
       expect(message?.content).not.toContain("@TRACK")
+
+      const response = await request.get(trackingPath)
+      expect(response.status).toBe(302)
+      expect(response.headers.location).toBe("https://example.com/post")
+
+      await waitFor(async () => {
+        const clicks = await prisma.click.findMany({
+          where: { trackedLinkId: trackedLink.id },
+        })
+        expect(clicks).toHaveLength(1)
+        expect(clicks[0]?.subscriberId).toBe(subscriber.id)
+      })
+    })
+
+    it("strips trailing slashes from baseURL before building links", async () => {
+      const { org, list } = await seedOrg({ baseURL: `${BASE_URL}//` })
+      const subscriber = await createSubscriber({
+        organizationId: org.id,
+        listIds: [list.id],
+      })
+      const campaign = await createCampaign({
+        organizationId: org.id,
+        status: "CREATING",
+        listIds: [list.id],
+        content:
+          '<a href="{{unsubscribe_link}}">out</a><a href="https://example.com/post@TRACK">Read</a>',
+      })
+
+      await processQueuedCampaigns()
+
+      const trackedLink = await prisma.trackedLink.findFirstOrThrow({
+        where: { campaignId: campaign.id },
+      })
+      const [message] = await messagesFor(campaign.id)
+      expect(message?.content).toContain(
+        `${BASE_URL}/unsubscribe?sid=${subscriber.id}`
+      )
+      expect(message?.content).toContain(
+        `${BASE_URL}/img/${message?.id}/img.png`
+      )
+      expect(message?.content).toContain(
+        `${BASE_URL}/t/${trackedLink.id}?sid=${subscriber.id}`
+      )
+      expect(message?.content).not.toContain(`${BASE_URL}//`)
     })
 
     it("leaves untagged links untouched", async () => {
@@ -544,7 +644,7 @@ describe("processQueuedCampaigns cron", () => {
   })
 
   describe("scheduled campaigns", () => {
-    it("ignores a campaign scheduled for the future", async () => {
+    it("leaves a campaign scheduled for the future alone", async () => {
       const { org, list } = await seedOrg()
       await createSubscriber({ organizationId: org.id, listIds: [list.id] })
       const campaign = await createCampaign({
@@ -557,12 +657,18 @@ describe("processQueuedCampaigns cron", () => {
       await processQueuedCampaigns()
 
       expect(await messagesFor(campaign.id)).toHaveLength(0)
+      const stored = await prisma.campaign.findUniqueOrThrow({
+        where: { id: campaign.id },
+      })
+      expect(stored.status).toBe("SCHEDULED")
     })
 
-    // Nothing in the codebase moves SCHEDULED -> CREATING, so a campaign whose
-    // scheduled time has passed is never picked up. See CONCERNS.md.
-    it("also ignores a campaign whose scheduled time has passed", async () => {
+    it("starts a campaign whose scheduled time has passed", async () => {
       const { org, list } = await seedOrg()
+      const subscriber = await createSubscriber({
+        organizationId: org.id,
+        listIds: [list.id],
+      })
       await createSubscriber({ organizationId: org.id, listIds: [list.id] })
       const campaign = await createCampaign({
         organizationId: org.id,
@@ -573,11 +679,151 @@ describe("processQueuedCampaigns cron", () => {
 
       await processQueuedCampaigns()
 
-      expect(await messagesFor(campaign.id)).toHaveLength(0)
+      const messages = await messagesFor(campaign.id)
+      expect(messages).toHaveLength(2)
+      expect(messages.map((m) => m.subscriberId)).toContain(subscriber.id)
+    })
+
+    it("moves a past-due scheduled campaign to CREATING", async () => {
+      const { org, list } = await seedOrg()
+      const campaign = await createCampaign({
+        organizationId: org.id,
+        status: "SCHEDULED",
+        listIds: [list.id],
+        scheduledAt: subDays(new Date(), 1),
+      })
+      await prisma.campaign.update({
+        where: { id: campaign.id },
+        data: { content: null },
+      })
+
+      await processQueuedCampaigns()
+
       const stored = await prisma.campaign.findUniqueOrThrow({
         where: { id: campaign.id },
       })
-      expect(stored.status).toBe("SCHEDULED")
+      expect(stored.status).toBe("CREATING")
+    })
+  })
+
+  describe("campaigns with no recipients left", () => {
+    it("completes a CREATING campaign whose remaining recipients unsubscribed", async () => {
+      const { org, list } = await seedOrg()
+      await prisma.smtpSettings.updateMany({
+        where: { organizationId: org.id },
+        data: { fromName: "LetterSpace", fromEmail: "hello@example.com" },
+      })
+      const sent = await createSubscriber({
+        organizationId: org.id,
+        listIds: [list.id],
+      })
+      const gone = await createSubscriber({
+        organizationId: org.id,
+        listIds: [list.id],
+      })
+      const campaign = await createCampaign({
+        organizationId: org.id,
+        status: "CREATING",
+        listIds: [list.id],
+      })
+      await createMessage({
+        campaignId: campaign.id,
+        subscriberId: sent.id,
+        status: "SENT",
+      })
+      await prisma.listSubscriber.updateMany({
+        where: { subscriberId: gone.id },
+        data: { unsubscribedAt: new Date() },
+      })
+
+      await processQueuedCampaigns()
+
+      expect(
+        (
+          await prisma.campaign.findUniqueOrThrow({
+            where: { id: campaign.id },
+          })
+        ).status
+      ).toBe("SENDING")
+      expect(await messagesFor(campaign.id)).toHaveLength(1)
+
+      await sendMessagesCron()
+
+      expect(
+        (
+          await prisma.campaign.findUniqueOrThrow({
+            where: { id: campaign.id },
+          })
+        ).status
+      ).toBe("COMPLETED")
+    })
+  })
+
+  describe("cancellation", () => {
+    it("does not move a campaign cancelled mid-batch back to SENDING", async () => {
+      const { org, list } = await seedOrg()
+      await createSubscriber({ organizationId: org.id, listIds: [list.id] })
+      const campaign = await createCampaign({
+        organizationId: org.id,
+        status: "CREATING",
+        listIds: [list.id],
+      })
+      const findMany = prisma.campaign.findMany
+      // vi.spyOn can't restore methods on the extended client
+      prisma.campaign.findMany = (async (
+        args: Parameters<typeof findMany>[0]
+      ) => {
+        const result = await findMany(args)
+        await prisma.campaign.update({
+          where: { id: campaign.id },
+          data: { status: "CANCELLED" },
+        })
+        return result
+      }) as typeof findMany
+
+      try {
+        await processQueuedCampaigns()
+      } finally {
+        prisma.campaign.findMany = findMany
+      }
+
+      expect(await messagesFor(campaign.id)).toHaveLength(1)
+      const stored = await prisma.campaign.findUniqueOrThrow({
+        where: { id: campaign.id },
+      })
+      expect(stored.status).toBe("CANCELLED")
+    })
+  })
+
+  describe("skip logging", () => {
+    it("logs a recurring skip once for each campaign", async () => {
+      const log = vi.mocked(console.log)
+      const { org, list } = await seedOrg()
+      await createSubscriber({ organizationId: org.id, listIds: [list.id] })
+      const campaigns = await Promise.all(
+        [0, 1].map(() =>
+          createCampaign({
+            organizationId: org.id,
+            status: "CREATING",
+            listIds: [list.id],
+            subject: "Subject",
+          })
+        )
+      )
+      await prisma.campaign.updateMany({
+        where: { id: { in: campaigns.map((c) => c.id) } },
+        data: { content: null },
+      })
+
+      await processQueuedCampaigns()
+      await processQueuedCampaigns()
+
+      for (const campaign of campaigns) {
+        const lines = log.mock.calls.filter((args) =>
+          String(args[0]).includes(`Campaign ${campaign.id} is missing`)
+        )
+        expect(lines).toHaveLength(1)
+      }
     })
   })
 })

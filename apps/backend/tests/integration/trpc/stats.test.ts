@@ -86,18 +86,21 @@ describe("trpc stats router", () => {
         subscriberId: subscriber.id,
         status: "SENT",
         createdAt: thisMonth(),
+        sentAt: thisMonth(),
       })
       await createMessage({
         campaignId: campaign.id,
         subscriberId: subscriber.id,
         status: "FAILED",
         createdAt: lastMonth(),
+        sentAt: lastMonth(),
       })
       await createMessage({
         campaignId: campaign.id,
         subscriberId: subscriber.id,
         status: "SENT",
         createdAt: beforeWindow(),
+        sentAt: beforeWindow(),
       })
       // Not a processed status: excluded everywhere.
       await createMessage({
@@ -113,6 +116,32 @@ describe("trpc stats router", () => {
         total: 3,
         last30Days: 1,
         lastPeriod: 1,
+      })
+    })
+
+    it("windows messages by sentAt, not createdAt", async () => {
+      const { user, orgId, campaign, subscriber } = await seed()
+
+      await createMessage({
+        campaignId: campaign.id,
+        subscriberId: subscriber.id,
+        status: "OPENED",
+        createdAt: lastMonth(),
+        sentAt: thisMonth(),
+      })
+
+      const stats = await getStats(user.id, orgId)
+
+      expect(stats.messages).toEqual({
+        total: 1,
+        last30Days: 1,
+        lastPeriod: 0,
+      })
+      expect(stats.openRate.thisMonth).toBe(100)
+      expect(stats.openRate.lastMonth).toBe(0)
+      expect(stats.deliveryRate.thisMonth).toEqual({
+        delivered: 1,
+        rate: 100,
       })
     })
 
@@ -451,16 +480,19 @@ describe("trpc stats router", () => {
       await createMessage({
         campaignId: campaign.id,
         subscriberId: first.id,
+        status: "SENT",
         createdAt: thisMonth(),
       })
       await createMessage({
         campaignId: campaign.id,
         subscriberId: first.id,
+        status: "SENT",
         createdAt: thisMonth(),
       })
       await createMessage({
         campaignId: campaign.id,
         subscriberId: second.id,
+        status: "SENT",
         createdAt: lastMonth(),
       })
 
@@ -474,6 +506,25 @@ describe("trpc stats router", () => {
       })
     })
 
+    it.each(["QUEUED", "CANCELLED"] as const)(
+      "does not count a recipient whose only message is %s",
+      async (status) => {
+        const { user, orgId, campaign, subscriber } = await seed()
+
+        await createMessage({
+          campaignId: campaign.id,
+          subscriberId: subscriber.id,
+          status,
+          createdAt: thisMonth(),
+        })
+
+        const stats = await getStats(user.id, orgId)
+
+        expect(stats.recipients.allTime).toBe(0)
+        expect(stats.recipients.thisMonth).toBe(0)
+      }
+    )
+
     it("excludes another organization's recipients", async () => {
       const { user, orgId } = await createUser()
       const { orgId: otherOrgId } = await createUser()
@@ -482,6 +533,7 @@ describe("trpc stats router", () => {
       await createMessage({
         campaignId: campaign.id,
         subscriberId: subscriber.id,
+        status: "SENT",
       })
 
       const stats = await getStats(user.id, orgId)

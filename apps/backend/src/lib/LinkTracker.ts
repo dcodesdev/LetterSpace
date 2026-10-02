@@ -72,7 +72,8 @@ export class LinkTracker {
   async replaceMessageContentWithTrackedLinks(
     content: string,
     campaignId: string,
-    baseURL: string
+    baseURL: string,
+    subscriberId: string
   ) {
     const links = this.findTrackingLinks(content)
     let updatedContent = content
@@ -80,7 +81,7 @@ export class LinkTracker {
     const trackedLinkResults = await Promise.all(
       links.map(async (link) => {
         const trackedLink = await this.getOrCreateTrackLink(link, campaignId)
-        const trackingUrl = `${baseURL}/r/${trackedLink.id}`
+        const trackingUrl = `${baseURL}/t/${trackedLink.id}?sid=${subscriberId}`
 
         return {
           originalLink: link,

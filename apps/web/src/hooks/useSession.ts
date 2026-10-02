@@ -21,14 +21,23 @@ export function useSession() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!user.isLoading && !user.data) {
-      navigate("/")
+    if (user.isLoading) return
+
+    if (!user.data) {
+      Cookies.remove("token")
+      navigate("/", { replace: true })
+      return
     }
 
     if (!orgId) {
-      navigate("/")
+      const firstOrgId = user.data.UserOrganizations[0]?.organizationId
+      if (firstOrgId) {
+        setOrgId(firstOrgId)
+      } else {
+        navigate("/onboarding", { replace: true })
+      }
     }
-  }, [orgId, user.data, navigate, user.isLoading])
+  }, [orgId, setOrgId, user.data, navigate, user.isLoading])
 
   const logout = useCallback(() => {
     removeOrgId()

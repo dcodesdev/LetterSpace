@@ -15,10 +15,13 @@ export const authenticateApiKey = async (
   try {
     const keyRecord = await prisma.apiKey.findUnique({
       where: { key: apiKey },
-      select: { id: true, Organization: true },
+      select: { id: true, expiresAt: true, Organization: true },
     })
 
-    if (!keyRecord) {
+    if (
+      !keyRecord ||
+      (keyRecord.expiresAt && keyRecord.expiresAt < new Date())
+    ) {
       res.status(401).json({ error: "Invalid API Key" })
       return
     }

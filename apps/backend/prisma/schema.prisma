@@ -130,6 +130,8 @@ model Campaign {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model List {
@@ -146,6 +148,8 @@ model List {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([organizationId])
 }
 
 model CampaignList {
@@ -173,6 +177,7 @@ model ListSubscriber {
   updatedAt DateTime @updatedAt
 
   @@unique([listId, subscriberId])
+  @@index([subscriberId])
 }
 
 model Template {
@@ -229,6 +234,9 @@ model Message {
 
   @@index([updatedAt, id])
   @@index([messageId])
+  @@index([campaignId])
+  @@index([subscriberId])
+  @@index([status])
 }
 
 model TrackedLink {

@@ -64,6 +64,7 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
       where: {
         Campaign: {
           organizationId: organization.id,
+          status: { not: "CANCELLED" },
         },
         OR: [
           { status: "QUEUED" },
@@ -145,10 +146,14 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
           return
         }
 
-        await prisma.message.update({
-          where: { id: message.id },
+        const claimed = await prisma.message.updateMany({
+          where: { id: message.id, status: { in: ["QUEUED", "RETRYING"] } },
           data: { status: "PENDING" },
         })
+
+        if (claimed.count === 0) {
+          return
+        }
 
         try {
           const result = await mailer.sendEmail({
@@ -167,7 +172,7 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
               messageId: result.messageId,
               status: result.success
                 ? successStatus
-                : message.tries >= emailSettings.maxRetries
+                : message.tries + 1 >= emailSettings.maxRetries
                   ? "FAILED"
                   : "RETRYING",
               sentAt: result.success ? new Date() : undefined,
@@ -182,7 +187,7 @@ export const sendMessagesCron = cronJob("sendMessages", async () => {
             where: { id: message.id },
             data: {
               status:
-                message.tries >= emailSettings.maxRetries
+                message.tries + 1 >= emailSettings.maxRetries
                   ? "FAILED"
                   : "RETRYING",
               error: String(error),

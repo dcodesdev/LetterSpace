@@ -2,7 +2,6 @@ node_modules
 # Keep environment variables out of version control
 .env
 
-prisma/client/*
-!prisma/client/sql
+prisma/client
 dist
 tsconfig.build.tsbuildinfo

@@ -44,11 +44,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Prisma generate
-        run: pnpm --filter backend generate
-
       - name: Run migrations
         run: pnpm --filter backend migrate:deploy
+
+      - name: Prisma generate
+        run: pnpm --filter backend generate
 
       - name: Run tests
         run: pnpm --filter backend test:run

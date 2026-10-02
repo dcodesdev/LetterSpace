@@ -510,9 +510,10 @@ export const sendTestEmail = authProcedure
       })
     }
 
+    const campaignContent = campaign.content
     const content = campaign.Template
-      ? campaign.Template.content.replace(/{{content}}/g, campaign.content)
-      : campaign.content
+      ? campaign.Template.content.replace(/{{content}}/g, () => campaignContent)
+      : campaignContent
 
     const mailer = new Mailer(settings)
 

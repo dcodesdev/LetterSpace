@@ -10,6 +10,16 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png"],
+      workbox: {
+        navigateFallbackDenylist: [
+          /^\/docs/,
+          /^\/api/,
+          /^\/trpc/,
+          /^\/t\//,
+          /^\/img\//,
+          /^\/webhook\//,
+        ],
+      },
       manifest: {
         name: "LetterSpace",
         short_name: "LetterSpace",

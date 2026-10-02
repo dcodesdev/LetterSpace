@@ -40,7 +40,7 @@ export function EmailPreview({ content, className = "" }: EmailPreviewProps) {
     <iframe
       ref={iframeRef}
       className={cn("w-full scroll-hidden rounded-md bg-white", className)}
-      sandbox="allow-same-origin"
+      sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       title="Email Preview"
     />
   )

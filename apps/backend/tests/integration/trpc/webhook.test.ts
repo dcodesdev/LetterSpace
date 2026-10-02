@@ -435,18 +435,19 @@ describe("trpc webhook router", () => {
       expect(result.items).toEqual([])
     })
 
-    it("returns nothing for another organization's webhook id", async () => {
+    it("rejects another organization's webhook id with NOT_FOUND", async () => {
       const { user, orgId } = await createUser()
       const { orgId: otherOrgId } = await createUser()
       const webhook = await createWebhook({ organizationId: otherOrgId })
       await createLog(webhook.id)
 
-      const result = await createCaller({ id: user.id }).webhook.logs({
-        webhookId: webhook.id,
-        organizationId: orgId,
-      })
-
-      expect(result.items).toEqual([])
+      await expectTrpcError(
+        createCaller({ id: user.id }).webhook.logs({
+          webhookId: webhook.id,
+          organizationId: orgId,
+        }),
+        "NOT_FOUND"
+      )
     })
 
     it("rejects an organization the caller is not a member of", async () => {

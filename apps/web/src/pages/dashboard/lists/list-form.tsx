@@ -16,6 +16,7 @@ import { Loader2 } from "lucide-react"
 import { z } from "zod"
 import { useSession } from "@/hooks"
 import { trpc } from "@/trpc"
+import { toastError } from "@/utils"
 
 const formSchema = z.object({
   name: z.string().min(3, {
@@ -48,6 +49,9 @@ export function CreateListForm({ onSuccess }: { onSuccess: () => void }) {
           form.reset()
           onSuccess()
           utils.list.invalidate()
+        },
+        onError: (error) => {
+          toastError("Error creating list", error)
         },
       }
     )

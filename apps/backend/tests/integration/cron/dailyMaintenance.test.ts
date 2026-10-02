@@ -180,6 +180,33 @@ describe("dailyMaintenance cron", () => {
     expect(await contentOf(cleaned.id)).toBeNull()
   })
 
+  it("falls back to 90 days for an organization with no settings row", async () => {
+    const { org, subscriber, campaign } = await seedOrg()
+    await prisma.generalSettings.deleteMany({
+      where: { organizationId: org.id },
+    })
+
+    const kept = await createMessage({
+      campaignId: campaign.id,
+      subscriberId: subscriber.id,
+      status: "SENT",
+      content: "<p>Sixty</p>",
+      createdAt: subDays(new Date(), 60),
+    })
+    const cleaned = await createMessage({
+      campaignId: campaign.id,
+      subscriberId: subscriber.id,
+      status: "SENT",
+      content: "<p>Hundred</p>",
+      createdAt: subDays(new Date(), 100),
+    })
+
+    await dailyMaintenanceCron()
+
+    expect(await contentOf(kept.id)).toBe("<p>Sixty</p>")
+    expect(await contentOf(cleaned.id)).toBeNull()
+  })
+
   it("is idempotent across runs", async () => {
     const { subscriber, campaign } = await seedOrg(30)
     const message = await createMessage({

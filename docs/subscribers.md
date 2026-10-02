@@ -16,21 +16,21 @@ POST /trpc/subscriber.create
 }
 ```
 
-Returns `CONFLICT` if the email already exists in the organization. To upsert instead, use `POST /api/subscribers` ([rest-api.md](rest-api.md)).
+Returns `CONFLICT` if the email already exists in the organization, and `NOT_FOUND` if a list id does not belong to it. To upsert instead, use `POST /api/subscribers` ([rest-api.md](rest-api.md)).
 
 ## Update
 
 `subscriber.update` takes the full desired state:
 
-- `listIds` is a replacement set — lists missing from it are removed, new ones are added.
-- `metadata` is a replacement set too. Omitting it deletes all metadata for that subscriber.
+- `listIds` is a replacement set — lists missing from it are removed, new ones are added. New list ids must belong to the organization, or it returns `NOT_FOUND`.
+- `metadata` is a replacement set too. Omit it to keep the existing metadata.
 
 ## Read
 
-| Procedure | Returns |
-| --- | --- |
+| Procedure         | Returns                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------- |
 | `subscriber.list` | Paginated subscribers with metadata and list membership; `search` matches name and email |
-| `subscriber.get` | One subscriber with lists, metadata, and the 10 most recent messages |
+| `subscriber.get`  | One subscriber with lists, metadata, and the 10 most recent messages                     |
 
 ## Delete
 
@@ -38,7 +38,7 @@ Returns `CONFLICT` if the email already exists in the organization. To upsert in
 
 ## Metadata
 
-`SubscriberMetadata` is a key/value table, unique per `(subscriberId, key)`. `subscriber.create` caps keys at 64 characters and values at 256.
+`SubscriberMetadata` is a key/value table, unique per `(subscriberId, key)`. `subscriber.create` and `subscriber.update` cap keys at 64 characters and values at 256.
 
 Every key is available in email content as `{{subscriber.metadata.<key>}}`. See [placeholders.md](placeholders.md).
 
@@ -54,4 +54,4 @@ Membership is never deleted on unsubscribe — see [unsubscribes.md](unsubscribe
 - `name` comes from a `name` column, or `first_name` + `last_name`. Other columns are ignored.
 - A malformed file is `BAD_REQUEST` `Invalid CSV: <parser message>`.
 - Rows are de-duplicated by email before saving; the last row wins. The returned `count` is the number of unique emails.
-- Existing subscribers are updated in place, including `name` (set to null when the file has no name columns). With `listId`, each subscriber is added to that list.
+- Existing subscribers are updated in place, including `name` (set to null when the file has no name columns). With `listId`, each subscriber is added to that list; a `listId` from another organization returns `NOT_FOUND`.

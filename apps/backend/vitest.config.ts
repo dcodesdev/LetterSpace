@@ -5,6 +5,7 @@ import { defineConfig } from "vitest/config"
 export default defineConfig({
   test: {
     include: ["tests/**/*.test.ts", "src/**/*.test.ts"],
+    globalSetup: ["tests/integration/helpers/global-setup.ts"],
     setupFiles: ["tests/integration/helpers/setup.ts"],
     // One shared test database: never run files or tests in parallel.
     fileParallelism: false,

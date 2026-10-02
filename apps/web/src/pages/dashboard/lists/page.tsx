@@ -24,6 +24,7 @@ import { Plus } from "lucide-react"
 import { Pagination } from "@/components"
 import { usePaginationWithQueryState, useSession } from "@/hooks"
 import { trpc } from "@/trpc"
+import { toastError } from "@/utils"
 import { columns } from "./columns"
 import { CreateListForm } from "./list-form"
 import { ListSearch } from "./list-search"
@@ -60,6 +61,9 @@ export function ListsPage() {
   const deleteList = trpc.list.delete.useMutation({
     onSuccess: () => {
       utils.list.invalidate()
+    },
+    onError: (error) => {
+      toastError("Error deleting list", error)
     },
   })
 

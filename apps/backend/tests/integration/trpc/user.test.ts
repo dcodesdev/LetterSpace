@@ -96,6 +96,18 @@ describe("trpc user router", () => {
       expect(result.user.UserOrganizations).toHaveLength(1)
     })
 
+    it("does not return the password hash or pwdVersion", async () => {
+      const { user } = await createUser()
+
+      const result = await createCaller().user.login({
+        email: user.email,
+        password: USER_PASSWORD,
+      })
+
+      expect(result.user).not.toHaveProperty("password")
+      expect(result.user).not.toHaveProperty("pwdVersion")
+    })
+
     it("rejects a wrong password", async () => {
       const { user } = await createUser()
 

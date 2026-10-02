@@ -2,10 +2,10 @@
 
 Two cron jobs keep the database from growing without bound. Both are per organization and driven by `cleanupInterval` in general settings.
 
-| Job | Schedule | Action |
-| --- | --- | --- |
-| `daily-maintenance` | midnight | Sets `content` to null on old messages |
-| `cleanup-webhook-logs` | 01:00 | Deletes old `WebhookLog` rows |
+| Job                    | Schedule | Action                                 |
+| ---------------------- | -------- | -------------------------------------- |
+| `daily-maintenance`    | midnight | Sets `content` to null on old messages |
+| `cleanup-webhook-logs` | 01:00    | Deletes old `WebhookLog` rows          |
 
 ## Message body cleanup
 
@@ -13,7 +13,7 @@ Two cron jobs keep the database from growing without bound. Both are per organiz
 
 Consequence: previewing an old message shows nothing, and resending it sends an empty email. See [messages.md](messages.md).
 
-Default when an organization has no general settings row: 30 days.
+Default when an organization has no general settings row: 90 days.
 
 ## Webhook log cleanup
 

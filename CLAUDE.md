@@ -23,7 +23,7 @@ pnpm format                 # Format with Prettier
 ```bash
 pnpm --filter backend dev           # Run backend only
 pnpm --filter backend test          # Run tests (Vitest against a real Postgres)
-pnpm --filter backend generate      # Prisma codegen
+pnpm --filter backend generate      # Prisma codegen + TypedSQL (needs a migrated DB)
 pnpm --filter backend migrate:dev   # Dev migrations
 ```
 
@@ -124,4 +124,5 @@ Key models: User, Organization (multi-tenancy), Subscriber, List, Campaign, Temp
 - Cron jobs and the mailer run in every environment - there is no `NODE_ENV` gate, so point a dev organization at a local SMTP catcher
 - Backend tests use `.env.test` for configuration; see [docs/testing.md](docs/testing.md)
 - Webhook transformers run in QuickJS sandbox with configurable memory limits
+- `generate` runs `prisma generate --sql`, which needs a running, migrated database at `DATABASE_URL` (`apps/backend/.env`). Run `pnpm --filter backend migrate:dev` before the first `pnpm dev`. The TypedSQL output in `prisma/client/sql` is generated, not committed - see [docs/typed-sql.md](docs/typed-sql.md)
 - Feature docs live in `docs/` - one file per feature, see `docs/README.md`

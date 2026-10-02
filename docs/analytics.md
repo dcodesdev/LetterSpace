@@ -10,12 +10,12 @@ POST /trpc/dashboard.getStats   { organizationId }
 
 Window: the last 6 months. Returns:
 
-| Key | Contents |
-| --- | --- |
-| `messageStats` | Message counts grouped by status |
-| `recentCampaigns` | The 5 most recent `COMPLETED` campaigns with total and delivered message counts and a delivery rate |
-| `subscriberGrowth` | Daily new-subscriber counts, accumulated onto the subscriber count from before the window |
-| `dbSize` | Row counts per model and an approximate `total_size_mb` for the organization's text content |
+| Key                | Contents                                                                                            |
+| ------------------ | --------------------------------------------------------------------------------------------------- |
+| `messageStats`     | Message counts grouped by status                                                                    |
+| `recentCampaigns`  | The 5 most recent `COMPLETED` campaigns with total and delivered message counts and a delivery rate |
+| `subscriberGrowth` | Daily new-subscriber counts, accumulated onto the subscriber count from before the window           |
+| `dbSize`           | Row counts per model and an approximate `total_size_mb` for the organization's text content         |
 
 `dbSize` sums the byte length of stored text — campaign, template and message bodies, subscriber and list fields, webhook log payloads. It is an estimate of content size, not the size of the database on disk.
 
@@ -28,15 +28,15 @@ POST /trpc/stats.getStats   { organizationId }
 Compares the last 30 days against the 30 days before that. Every group carries `thisMonth`, `lastMonth` and a `comparison` delta:
 
 - `campaigns` and `completedCampaigns` — counts, plus `total`
-- `openRate` — opened or clicked messages over messages created in the period, as a percentage
+- `openRate` — opened or clicked messages over messages sent in the period, as a percentage
 - `clickRate` — clicked messages, count and percentage
 - `deliveryRate` — `SENT`/`OPENED`/`CLICKED` messages, count and percentage
 - `messages` — `total`, `last30Days`, `lastPeriod`
-- `recipients` — distinct subscribers messaged, all time and per period
+- `recipients` — distinct subscribers with a processed message, all time and per period
 - `subscribers` — `allTime` and `newThisMonth`
 - `unsubscribed` — memberships whose `unsubscribedAt` falls in the period
 
-Rate denominators count messages **created** in the period, while the numerators count messages **sent** in it. A campaign that spans the boundary skews both rates for that period.
+Both sides of every rate count messages by `sentAt`, so a message counts in the period it was sent.
 
 Rates are percentages of processed messages, so they are computed against real sends rather than against every row, including cancelled ones. Status groupings are listed in [messages.md](messages.md).
 
@@ -46,4 +46,4 @@ Rates are percentages of processed messages, so they are computed against real s
 
 Because rates depend on opens and clicks being recorded, read them together with the caveats in [tracking.md](tracking.md).
 
-Raw SQL for the distinct-recipient, growth and size queries lives in `apps/backend/prisma/sql/`.
+Raw SQL for the distinct-recipient, growth and size queries lives in `apps/backend/prisma/sql/`. See [typed-sql.md](typed-sql.md).

@@ -4,6 +4,7 @@ import { prisma } from "@src/utils/prisma"
 import { beforeEach, describe, expect, it } from "vitest"
 
 const BASE_URL = "https://track.test"
+const SUBSCRIBER_ID = "subscriber-1"
 
 let campaignId: string
 let tracker: LinkTracker
@@ -86,17 +87,18 @@ describe("LinkTracker", () => {
   })
 
   describe("replaceMessageContentWithTrackedLinks", () => {
-    it("rewrites each marked url to a tracking url and returns the ids", async () => {
+    it("rewrites each marked url to a /t/ tracking url carrying the subscriber id", async () => {
       const { content, trackedIds } =
         await tracker.replaceMessageContentWithTrackedLinks(
           `<a href="https://example.com/a@TRACK">a</a><a href="https://example.com/b@TRACK">b</a>`,
           campaignId,
-          BASE_URL
+          BASE_URL,
+          SUBSCRIBER_ID
         )
 
       expect(trackedIds).toHaveLength(2)
       expect(content).toBe(
-        `<a href="${BASE_URL}/r/${trackedIds[0]}">a</a><a href="${BASE_URL}/r/${trackedIds[1]}">b</a>`
+        `<a href="${BASE_URL}/t/${trackedIds[0]}?sid=${SUBSCRIBER_ID}">a</a><a href="${BASE_URL}/t/${trackedIds[1]}?sid=${SUBSCRIBER_ID}">b</a>`
       )
       expect(content).not.toContain("@TRACK")
     })
@@ -108,7 +110,8 @@ describe("LinkTracker", () => {
         await tracker.replaceMessageContentWithTrackedLinks(
           original,
           campaignId,
-          BASE_URL
+          BASE_URL,
+          SUBSCRIBER_ID
         )
 
       expect(content).toBe(original)
@@ -125,7 +128,8 @@ describe("LinkTracker", () => {
       const result = await tracker.replaceMessageContentWithTrackedLinks(
         content,
         campaignId,
-        BASE_URL
+        BASE_URL,
+        SUBSCRIBER_ID
       )
 
       expect(result.trackedIds).toEqual([existing?.id])
@@ -137,7 +141,8 @@ describe("LinkTracker", () => {
         new LinkTracker(tx).replaceMessageContentWithTrackedLinks(
           `<a href="https://example.com/tx@TRACK">tx</a>`,
           campaignId,
-          BASE_URL
+          BASE_URL,
+          SUBSCRIBER_ID
         )
       )
 

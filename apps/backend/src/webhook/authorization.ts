@@ -55,27 +55,7 @@ export async function runAuthorization(
       context.setProp(global, "_paramsStr", paramsStr)
       paramsStr.dispose()
 
-      // Add JSON parse/stringify to the context
       const setupResult = context.evalCode(`
-        const JSON = {
-          parse: (str) => eval('(' + str + ')'),
-          stringify: (obj) => {
-            if (obj === null) return 'null';
-            if (typeof obj === 'string') return '"' + obj.replace(/"/g, '\\"') + '"';
-            if (typeof obj === 'number' || typeof obj === 'boolean') return String(obj);
-            if (Array.isArray(obj)) return '[' + obj.map(v => JSON.stringify(v)).join(',') + ']';
-            if (typeof obj === 'object') {
-              const pairs = [];
-              for (const key in obj) {
-                if (obj.hasOwnProperty(key)) {
-                  pairs.push('"' + key + '":' + JSON.stringify(obj[key]));
-                }
-              }
-              return '{' + pairs.join(',') + '}';
-            }
-            return undefined;
-          }
-        };
         const body = JSON.parse(_bodyStr);
         const query = JSON.parse(_queryStr);
         const params = JSON.parse(_paramsStr);

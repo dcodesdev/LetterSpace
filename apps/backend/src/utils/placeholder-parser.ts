@@ -32,7 +32,7 @@ export function replacePlaceholders(
     )
     const value = data[key as PlaceholderDataKey]
     if (value !== undefined) {
-      result = result.replace(placeholderRegex, value)
+      result = result.replace(placeholderRegex, () => value)
     }
   }
   return result

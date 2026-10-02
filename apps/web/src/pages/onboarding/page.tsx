@@ -17,6 +17,7 @@ import { Building2Icon } from "lucide-react"
 import { useLocalStorage } from "usehooks-ts"
 import { z } from "zod"
 import { trpc } from "@/trpc"
+import { toastError } from "@/utils"
 
 const formSchema = z.object({
   name: z
@@ -45,6 +46,9 @@ export function OnboardingPage() {
       onSuccess: (data) => {
         setOrgId(data.organization.id)
         navigate("/dashboard")
+      },
+      onError: (error) => {
+        toastError("Error creating organization", error)
       },
     })
   }

@@ -10,28 +10,34 @@ const cronController = initializeCronJobs()
 
 const PORT = process.env.PORT || 5000
 
-prisma.$connect().then(async () => {
-  console.log("Connected to database")
+prisma
+  .$connect()
+  .then(async () => {
+    console.log("Connected to database")
 
-  // For backwards compatibility, set all messages that have campaign status === "CANCELLED" to "CANCELLED"
-  await prisma.message.updateMany({
-    where: {
-      Campaign: {
+    // For backwards compatibility, set all messages that have campaign status === "CANCELLED" to "CANCELLED"
+    await prisma.message.updateMany({
+      where: {
+        Campaign: {
+          status: "CANCELLED",
+        },
+        status: {
+          in: ["QUEUED", "PENDING", "RETRYING"],
+        },
+      },
+      data: {
         status: "CANCELLED",
       },
-      status: {
-        in: ["QUEUED", "PENDING", "RETRYING"],
-      },
-    },
-    data: {
-      status: "CANCELLED",
-    },
-  })
+    })
 
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`)
+    })
   })
-})
+  .catch((error) => {
+    console.error("Failed to start server", error)
+    process.exit(1)
+  })
 
 // Handle graceful shutdown
 const shutdown = () => {

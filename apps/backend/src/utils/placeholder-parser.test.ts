@@ -119,4 +119,17 @@ describe("replacePlaceholders", () => {
       "Hi SpacedEve, welcome Org Spaced Inc.. Date: 2024-02-20."
     )
   })
+
+  it("should insert values containing $ patterns literally", () => {
+    expect(
+      replacePlaceholders("Deal: {{campaign.name}}!", {
+        "campaign.name": "Save $$$",
+      })
+    ).toBe("Deal: Save $$$!")
+    expect(
+      replacePlaceholders("Hi {{subscriber.name}}, bye", {
+        "subscriber.name": "$' $& $`",
+      })
+    ).toBe("Hi $' $& $`, bye")
+  })
 })

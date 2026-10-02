@@ -321,13 +321,15 @@ describe("trpc campaign router", () => {
       const { user, orgId } = await createUser()
       const listA = await createList({ organizationId: orgId })
       const listB = await createList({ organizationId: orgId })
+      const empty = await createList({ organizationId: orgId })
       await createSubscriber({
         organizationId: orgId,
         listIds: [listA.id, listB.id],
       })
+      await createSubscriber({ organizationId: orgId, listIds: [listB.id] })
       const campaign = await createCampaign({
         organizationId: orgId,
-        listIds: [listA.id, listB.id],
+        listIds: [listA.id, listB.id, empty.id],
       })
 
       const result = await createCaller({ id: user.id }).campaign.get({
@@ -335,7 +337,14 @@ describe("trpc campaign router", () => {
         organizationId: orgId,
       })
 
-      expect(result.campaign.uniqueRecipientCount).toBe(1)
+      expect(result.campaign.uniqueRecipientCount).toBe(2)
+      const counts = Object.fromEntries(
+        result.campaign.CampaignLists.map((cl) => [
+          cl.listId,
+          cl.List._count.ListSubscribers,
+        ])
+      )
+      expect(counts).toEqual({ [listA.id]: 1, [listB.id]: 2, [empty.id]: 0 })
     })
 
     it("excludes unsubscribed members from the recipient count", async () => {

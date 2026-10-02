@@ -14,6 +14,7 @@ const BATCH_SIZE = 100
 
 async function getSubscribersForCampaign(
   campaignId: string,
+  organizationId: string,
   selectedListIds: string[]
 ): Promise<Map<string, Subscriber & { Metadata: SubscriberMetadata[] }>> {
   if (selectedListIds.length === 0) {
@@ -22,6 +23,7 @@ async function getSubscribersForCampaign(
 
   const subscribers = await prisma.subscriber.findMany({
     where: {
+      organizationId,
       Messages: { none: { campaignId } },
       ListSubscribers: {
         some: {
@@ -49,29 +51,48 @@ async function getSubscribersForCampaign(
   return subscribersMap
 }
 
-const logged = {
-  noQueuedCampaigns: false,
-  missingCampaignData: false,
-  noSubscribers: false,
-  missingCampaignContent: false,
-  missingCampaignSubject: false,
-  errorProcessingCampaign: false,
-}
+const logged = new Set<string>()
 
-const oneTimeLogger = (key: keyof typeof logged, ...messages: unknown[]) => {
-  if (!logged[key]) {
+type LogReason =
+  | "noQueuedCampaigns"
+  | "missingCampaignData"
+  | "noSubscribers"
+  | "missingCampaignContent"
+  | "missingCampaignSubject"
+  | "errorProcessingCampaign"
+
+const logKey = (reason: LogReason, campaignId?: string) =>
+  campaignId ? `${campaignId}:${reason}` : reason
+
+const oneTimeLogger = (
+  key: { reason: LogReason; campaignId?: string },
+  ...messages: unknown[]
+) => {
+  const k = logKey(key.reason, key.campaignId)
+  if (!logged.has(k)) {
     console.log(...messages)
-    logged[key] = true
+    logged.add(k)
   }
 }
 
-const turnOnLogger = (key: keyof typeof logged) => {
-  logged[key] = false
+const turnOnLogger = (key: { reason: LogReason; campaignId?: string }) => {
+  logged.delete(logKey(key.reason, key.campaignId))
 }
+
+const moveToSending = (campaignId: string) =>
+  prisma.campaign.updateMany({
+    where: { id: campaignId, status: "CREATING" },
+    data: { status: "SENDING" },
+  })
 
 export const processQueuedCampaigns = cronJob(
   "process-queued-campaigns",
   async () => {
+    await prisma.campaign.updateMany({
+      where: { status: "SCHEDULED", scheduledAt: { lte: new Date() } },
+      data: { status: "CREATING" },
+    })
+
     const queuedCampaigns = await prisma.campaign.findMany({
       where: {
         status: "CREATING",
@@ -90,15 +111,23 @@ export const processQueuedCampaigns = cronJob(
       },
     })
 
+    const queuedIds = new Set(queuedCampaigns.map((c) => c.id))
+    for (const key of logged) {
+      const [campaignId, reason] = key.split(":")
+      if (reason && campaignId && !queuedIds.has(campaignId)) {
+        logged.delete(key)
+      }
+    }
+
     if (queuedCampaigns.length === 0) {
       oneTimeLogger(
-        "noQueuedCampaigns",
+        { reason: "noQueuedCampaigns" },
         "Cron job: No queued campaigns to process."
       )
       return
     }
 
-    turnOnLogger("noQueuedCampaigns")
+    turnOnLogger({ reason: "noQueuedCampaigns" })
 
     for (const campaign of queuedCampaigns) {
       try {
@@ -110,7 +139,7 @@ export const processQueuedCampaigns = cronJob(
           !campaign.Organization.GeneralSettings?.baseURL
         ) {
           oneTimeLogger(
-            "missingCampaignData",
+            { reason: "missingCampaignData", campaignId: campaign.id },
             `Cron job: Campaign ${campaign.id} is missing required data (content, subject, organization, or baseURL). Skipping.`
           )
           // Optionally, update status to FAILED or similar
@@ -118,41 +147,32 @@ export const processQueuedCampaigns = cronJob(
           continue
         }
 
-        turnOnLogger("missingCampaignData")
+        turnOnLogger({ reason: "missingCampaignData", campaignId: campaign.id })
 
-        const generalSettings = campaign.Organization.GeneralSettings
+        const baseURL = campaign.Organization.GeneralSettings.baseURL.replace(
+          /\/+$/,
+          ""
+        )
 
         const selectedListIds = campaign.CampaignLists.map((cl) => cl.listId)
 
         const allSubscribersMap = await getSubscribersForCampaign(
           campaign.id,
+          campaign.organizationId,
           selectedListIds
         )
         if (allSubscribersMap.size === 0) {
           oneTimeLogger(
-            "noSubscribers",
-            `Cron job: Campaign ${campaign.id} has no subscribers. Skipping.`
+            { reason: "noSubscribers", campaignId: campaign.id },
+            `Cron job: Campaign ${campaign.id} has no subscribers left. Moving to SENDING.`
           )
+          await moveToSending(campaign.id)
           continue
         }
 
-        turnOnLogger("noSubscribers")
+        turnOnLogger({ reason: "noSubscribers", campaignId: campaign.id })
 
-        const messageSubscriberIds = (
-          await prisma.message.findMany({
-            where: { campaignId: campaign.id },
-            select: { subscriberId: true },
-          })
-        ).map((m) => m.subscriberId)
-        const subscribersWithMessage = new Set(messageSubscriberIds)
-
-        const subscribersToProcess = Array.from(
-          allSubscribersMap.values()
-        ).filter((sub) => !subscribersWithMessage.has(sub.id))
-
-        if (subscribersToProcess.length === 0) {
-          continue
-        }
+        const subscribersToProcess = Array.from(allSubscribersMap.values())
 
         await prisma.$transaction(
           async (tx) => {
@@ -163,30 +183,37 @@ export const processQueuedCampaigns = cronJob(
               const messageId = uuidV4()
               if (!campaign.content) {
                 oneTimeLogger(
-                  "missingCampaignContent",
+                  { reason: "missingCampaignContent", campaignId: campaign.id },
                   `Cron job: Campaign ${campaign.id} has no content. Skipping.`
                 )
                 continue
               }
 
-              turnOnLogger("missingCampaignContent")
+              turnOnLogger({
+                reason: "missingCampaignContent",
+                campaignId: campaign.id,
+              })
 
+              const campaignContent = campaign.content
               let emailContent = campaign.Template
                 ? campaign.Template.content.replace(
                     /{{content}}/g,
-                    campaign.content
+                    () => campaignContent
                   )
-                : campaign.content
+                : campaignContent
 
               if (!campaign.subject) {
                 oneTimeLogger(
-                  "missingCampaignSubject",
+                  { reason: "missingCampaignSubject", campaignId: campaign.id },
                   `Cron job: Campaign ${campaign.id} has no subject. Skipping.`
                 )
                 continue
               }
 
-              turnOnLogger("missingCampaignSubject")
+              turnOnLogger({
+                reason: "missingCampaignSubject",
+                campaignId: campaign.id,
+              })
 
               const placeholderData: Partial<
                 Record<PlaceholderDataKey, string>
@@ -195,12 +222,12 @@ export const processQueuedCampaigns = cronJob(
                 "campaign.name": campaign.title,
                 "campaign.subject": campaign.subject,
                 "organization.name": campaign.Organization.name,
-                unsubscribe_link: `${generalSettings.baseURL}/unsubscribe?sid=${subscriber.id}&cid=${campaign.id}&mid=${messageId}`,
+                unsubscribe_link: `${baseURL}/unsubscribe?sid=${subscriber.id}&cid=${campaign.id}&mid=${messageId}`,
                 current_date: new Date().toLocaleDateString("en-CA"),
               }
 
               if (campaign.openTracking) {
-                emailContent += `<img src="${generalSettings.baseURL}/img/${messageId}/img.png" alt="" width="1" height="1" style="display:none" />`
+                emailContent += `<img src="${baseURL}/img/${messageId}/img.png" alt="" width="1" height="1" style="display:none" />`
               }
 
               if (subscriber.name) {
@@ -215,7 +242,7 @@ export const processQueuedCampaigns = cronJob(
 
               emailContent = replacePlaceholders(emailContent, placeholderData)
 
-              if (!generalSettings.baseURL) {
+              if (!baseURL) {
                 console.error(
                   `Cron job: Campaign ${campaign.id} has no baseURL. Skipping.`
                 )
@@ -226,7 +253,8 @@ export const processQueuedCampaigns = cronJob(
                 await linkTracker.replaceMessageContentWithTrackedLinks(
                   emailContent,
                   campaign.id,
-                  generalSettings.baseURL
+                  baseURL,
+                  subscriber.id
                 )
 
               messagesToCreate.push({
@@ -256,8 +284,8 @@ export const processQueuedCampaigns = cronJob(
               })
 
               if (subscribersLeft === 0) {
-                await tx.campaign.update({
-                  where: { id: campaign.id },
+                await tx.campaign.updateMany({
+                  where: { id: campaign.id, status: "CREATING" },
                   data: { status: "SENDING" },
                 })
               }
@@ -270,10 +298,13 @@ export const processQueuedCampaigns = cronJob(
           { timeout: 60_000 }
         ) // End transaction
 
-        turnOnLogger("errorProcessingCampaign")
+        turnOnLogger({
+          reason: "errorProcessingCampaign",
+          campaignId: campaign.id,
+        })
       } catch (error) {
         oneTimeLogger(
-          "errorProcessingCampaign",
+          { reason: "errorProcessingCampaign", campaignId: campaign.id },
           `Cron job: Error processing campaign ${campaign.id}:`,
           error
         )

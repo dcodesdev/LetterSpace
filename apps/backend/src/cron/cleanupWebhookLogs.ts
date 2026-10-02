@@ -1,6 +1,6 @@
 import dayjs from "dayjs"
 import { prisma } from "../utils/prisma"
-import { cronJob } from "./cron.utils"
+import { DEFAULT_CLEANUP_INTERVAL_DAYS, cronJob } from "./cron.utils"
 
 export const cleanupWebhookLogsCron = cronJob(
   "cleanup-webhook-logs",
@@ -14,7 +14,8 @@ export const cleanupWebhookLogsCron = cronJob(
     let totalDeletedLogs = 0
 
     for (const org of organizations) {
-      const cleanupIntervalDays = org.GeneralSettings?.cleanupInterval ?? 90
+      const cleanupIntervalDays =
+        org.GeneralSettings?.cleanupInterval ?? DEFAULT_CLEANUP_INTERVAL_DAYS
       const cleanupOlderThanDate = dayjs()
         .subtract(cleanupIntervalDays, "days")
         .toDate()

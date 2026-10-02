@@ -1,10 +1,11 @@
 #!/bin/sh
+set -e
 
 pnpm exec prisma migrate deploy
 pnpm exec prisma generate
 
 if [ "$1" = "--bun" ]; then
-  bun run src/index.ts
+  exec bun run src/index.ts
 else
-  node dist/index.js
+  exec node dist/index.js
 fi

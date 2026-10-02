@@ -99,6 +99,20 @@ export const getWebhookLogs = authProcedure
       })
     }
 
+    const webhook = await prisma.webhook.findFirst({
+      where: {
+        id: input.webhookId,
+        organizationId: input.organizationId,
+      },
+    })
+
+    if (!webhook) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Webhook not found",
+      })
+    }
+
     const logs = await prisma.webhookLog.findMany({
       where: {
         webhookId: input.webhookId,

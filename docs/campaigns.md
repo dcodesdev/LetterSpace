@@ -6,7 +6,7 @@ A campaign is one newsletter send: content, a subject, a template, and the lists
 
 1. `campaign.create { title, description?, organizationId }` — starts in `DRAFT`.
 2. `campaign.update` — set `subject`, `content`, `templateId`, `listIds`, `openTracking`, `scheduledAt`. Only `DRAFT` campaigns can be updated; anything else returns `BAD_REQUEST`.
-3. `campaign.sendTestEmail { campaignId, organizationId, email }` — sends one copy with a `[Test]` subject prefix. Placeholders are *not* substituted in a test email.
+3. `campaign.sendTestEmail { campaignId, organizationId, email }` — sends one copy with a `[Test]` subject prefix. Placeholders are _not_ substituted in a test email.
 4. `campaign.start { id, organizationId }`.
 
 `campaign.start` refuses unless all of these hold:
@@ -21,20 +21,20 @@ A campaign is one newsletter send: content, a subject, a template, and the lists
 
 ## Statuses
 
-| Status | Meaning |
-| --- | --- |
-| `DRAFT` | Editable. The only status you can start from |
-| `SCHEDULED` | `start` was called with a future `scheduledAt` |
-| `CREATING` | Messages are being generated, 100 subscribers per pass |
-| `SENDING` | Every message exists; the sender cron is working through them |
-| `COMPLETED` | No message is left queued or retrying |
-| `CANCELLED` | Cancelled by hand |
+| Status      | Meaning                                                       |
+| ----------- | ------------------------------------------------------------- |
+| `DRAFT`     | Editable. The only status you can start from                  |
+| `SCHEDULED` | `start` was called with a future `scheduledAt`                |
+| `CREATING`  | Messages are being generated, 100 subscribers per pass        |
+| `SENDING`   | Every message exists; the sender cron is working through them |
+| `COMPLETED` | No message is left queued or retrying                         |
+| `CANCELLED` | Cancelled by hand                                             |
 
-`start` picks `SCHEDULED` when `scheduledAt` is in the future and `CREATING` otherwise. Nothing in the codebase promotes a `SCHEDULED` campaign to `CREATING`, so a scheduled campaign stays parked until you cancel it and start it again without a schedule. Message generation and delivery are covered in [sending.md](sending.md).
+`start` picks `SCHEDULED` when `scheduledAt` is in the future and `CREATING` otherwise. A `SCHEDULED` campaign moves to `CREATING` within a second of `scheduledAt` passing. A `CREATING` campaign with no recipients left to build moves to `SENDING`. Message generation and delivery are covered in [sending.md](sending.md).
 
 ## Cancel
 
-`campaign.cancel` works from `CREATING`, `SENDING` or `SCHEDULED`. It marks the campaign `CANCELLED` and flips every `QUEUED`, `PENDING` or `RETRYING` message to `CANCELLED`. Messages already handed to SMTP are not recalled.
+`campaign.cancel` works from `CREATING`, `SENDING` or `SCHEDULED`. It marks the campaign `CANCELLED` and flips every `QUEUED`, `PENDING` or `RETRYING` message to `CANCELLED`. No further messages are built or sent for it, including messages from a build batch still in flight. Messages already handed to SMTP are not recalled.
 
 ## Duplicate
 

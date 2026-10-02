@@ -20,7 +20,7 @@ Having at least one active webhook changes the send pipeline: successfully sent 
 2. **Transform** — normalize the payload into `{ messageId, event, error? }`.
 3. **Process** — find the message by `messageId` within the webhook's organization and update its status.
 
-Every request to an existing webhook, active or not, is written to `WebhookLog` with the raw body, transformed payload, response code and body, any error, and the duration in milliseconds — successes and failures alike. Read them with `webhook.logs { webhookId, organizationId, limit, cursor }` or in the webhook detail page.
+Every request to an existing webhook, active or not, is written to `WebhookLog` with the raw body, transformed payload, response code and body, any error, and the duration in milliseconds — successes and failures alike. Read them with `webhook.logs { webhookId, organizationId, limit, cursor }` or in the webhook detail page. A `webhookId` outside your organization returns `NOT_FOUND`.
 
 ## Authorization code
 
@@ -32,7 +32,7 @@ function authorize(headers, body, query, params) {
 }
 ```
 
-It runs in a QuickJS sandbox with no network, timers or `require`, a 5 second execution timeout, a 128MB memory limit and a 1MB stack. `JSON.parse` and `JSON.stringify` are shimmed in. A thrown error or a timeout is 500; a falsy return is 401.
+It runs in a QuickJS sandbox with no network, timers or `require`, a 5 second execution timeout, a 128MB memory limit and a 1MB stack. `JSON` is QuickJS's built-in, so strings with quotes, backslashes or newlines are escaped correctly. A thrown error or a timeout is 500; a falsy return is 401.
 
 ## Transform code
 
@@ -62,27 +62,27 @@ Both `authCode` and `transformCode` are stored as plain text in the database, se
 
 ## Event mapping
 
-| Event names | Resulting status |
-| --- | --- |
-| `pending`, `delayed` | `PENDING` |
-| `delivered`, `sent` | `SENT` |
-| `opened`, `open` | `OPENED` |
-| `clicked`, `click` | `CLICKED` |
-| `bounced`, `bounce`, `failed` | `FAILED`, error defaults to `Email bounced` |
+| Event names                       | Resulting status                                 |
+| --------------------------------- | ------------------------------------------------ |
+| `pending`, `delayed`              | `PENDING`                                        |
+| `delivered`, `sent`               | `SENT`                                           |
+| `opened`, `open`                  | `OPENED`                                         |
+| `clicked`, `click`                | `CLICKED`                                        |
+| `bounced`, `bounce`, `failed`     | `FAILED`, error defaults to `Email bounced`      |
 | `complained`, `complaint`, `spam` | `COMPLAINED`, error defaults to `Spam complaint` |
 
 Event names are lowercased before lookup. An `error` field in the transformed payload overrides the default text.
 
 ## Manage webhooks
 
-| Procedure | Input |
-| --- | --- |
+| Procedure        | Input                                                           |
+| ---------------- | --------------------------------------------------------------- |
 | `webhook.create` | `{ organizationId, name, isActive, authCode?, transformCode? }` |
-| `webhook.update` | `{ id, organizationId, ...partial }` |
-| `webhook.delete` | `{ id, organizationId }` |
-| `webhook.list` | `{ organizationId }` |
-| `webhook.get` | `{ id, organizationId }` |
-| `webhook.logs` | `{ webhookId, organizationId, limit, cursor? }` |
+| `webhook.update` | `{ id, organizationId, ...partial }`                            |
+| `webhook.delete` | `{ id, organizationId }`                                        |
+| `webhook.list`   | `{ organizationId }`                                            |
+| `webhook.get`    | `{ id, organizationId }`                                        |
+| `webhook.logs`   | `{ webhookId, organizationId, limit, cursor? }`                 |
 
 The `settings.createWebhook`, `settings.deleteWebhook` and `settings.listWebhooks` procedures are stubs that do nothing — use the `webhook.*` router.
 

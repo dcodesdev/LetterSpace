@@ -41,3 +41,6 @@ README.md
 LICENSE
 Makefile
 helm-charts
+.pnpm-store
+.claude
+plans

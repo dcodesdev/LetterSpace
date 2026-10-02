@@ -5,6 +5,25 @@ import { z } from "zod"
 import { authProcedure, publicProcedure } from "../trpc"
 import { prisma } from "../utils/prisma"
 
+const assertListsInOrganization = async (
+  listIds: string[],
+  organizationId: string
+) => {
+  const uniqueIds = [...new Set(listIds)]
+  if (!uniqueIds.length) return
+
+  const count = await prisma.list.count({
+    where: { id: { in: uniqueIds }, organizationId },
+  })
+
+  if (count !== uniqueIds.length) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "List not found",
+    })
+  }
+}
+
 const createSubscriberSchema = z.object({
   email: z.string().email("Invalid email address"),
   name: z.string().optional(),
@@ -52,6 +71,8 @@ export const createSubscriber = authProcedure
       })
     }
 
+    await assertListsInOrganization(input.listIds, input.organizationId)
+
     const subscriber = await prisma.subscriber.create({
       data: {
         email: input.email,
@@ -91,8 +112,8 @@ const updateSubscriberSchema = z.object({
   metadata: z
     .array(
       z.object({
-        key: z.string().min(1),
-        value: z.string().min(1),
+        key: z.string().min(1).max(64),
+        value: z.string().min(1).max(256),
       })
     )
     .optional(),
@@ -143,6 +164,8 @@ export const updateSubscriber = authProcedure
       (id) => !input.listIds.includes(id)
     )
 
+    await assertListsInOrganization(listsToAdd, input.organizationId)
+
     const updatedSubscriber = await prisma.subscriber.update({
       where: { id: input.id },
       data: {
@@ -159,15 +182,16 @@ export const updateSubscriber = authProcedure
             listId,
           })),
         },
-        Metadata: input.metadata
-          ? {
-              deleteMany: {},
-              create: input.metadata.map((meta) => ({
-                key: meta.key,
-                value: meta.value,
-              })),
-            }
-          : { deleteMany: {} },
+        Metadata:
+          input.metadata !== undefined
+            ? {
+                deleteMany: {},
+                create: input.metadata.map((meta) => ({
+                  key: meta.key,
+                  value: meta.value,
+                })),
+              }
+            : undefined,
       },
       include: {
         ListSubscribers: {
@@ -245,6 +269,10 @@ export const importSubscribers = authProcedure
         code: "UNAUTHORIZED",
         message: "Organization not found",
       })
+    }
+
+    if (input.listId) {
+      await assertListsInOrganization([input.listId], input.organizationId)
     }
 
     const file = input.file.get("file") as File

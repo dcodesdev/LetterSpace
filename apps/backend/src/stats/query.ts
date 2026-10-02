@@ -52,7 +52,7 @@ export const getStats = authProcedure
             Campaign: {
               organizationId: input.organizationId,
             },
-            createdAt: {
+            sentAt: {
               gte: thirtyDaysAgo,
               lt: now,
             },
@@ -64,7 +64,7 @@ export const getStats = authProcedure
             Campaign: {
               organizationId: input.organizationId,
             },
-            createdAt: {
+            sentAt: {
               gte: sixtyDaysAgo,
               lt: thirtyDaysAgo,
             },

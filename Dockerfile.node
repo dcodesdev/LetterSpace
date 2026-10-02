@@ -16,8 +16,9 @@ RUN timeout 120 pnpm install --frozen-lockfile
 
 COPY . .
 
+RUN ./scripts/generate-prisma-sql.sh
+
 WORKDIR /app/apps/backend
-RUN pnpm run generate
 RUN pnpm run build
 
 ENV NODE_ENV=production

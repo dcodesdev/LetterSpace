@@ -151,6 +151,29 @@ describe("trpc subscriber router", () => {
         await prisma.subscriber.count({ where: { organizationId: otherOrgId } })
       ).toBe(0)
     })
+
+    it("rejects a list from another organization", async () => {
+      const { user, orgId } = await createUser()
+      const { orgId: otherOrgId } = await createUser()
+      const mine = await createList({ organizationId: orgId })
+      const theirs = await createList({ organizationId: otherOrgId })
+
+      await expectTrpcError(
+        createCaller({ id: user.id }).subscriber.create({
+          email: "sneaky@example.com",
+          organizationId: orgId,
+          listIds: [mine.id, theirs.id],
+        }),
+        "NOT_FOUND"
+      )
+
+      expect(
+        await prisma.subscriber.count({ where: { organizationId: orgId } })
+      ).toBe(0)
+      expect(
+        await prisma.listSubscriber.count({ where: { listId: theirs.id } })
+      ).toBe(0)
+    })
   })
 
   describe("list", () => {
@@ -334,6 +357,27 @@ describe("trpc subscriber router", () => {
   })
 
   describe("update", () => {
+    it("rejects adding a list from another organization", async () => {
+      const { user, orgId } = await createUser()
+      const { orgId: otherOrgId } = await createUser()
+      const theirs = await createList({ organizationId: otherOrgId })
+      const subscriber = await createSubscriber({ organizationId: orgId })
+
+      await expectTrpcError(
+        createCaller({ id: user.id }).subscriber.update({
+          id: subscriber.id,
+          email: subscriber.email,
+          organizationId: orgId,
+          listIds: [theirs.id],
+        }),
+        "NOT_FOUND"
+      )
+
+      expect(
+        await prisma.listSubscriber.count({ where: { listId: theirs.id } })
+      ).toBe(0)
+    })
+
     it("updates the email, name and verification flag", async () => {
       const { user, orgId } = await createUser()
       const subscriber = await createSubscriber({
@@ -387,7 +431,7 @@ describe("trpc subscriber router", () => {
       )
     })
 
-    it("replaces metadata and clears it when omitted", async () => {
+    it("replaces metadata, keeps it when omitted and clears it when empty", async () => {
       const { user, orgId } = await createUser()
       const subscriber = await createSubscriber({ organizationId: orgId })
       const caller = createCaller({ id: user.id })
@@ -412,6 +456,54 @@ describe("trpc subscriber router", () => {
         organizationId: orgId,
         listIds: [],
       })
+
+      expect(
+        await prisma.subscriberMetadata.findMany({
+          where: { subscriberId: subscriber.id },
+        })
+      ).toMatchObject([{ key: "plan", value: "pro" }])
+
+      await caller.subscriber.update({
+        id: subscriber.id,
+        email: subscriber.email,
+        organizationId: orgId,
+        listIds: [],
+        metadata: [],
+      })
+
+      expect(
+        await prisma.subscriberMetadata.count({
+          where: { subscriberId: subscriber.id },
+        })
+      ).toBe(0)
+    })
+
+    it("rejects over-long metadata keys and values", async () => {
+      const { user, orgId } = await createUser()
+      const subscriber = await createSubscriber({ organizationId: orgId })
+      const caller = createCaller({ id: user.id })
+
+      await expectTrpcError(
+        caller.subscriber.update({
+          id: subscriber.id,
+          email: subscriber.email,
+          organizationId: orgId,
+          listIds: [],
+          metadata: [{ key: "k".repeat(65), value: "v" }],
+        }),
+        "BAD_REQUEST"
+      )
+
+      await expectTrpcError(
+        caller.subscriber.update({
+          id: subscriber.id,
+          email: subscriber.email,
+          organizationId: orgId,
+          listIds: [],
+          metadata: [{ key: "k", value: "v".repeat(257) }],
+        }),
+        "BAD_REQUEST"
+      )
 
       expect(
         await prisma.subscriberMetadata.count({
@@ -554,6 +646,28 @@ describe("trpc subscriber router", () => {
   })
 
   describe("import", () => {
+    it("rejects a list from another organization", async () => {
+      const { user, orgId } = await createUser()
+      const { orgId: otherOrgId } = await createUser()
+      const theirs = await createList({ organizationId: otherOrgId })
+
+      await expectTrpcError(
+        createCaller({ id: user.id }).subscriber.import({
+          file: csv("email\na@example.com\n"),
+          organizationId: orgId,
+          listId: theirs.id,
+        }),
+        "NOT_FOUND"
+      )
+
+      expect(
+        await prisma.subscriber.count({ where: { organizationId: orgId } })
+      ).toBe(0)
+      expect(
+        await prisma.listSubscriber.count({ where: { listId: theirs.id } })
+      ).toBe(0)
+    })
+
     it("imports subscribers from a csv", async () => {
       const { user, orgId } = await createUser()
 

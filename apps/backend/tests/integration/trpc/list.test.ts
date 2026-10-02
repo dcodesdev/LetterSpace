@@ -271,6 +271,31 @@ describe("trpc list router", () => {
         "UNAUTHORIZED"
       )
     })
+
+    it("does not load subscribers before the membership check", async () => {
+      const { user } = await createUser()
+      const { orgId: otherOrgId } = await createUser()
+      const list = await createList({ organizationId: otherOrgId })
+
+      const original = prisma.list.findUnique
+      const calls: unknown[] = []
+      prisma.list.findUnique = ((args: unknown) => {
+        calls.push(args)
+        return original(args as Parameters<typeof original>[0])
+      }) as typeof original
+
+      try {
+        await expectTrpcError(
+          createCaller({ id: user.id }).list.get({ id: list.id }),
+          "UNAUTHORIZED"
+        )
+      } finally {
+        prisma.list.findUnique = original
+      }
+
+      expect(calls).toHaveLength(1)
+      expect(calls[0]).not.toHaveProperty("include")
+    })
   })
 
   describe("update", () => {

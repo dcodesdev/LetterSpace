@@ -13,21 +13,19 @@ curl https://your-host/api/subscribers \
   -H "x-api-key: sk_..."
 ```
 
-A missing or unknown key returns 401. The key resolves to its organization, which scopes every endpoint. `lastUsed` is updated on each request.
+A missing, unknown or expired key returns 401. The key resolves to its organization, which scopes every endpoint. `lastUsed` is updated on each request.
 
 `settings.listApiKeys` shows name, creation, expiry and last use — never the key itself. `settings.deleteApiKey { id, organizationId }` revokes one.
 
-`expiresAt` is stored and displayed but is not checked during authentication; delete a key to revoke it.
-
 ## Endpoints
 
-| Method | Path | Does |
-| --- | --- | --- |
-| `POST` | `/api/subscribers` | Create or update a subscriber by email |
-| `GET` | `/api/subscribers` | List subscribers, paginated |
-| `GET` | `/api/subscribers/:id` | One subscriber |
-| `PUT` | `/api/subscribers/:id` | Update a subscriber |
-| `DELETE` | `/api/subscribers/:id` | Delete a subscriber |
+| Method   | Path                   | Does                                   |
+| -------- | ---------------------- | -------------------------------------- |
+| `POST`   | `/api/subscribers`     | Create or update a subscriber by email |
+| `GET`    | `/api/subscribers`     | List subscribers, paginated            |
+| `GET`    | `/api/subscribers/:id` | One subscriber                         |
+| `PUT`    | `/api/subscribers/:id` | Update a subscriber                    |
+| `DELETE` | `/api/subscribers/:id` | Delete a subscriber                    |
 
 ### Create or update
 

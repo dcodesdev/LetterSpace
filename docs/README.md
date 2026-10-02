@@ -20,5 +20,6 @@ One file per feature. Each documents what the code does today.
 | [analytics.md](analytics.md)       | Dashboard and analytics numbers                          |
 | [maintenance.md](maintenance.md)   | Automatic cleanup of message bodies and webhook logs     |
 | [testing.md](testing.md)           | Running and writing the backend test suite               |
+| [typed-sql.md](typed-sql.md)       | Raw SQL queries and their generated TypedSQL functions   |
 
 Install and deploy instructions live in [apps/docs](../apps/docs/src/app/getting-started/page.mdx).

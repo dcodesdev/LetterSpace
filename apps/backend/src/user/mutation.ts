@@ -94,7 +94,10 @@ export const login = publicProcedure
 
     return {
       token,
-      user,
+      user: {
+        id: user.id,
+        UserOrganizations: user.UserOrganizations,
+      },
     }
   })
 

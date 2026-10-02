@@ -83,6 +83,37 @@ export const getList = authProcedure
     })
   )
   .query(async ({ ctx, input }) => {
+    const listOrganization = await prisma.list.findUnique({
+      where: {
+        id: input.id,
+      },
+      select: {
+        organizationId: true,
+      },
+    })
+
+    if (!listOrganization) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "List not found",
+      })
+    }
+
+    // Verify user has access to organization
+    const userOrganization = await prisma.userOrganization.findFirst({
+      where: {
+        userId: ctx.user.id,
+        organizationId: listOrganization.organizationId,
+      },
+    })
+
+    if (!userOrganization) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You don't have access to this list",
+      })
+    }
+
     const list = await prisma.list.findUnique({
       where: {
         id: input.id,
@@ -101,21 +132,6 @@ export const getList = authProcedure
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "List not found",
-      })
-    }
-
-    // Verify user has access to organization
-    const userOrganization = await prisma.userOrganization.findFirst({
-      where: {
-        userId: ctx.user.id,
-        organizationId: list.organizationId,
-      },
-    })
-
-    if (!userOrganization) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "You don't have access to this list",
       })
     }
 

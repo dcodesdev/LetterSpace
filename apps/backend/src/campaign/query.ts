@@ -128,44 +128,47 @@ export const getCampaign = authProcedure
       })
     }
 
-    const listSubscribers = await prisma.listSubscriber.findMany({
-      where: {
-        listId: {
-          in: campaign.CampaignLists.map((cl) => cl.listId),
+    const listIds = campaign.CampaignLists.map((cl) => cl.listId)
+
+    const [uniqueRecipientCount, listCounts] = await Promise.all([
+      prisma.subscriber.count({
+        where: {
+          ListSubscribers: {
+            some: {
+              listId: { in: listIds },
+              unsubscribedAt: null,
+            },
+          },
         },
-        unsubscribedAt: null,
-      },
-      select: {
-        id: true,
-      },
-      distinct: ["subscriberId"],
-    })
+      }),
+      prisma.listSubscriber.groupBy({
+        by: ["listId"],
+        where: {
+          listId: { in: listIds },
+          unsubscribedAt: null,
+        },
+        _count: true,
+      }),
+    ])
+
+    const countByListId = new Map(
+      listCounts.map((group) => [group.listId, group._count])
+    )
 
     // Add the count to each list for backward compatibility
     const campaignWithCounts = {
       ...campaign,
-      CampaignLists: await Promise.all(
-        campaign.CampaignLists.map(async (cl) => {
-          const count = await prisma.listSubscriber.count({
-            where: {
-              listId: cl.listId,
-              unsubscribedAt: null,
-            },
-          })
-
-          return {
-            ...cl,
-            List: {
-              ...cl.List,
-              _count: {
-                ListSubscribers: count,
-              },
-            },
-          }
-        })
-      ),
+      CampaignLists: campaign.CampaignLists.map((cl) => ({
+        ...cl,
+        List: {
+          ...cl.List,
+          _count: {
+            ListSubscribers: countByListId.get(cl.listId) ?? 0,
+          },
+        },
+      })),
       // Add the unique subscriber count directly to the campaign object
-      uniqueRecipientCount: listSubscribers.length,
+      uniqueRecipientCount,
     }
 
     const promises = {

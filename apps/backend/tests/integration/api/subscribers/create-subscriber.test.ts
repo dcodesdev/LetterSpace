@@ -304,6 +304,43 @@ describe("[POST] /api/subscribers", () => {
     )
   })
 
+  it("should not put a raw HTML name into the verification email", async () => {
+    const {
+      apiKey: { key: apiKey },
+      orgId,
+    } = await createUser()
+
+    await prisma.smtpSettings.updateMany({
+      where: { organizationId: orgId },
+      data: { fromEmail: "sender@example.com" },
+    })
+
+    await prisma.generalSettings.upsert({
+      where: { organizationId: orgId },
+      update: { baseURL: "http://localhost:3000" },
+      create: { organizationId: orgId, baseURL: "http://localhost:3000" },
+    })
+
+    const list = await createList({ organizationId: orgId })
+
+    const response = await request
+      .post("/api/subscribers")
+      .set("x-api-key", apiKey)
+      .send({
+        email: "optin@example.com",
+        name: `<b>Bob</b> & "Al's" $'`,
+        lists: [list.id],
+        doubleOptIn: true,
+      })
+
+    expect(response.status).toBe(201)
+    expect(sendMail).toHaveBeenCalledTimes(1)
+
+    const { html } = sendMail.mock.calls[0]![0] as { html: string }
+    expect(html).toContain("/verify-email?token=")
+    expect(html).not.toContain("<b>Bob</b>")
+  })
+
   it("should reject a list belonging to another organization", async () => {
     const {
       apiKey: { key: apiKey },

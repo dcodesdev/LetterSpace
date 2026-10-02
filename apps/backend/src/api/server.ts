@@ -6,6 +6,7 @@ import path from "path"
 import { z } from "zod"
 import { Prisma } from "../../prisma/client"
 import { Mailer } from "../lib/Mailer"
+import { escapeHtml } from "../utils/escape-html"
 import { prisma } from "../utils/prisma"
 import { authenticateApiKey } from "./middleware"
 
@@ -246,8 +247,8 @@ apiRouter.post("/subscribers", async (req, res) => {
         let emailHtmlContent = await fs.readFile(templatePath, "utf-8")
 
         emailHtmlContent = emailHtmlContent
-          .replace(/{{name}}/g, name || "there")
-          .replace(/{{verificationLink}}/g, verificationLink)
+          .replace(/{{name}}/g, () => escapeHtml(name || "there"))
+          .replace(/{{verificationLink}}/g, () => verificationLink)
           .replace(/{{currentYear}}/g, new Date().getFullYear().toString())
 
         await mailer.sendEmail({
@@ -332,8 +333,6 @@ apiRouter.post("/subscribers", async (req, res) => {
           createdAt: subscriber.createdAt,
           updatedAt: subscriber.updatedAt,
         }
-
-        console.log("data", data)
 
         res.status(201).json(data)
         return

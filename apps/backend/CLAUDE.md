@@ -12,7 +12,7 @@ pnpm test           # Run tests (Vitest with .env.test)
 pnpm test:watch     # Tests in watch mode
 pnpm lint           # ESLint
 pnpm lint:fix       # ESLint with auto-fix
-pnpm generate       # Prisma codegen
+pnpm generate       # Prisma codegen + TypedSQL (needs a migrated DB)
 pnpm migrate:dev    # Create/apply dev migrations
 pnpm migrate:deploy # Apply production migrations
 ```
@@ -23,6 +23,8 @@ pnpm migrate:deploy # Apply production migrations
 pnpm prisma db seed                    # Seed database
 pnpm prisma migrate reset --force      # Reset and reseed
 ```
+
+`generate` runs `prisma generate --sql`, which connects to `DATABASE_URL` (from `.env`) and needs every migration applied. Run `pnpm migrate:dev` before the first `pnpm dev`. Queries live in `prisma/sql/*.sql`; the output in `prisma/client/sql` is gitignored. See [docs/typed-sql.md](../../docs/typed-sql.md).
 
 ## Architecture
 

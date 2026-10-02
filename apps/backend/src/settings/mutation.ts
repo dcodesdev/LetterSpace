@@ -341,7 +341,21 @@ export const testSmtp = authProcedure
       organizationId: z.string(),
     })
   )
-  .mutation(async ({ input }) => {
+  .mutation(async ({ ctx, input }) => {
+    const userOrganization = await prisma.userOrganization.findFirst({
+      where: {
+        userId: ctx.user.id,
+        organizationId: input.organizationId,
+      },
+    })
+
+    if (!userOrganization) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Organization not found",
+      })
+    }
+
     const settings = await prisma.smtpSettings.findFirst({
       where: {
         organizationId: input.organizationId,

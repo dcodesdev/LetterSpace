@@ -77,6 +77,38 @@ describe("transformPayload with transform code", () => {
     })
   })
 
+  it("escapes quotes, backslashes and newlines in string values", async () => {
+    const error = 'said "no" at C:\\tmp\nline two\ttab'
+    const result = await transform(
+      `function transform(payload) {
+        return { messageId: payload.id, event: 'bounced', error: payload.reason }
+      }`,
+      fakeRequest({ body: { id: 'msg-"1"', reason: error } })
+    )
+
+    expect(result).toEqual({
+      success: true,
+      data: { messageId: 'msg-"1"', event: "bounced", error },
+    })
+  })
+
+  it("escapes quotes, backslashes and newlines in keys", async () => {
+    const key = 'a"b\\c\nd'
+    const result = await transform(
+      `function transform(payload) {
+        const obj = {}
+        obj[payload.key] = 1
+        return { messageId: JSON.stringify(obj), event: 'sent' }
+      }`,
+      fakeRequest({ body: { key } })
+    )
+
+    expect(result).toEqual({
+      success: true,
+      data: { messageId: JSON.stringify({ [key]: 1 }), event: "sent" },
+    })
+  })
+
   it("returns 500 on a syntax error", async () => {
     const result = await transform("function transform( {")
 
